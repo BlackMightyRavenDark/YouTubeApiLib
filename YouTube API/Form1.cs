@@ -111,5 +111,51 @@ namespace YouTube_API
             btnGetChannelVideoList.Enabled = true;
             btnSaveList.Enabled = true;
         }
+
+        private async void btnGetChannelPages_Click(object sender, EventArgs e)
+        {
+            btnGetChannelPages.Enabled = false;
+            textBoxChannelPages.Clear();
+
+            string channelName = textBoxChannelName.Text;
+            if (string.IsNullOrEmpty(channelName) || string.IsNullOrWhiteSpace(channelName))
+            {
+                MessageBox.Show("Не введено название канала!", "Ошибка!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                btnGetChannelPages.Enabled = true;
+                return;
+            }
+            string channelId = textBoxChannelId.Text;
+            if (string.IsNullOrEmpty(channelId) || string.IsNullOrWhiteSpace(channelId))
+            {
+                MessageBox.Show("Не введён ID канала!", "Ошибка!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                btnGetChannelPages.Enabled = true;
+                return;
+            }
+
+            YouTubeChannelTabsResult tabsResult = await Task.Run(() =>
+            {
+                YouTubeApi api = new YouTubeApi();
+                return api.GetChannelTabs(channelId, SortingOrder.Descending);
+            });
+            if (tabsResult.ErrorCode == 200)
+            {
+                JObject j = new JObject();
+                foreach (YouTubeChannelTab tab in tabsResult.Tabs)
+                {
+                    System.Diagnostics.Debug.WriteLine(tab.Title);
+                    j.Add(new JProperty(tab.Title, tab.Json));
+                }
+                string t = j.ToString();
+                textBoxChannelPages.Text = t;
+            }
+            else
+            {
+                MessageBox.Show("Ничего не найдено!", "Ошибка!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
+            btnGetChannelPages.Enabled = true;
+        }
     }
 }
