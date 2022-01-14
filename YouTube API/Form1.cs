@@ -134,27 +134,37 @@ namespace YouTube_API
                 return;
             }
 
-            YouTubeChannelTabsResult tabsResult = await Task.Run(() =>
+            JObject jResult = new JObject();
+
+            int count = await Task.Run(() =>
             {
+                int n = 0;
                 YouTubeApi api = new YouTubeApi();
-                return api.GetChannelTabs(channelId, SortingOrder.Descending);
-            });
-            if (tabsResult.ErrorCode == 200)
-            {
-                JObject j = new JObject();
-                foreach (YouTubeChannelTab tab in tabsResult.Tabs)
+                for (int i = (int)ChannelTab.Home; i < (int)ChannelTab.About; i++)
                 {
-                    System.Diagnostics.Debug.WriteLine(tab.Title);
-                    j.Add(new JProperty(tab.Title, tab.Json));
+                    ChannelTab tab = (ChannelTab)i;
+                    YouTubeChannelTabResult channelTabResult =
+                        api.GetChannelTab(channelId, tab, SortingOrder.Descending);
+                    string tabTitle = tab.ToString();
+                    if (channelTabResult.ErrorCode == 200)
+                    {
+                        n++;
+                        jResult.Add(new JProperty(tabTitle, channelTabResult.Tab.Json));
+                    }
                 }
-                string t = j.ToString();
-                textBoxChannelPages.Text = t;
+                return n;
+            });
+
+            if (count > 0)
+            {
+                textBoxChannelPages.Text = jResult.ToString();
             }
             else
             {
                 MessageBox.Show("Ничего не найдено!", "Ошибка!",
                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
+
             btnGetChannelPages.Enabled = true;
         }
     }

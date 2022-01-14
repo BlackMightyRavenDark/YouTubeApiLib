@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
 namespace YouTube_API
@@ -11,12 +10,71 @@ namespace YouTube_API
         public const string API_V1_BROWSE_URL = "https://www.youtube.com/youtubei/v1/browse";
         public const string API_V1_PLAYER_URL = "https://www.youtube.com/youtubei/v1/player";
         public const string YOUTUBE_CLIENT_VERSION = "2.20211221.00.00";
+        public const string TAB_HOME_PARAMS_ID = "EghmZWF0dXJlZA%3D%3D";
+        public const string TAB_VIDEOS_ASCENDING_PARAMS_ID = "EgZ2aWRlb3MYAiAAMAE%3D";
+        public const string TAB_VIDEOS_DESCENDING_PARAMS_ID = "EgZ2aWRlb3MYAyAAMAE%3D";
+        public const string TAB_VIDEOS_POPULARITY_PARAMS_ID = "EgZ2aWRlb3MYASAAMAE%3D";
+        public const string TAB_PLAYLISTS_DESCENDING_PARAMS_ID = "EglwbGF5bGlzdHMYAyABMAE%3D";
+        public const string TAB_PLAYLISTS_LAST_VIDEO_ADDED_PARAMS_ID = "EglwbGF5bGlzdHMYBCABMAE%3D";
+        public const string TAB_COMMUNITY_PARAMS_ID = "Egljb21tdW5pdHk%3D";
+        public const string TAB_CHANNELS_PARAMS_ID = "EghjaGFubmVscw%3D%3D";
+        public const string TAB_ABOUT_PARAMS_ID = "EgVhYm91dA%3D%3D";
 
-        public YouTubeChannelTabsResult GetChannelTabs(string channelId,
-            SortingOrder videosSortingOrder = SortingOrder.Descending)
+        public static string GetBrowseEndpointParams(ChannelTab channelTab, SortingOrder itemsSortingOrder)
+        {
+            switch (channelTab)
+            {
+                case ChannelTab.Home:
+                    return TAB_HOME_PARAMS_ID;
+
+                case ChannelTab.Videos:
+                    switch (itemsSortingOrder)
+                    {
+                        case SortingOrder.Ascending:
+                            return TAB_VIDEOS_ASCENDING_PARAMS_ID;
+
+                        case SortingOrder.Descending:
+                            return TAB_VIDEOS_DESCENDING_PARAMS_ID;
+
+                        case SortingOrder.Popularity:
+                            return TAB_VIDEOS_POPULARITY_PARAMS_ID;
+                    }
+                    break;
+
+                case ChannelTab.Playlists:
+                    switch (itemsSortingOrder)
+                    {
+                        case SortingOrder.Descending:
+                            return TAB_PLAYLISTS_DESCENDING_PARAMS_ID;
+
+                        default:
+                            return TAB_PLAYLISTS_LAST_VIDEO_ADDED_PARAMS_ID;
+                    }
+
+                case ChannelTab.Community:
+                    return TAB_COMMUNITY_PARAMS_ID;
+
+                case ChannelTab.Channels:
+                    return TAB_CHANNELS_PARAMS_ID;
+
+                case ChannelTab.About:
+                    return TAB_ABOUT_PARAMS_ID;
+            }
+
+            return null;
+        }
+
+        public YouTubeChannelTabResult GetChannelTab(string channelId, ChannelTab channelTab,
+            SortingOrder itemsSortingOrder = SortingOrder.Descending)
+        {
+            string browseParams = GetBrowseEndpointParams(channelTab, itemsSortingOrder);
+            return GetChannelTab(channelId, browseParams);
+        }
+
+        public YouTubeChannelTabResult GetChannelTab(string channelId, string browseEndpointParams)
         {
             string url = $"{API_V1_BROWSE_URL}?key={API_V1_KEY}";
-            JObject body = GenerateChannelVideoListRequestBody(channelId, videosSortingOrder, null);
+            JObject body = GenerateChannelTabRequestBody(channelId, browseEndpointParams, null);
             int errorCode = Utils.HttpsPost(url, body.ToString(), out string response);
             if (errorCode == 200)
             {
@@ -24,33 +82,54 @@ namespace YouTube_API
                 JToken jt = json.Value<JToken>("contents");
                 if (jt == null)
                 {
-                    return new YouTubeChannelTabsResult(404);
+                    return new YouTubeChannelTabResult(null, 404);
                 }
                 jt = jt.Value<JObject>().Value<JObject>("twoColumnBrowseResultsRenderer").Value<JToken>("tabs");
                 if (jt == null)
                 {
-                    return new YouTubeChannelTabsResult(404);
+                    return new YouTubeChannelTabResult(null, 404);
                 }
 
-                YouTubeChannelTabsResult tabsResult = new YouTubeChannelTabsResult(errorCode);
                 JArray jTabs = jt.Value<JArray>();
-                foreach (JObject j in jTabs)
+                JObject jSelectedTab = FindSelectedTab(jTabs);
+                if (jSelectedTab != null)
                 {
-                    jt = j.Value<JToken>("tabRenderer");
-                    if (jt == null)
-                    {
-                        jt = j.Value<JToken>("expandableTabRenderer");
-                    }
-                    string title = jt.Value<JObject>().Value<string>("title");
-                    tabsResult.Tabs.Add(new YouTubeChannelTab(title, j));
+                    string tabTitle = jSelectedTab.Value<string>("title");
+                    return new YouTubeChannelTabResult(new YouTubeChannelTab(tabTitle, jSelectedTab), errorCode);
                 }
-                return tabsResult;
             }
-            return new YouTubeChannelTabsResult(errorCode);
+            return new YouTubeChannelTabResult(null, errorCode);
         }
 
-        public JObject GenerateChannelVideoListRequestBody(string channelId, 
-            SortingOrder sortingOrder, string continuationToken)
+        public static JObject FindSelectedTab(JArray jTabs)
+        {
+            foreach (JObject jObject in jTabs)
+            {
+                JToken jt = jObject.Value<JToken>("tabRenderer");
+                if (jt == null)
+                {
+                    jt = jObject.Value<JToken>("expandableTabRenderer");
+                }
+
+                JObject j = jt.Value<JObject>();
+                bool selected = j.Value<bool>("selected");
+                if (selected)
+                {
+                    return j;
+                }
+            }
+            return null;
+        }
+
+        public JObject GenerateChannelVideoListRequestBody(string channelId,
+            SortingOrder videosSortingOrder, string continuationToken)
+        {
+            string browseParams = GetBrowseEndpointParams(ChannelTab.Videos, videosSortingOrder);
+            return GenerateChannelTabRequestBody(channelId, browseParams, continuationToken);
+        }
+
+        public JObject GenerateChannelTabRequestBody(string channelId,
+            string browseEndpointParams, string continuationToken)
         {
             JObject jClient = new JObject();
             jClient["hl"] = "en";
@@ -66,19 +145,9 @@ namespace YouTube_API
             json["browseId"] = channelId;
             if (string.IsNullOrEmpty(continuationToken) || string.IsNullOrWhiteSpace(continuationToken))
             {
-                switch (sortingOrder)
+                if (!string.IsNullOrEmpty(browseEndpointParams) && !string.IsNullOrWhiteSpace(browseEndpointParams))
                 {
-                    case SortingOrder.Ascending:
-                        json["params"] = "EgZ2aWRlb3MYAiAAMAE%3D";
-                        break;
-
-                    case SortingOrder.Descending:
-                        json["params"] = "EgZ2aWRlb3MYAyAAMAE%3D";
-                        break;
-
-                    case SortingOrder.Popularity:
-                        json["params"] = "EgZ2aWRlb3MYASAAMAE%3D";
-                        break;
+                    json["params"] = browseEndpointParams;
                 }
             }
             else
@@ -345,6 +414,18 @@ namespace YouTube_API
         }
     }
 
+    public sealed class YouTubeChannelTabResult
+    {
+        public YouTubeChannelTab Tab { get; private set; }
+        public int ErrorCode { get; private set; }
+
+        public YouTubeChannelTabResult(YouTubeChannelTab channelTab, int errorCode)
+        {
+            Tab = channelTab;
+            ErrorCode = errorCode;
+        }
+    }
+
     public sealed class VideoListResult
     {
         public JArray List { get; private set; }
@@ -357,20 +438,7 @@ namespace YouTube_API
         }
     }
 
-    public sealed class YouTubeChannelTabsResult
-    {
-        public List<YouTubeChannelTab> Tabs { get; private set; }
-        public int ErrorCode { get; private set; }
-
-        public YouTubeChannelTabsResult(int errorCode)
-        {
-            ErrorCode = errorCode;
-            if (errorCode == 200)
-            {
-                Tabs = new List<YouTubeChannelTab>();
-            }
-        }
-    }
+    public enum ChannelTab { Home, Videos, Playlists, Community, Channels, About }
 
     public enum SortingOrder 
     {
