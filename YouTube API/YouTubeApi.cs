@@ -121,6 +121,45 @@ namespace YouTube_API
             return null;
         }
 
+        public VideoPageResult GetVideosPage(string channelId, string pageToken, SortingOrder sortingOrder)
+        {
+            bool tokenExists = !string.IsNullOrEmpty(pageToken) && !string.IsNullOrWhiteSpace(pageToken);
+            string browseParams = !tokenExists ? GetBrowseEndpointParams(ChannelTab.Videos, sortingOrder) : null;
+            JObject body = GenerateChannelTabRequestBody(channelId, browseParams, pageToken);
+            string url = $"{API_V1_BROWSE_URL}?key={API_V1_KEY}";
+            int errorCode = Utils.HttpsPost(url, body.ToString(), out string response);
+            if (errorCode == 200)
+            {
+                JObject json = JObject.Parse(response);
+                JArray jVideos;
+                if (!tokenExists)
+                {
+                    JObject jTabVideos = FindVideosTab(json);
+                    if (jTabVideos == null)
+                    {
+                        return new VideoPageResult(null, null, 404);
+                    }
+                    jVideos = FindItemsArray(jTabVideos, false);
+                }
+                else
+                {
+                    jVideos = FindItemsArray(json, true);
+                }
+                if (jVideos == null || jVideos.Count == 0)
+                {
+                    return new VideoPageResult(null, null, 404);
+                }
+
+                JArray jParsedArray = ParseGridRendererItems(jVideos, out pageToken);
+                if (jParsedArray == null || jParsedArray.Count == 0)
+                {
+                    return new VideoPageResult(null, null, 404);
+                }
+                return new VideoPageResult(jParsedArray, pageToken, errorCode);
+            }
+            return new VideoPageResult(null, null, errorCode);
+        }
+
         public JObject GenerateChannelVideoListRequestBody(string channelId,
             SortingOrder videosSortingOrder, string continuationToken)
         {
@@ -185,49 +224,31 @@ namespace YouTube_API
             JArray resList = new JArray();
             string continuationToken = null;
             int errorCode;
-            string req = $"{API_V1_BROWSE_URL}?key={API_V1_KEY}";
-            do
+            while (true)
             {
-                JObject body = GenerateChannelVideoListRequestBody(channelId, sortingOrder, continuationToken);
-                errorCode = Utils.HttpsPost(req, body.ToString(), out string response);
-                if (errorCode == 200)
+                VideoPageResult videoPageResult = GetVideosPage(channelId, continuationToken, sortingOrder);
+                errorCode = videoPageResult.ErrorCode;
+                if (errorCode != 200)
                 {
-                    JObject json = JObject.Parse(response);
-                    JArray jVideos;
-                    bool tokenExists = !string.IsNullOrEmpty(continuationToken);
-                    if (tokenExists)
-                    {
-                        jVideos = FindItemsArray(json, true);
-                    }
-                    else
-                    {
-                        JObject jTabVideos = FindVideosTab(json);
-                        if (jTabVideos == null)
-                        {
-                            return new VideoListResult(resList, errorCode);
-                        }
-                        jVideos = FindItemsArray(jTabVideos, false);
-                    }
-                    if (jVideos == null)
-                    {
-                        return new VideoListResult(resList, errorCode);
-                    }
-
-                    JArray ja = ParseGridRendererItems(jVideos, out continuationToken);
-                    foreach (JObject jo in ja)
-                    {
-                        resList.Add(jo);
-                    }
-
-                    if (!string.IsNullOrEmpty(continuationToken))
-                    {
-                        System.Diagnostics.Debug.WriteLine($"token = {continuationToken}");
-                    }
+                    break;
                 }
-            }
-            while (errorCode == 200 && !string.IsNullOrEmpty(continuationToken));
+
+                foreach (JObject j in videoPageResult.List)
+                {
+                    resList.Add(j);
+                }
+
+                continuationToken = videoPageResult.ContinuationToken;
+                bool continuationTokenExists = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrEmpty(continuationToken);
+                if (!continuationTokenExists)
+                {
+                    break;
+                }
             
-            return new VideoListResult(resList, errorCode);
+                System.Diagnostics.Debug.WriteLine(continuationToken);
+            }
+
+            return new VideoListResult(resList, resList.Count > 0 ? 200 : errorCode);
         }
 
         private JObject FindVideosTab(JObject root)
@@ -278,7 +299,6 @@ namespace YouTube_API
                         .Value<JArray>("contents")[0]
                         .Value<JObject>("gridRenderer")
                         .Value<JArray>("items");
-
                 }
             }
             catch (Exception ex)
@@ -306,10 +326,10 @@ namespace YouTube_API
                 }
                 else
                 {
-                    JToken jt0 = jObject.Value<JToken>("continuationItemRenderer");
-                    if (jt0 != null)
+                    jt = jObject.Value<JToken>("continuationItemRenderer");
+                    if (jt != null)
                     {
-                        JObject jContinuationItemRenderer = jt0.Value<JObject>();
+                        JObject jContinuationItemRenderer = jt.Value<JObject>();
                         continuationToken = jContinuationItemRenderer.Value<JObject>("continuationEndpoint").Value<JObject>("continuationCommand").Value<string>("token");
                     }
                 }
@@ -426,7 +446,7 @@ namespace YouTube_API
         }
     }
 
-    public sealed class VideoListResult
+    public class VideoListResult
     {
         public JArray List { get; private set; }
         public int ErrorCode { get; private set; }
@@ -435,6 +455,17 @@ namespace YouTube_API
         {
             List = list;
             ErrorCode = errorCode;
+        }
+    }
+
+    public sealed class VideoPageResult : VideoListResult
+    {
+        public string ContinuationToken { get; private set; }
+
+        public VideoPageResult(JArray videoList, string continuationToken, int errorCode)
+            : base(videoList, errorCode)
+        {
+            ContinuationToken = continuationToken;
         }
     }
 

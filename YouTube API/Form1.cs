@@ -23,7 +23,7 @@ namespace YouTube_API
         private void btnSaveList_Click(object sender, EventArgs e)
         {
             btnSaveList.Enabled = false;
-            if (searchResult == null)
+            if (searchResult == null || searchResult.Count == 0)
             {
                 MessageBox.Show("Список пуст!", "Ошибка!",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -84,19 +84,18 @@ namespace YouTube_API
             {
                 sortingOrder = SortingOrder.Popularity;
             }
-            VideoListResult videoListResult = 
+            VideoListResult videoListResult =
                 await Task.Run(() => api.GetChannelVideoList(youTubeChannel, sortingOrder));
+            if (videoListResult.List == null || videoListResult.List.Count == 0)
+            {
+                MessageBox.Show("Ничего не найдено!", "Ошибка!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                btnGetChannelVideoList.Enabled = true;
+                btnSaveList.Enabled = true;
+                return;
+            }
             if (videoListResult.ErrorCode == 200)
             {
-                if (videoListResult.List.Count == 0)
-                {
-                    MessageBox.Show("Ничего не найдено!", "Ошибка!",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    btnGetChannelVideoList.Enabled = true;
-                    btnSaveList.Enabled = true;
-                    return;
-                }
-                searchResult = videoListResult.List;
                 foreach (JObject jInfo in videoListResult.List)
                 {
                     string id = jInfo.Value<string>("id");
@@ -106,6 +105,8 @@ namespace YouTube_API
                     item.SubItems.Add(title);
                     listView1.Items.Add(item);
                 }
+
+                searchResult = videoListResult.List;
             }
 
             btnGetChannelVideoList.Enabled = true;
