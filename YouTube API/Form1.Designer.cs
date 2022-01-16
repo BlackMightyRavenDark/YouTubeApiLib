@@ -29,7 +29,7 @@ namespace YouTube_API
         /// </summary>
         private void InitializeComponent()
         {
-            this.btnGetChannelVideoList = new System.Windows.Forms.Button();
+            this.btnOpenChannel = new System.Windows.Forms.Button();
             this.textBoxChannelName = new System.Windows.Forms.TextBox();
             this.textBoxChannelId = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -44,25 +44,28 @@ namespace YouTube_API
             this.rbDescending = new System.Windows.Forms.RadioButton();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPageChannelVideos = new System.Windows.Forms.TabPage();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.btnNextPage = new System.Windows.Forms.Button();
             this.tabPageChannelPages = new System.Windows.Forms.TabPage();
             this.textBoxChannelPages = new System.Windows.Forms.TextBox();
             this.btnGetChannelPages = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPageChannelVideos.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.tabPageChannelPages.SuspendLayout();
             this.SuspendLayout();
             // 
-            // btnGetChannelVideoList
+            // btnOpenChannel
             // 
-            this.btnGetChannelVideoList.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnGetChannelVideoList.Location = new System.Drawing.Point(6, 231);
-            this.btnGetChannelVideoList.Name = "btnGetChannelVideoList";
-            this.btnGetChannelVideoList.Size = new System.Drawing.Size(115, 23);
-            this.btnGetChannelVideoList.TabIndex = 0;
-            this.btnGetChannelVideoList.Text = "Получить список";
-            this.btnGetChannelVideoList.UseVisualStyleBackColor = true;
-            this.btnGetChannelVideoList.Click += new System.EventHandler(this.btnGetChannelVideoList_Click);
+            this.btnOpenChannel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnOpenChannel.Location = new System.Drawing.Point(6, 231);
+            this.btnOpenChannel.Name = "btnOpenChannel";
+            this.btnOpenChannel.Size = new System.Drawing.Size(115, 23);
+            this.btnOpenChannel.TabIndex = 0;
+            this.btnOpenChannel.Text = "Перейти на канал";
+            this.btnOpenChannel.UseVisualStyleBackColor = true;
+            this.btnOpenChannel.Click += new System.EventHandler(this.btnOpenChannel_Click);
             // 
             // textBoxChannelName
             // 
@@ -205,15 +208,38 @@ namespace YouTube_API
             // tabPageChannelVideos
             // 
             this.tabPageChannelVideos.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPageChannelVideos.Controls.Add(this.panel1);
             this.tabPageChannelVideos.Controls.Add(this.listView1);
             this.tabPageChannelVideos.Controls.Add(this.btnSaveList);
-            this.tabPageChannelVideos.Controls.Add(this.btnGetChannelVideoList);
+            this.tabPageChannelVideos.Controls.Add(this.btnOpenChannel);
             this.tabPageChannelVideos.Location = new System.Drawing.Point(4, 22);
             this.tabPageChannelVideos.Name = "tabPageChannelVideos";
             this.tabPageChannelVideos.Padding = new System.Windows.Forms.Padding(3);
             this.tabPageChannelVideos.Size = new System.Drawing.Size(549, 260);
             this.tabPageChannelVideos.TabIndex = 0;
             this.tabPageChannelVideos.Text = "Спиок видео канала";
+            // 
+            // panel1
+            // 
+            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel1.Controls.Add(this.btnNextPage);
+            this.panel1.Location = new System.Drawing.Point(127, 231);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(330, 25);
+            this.panel1.TabIndex = 7;
+            this.panel1.Resize += new System.EventHandler(this.panel1_Resize);
+            // 
+            // btnNextPage
+            // 
+            this.btnNextPage.Enabled = false;
+            this.btnNextPage.Location = new System.Drawing.Point(130, 2);
+            this.btnNextPage.Name = "btnNextPage";
+            this.btnNextPage.Size = new System.Drawing.Size(70, 20);
+            this.btnNextPage.TabIndex = 0;
+            this.btnNextPage.Text = "Дальше";
+            this.btnNextPage.UseVisualStyleBackColor = true;
+            this.btnNextPage.Click += new System.EventHandler(this.btnNextPage_Click);
             // 
             // tabPageChannelPages
             // 
@@ -223,7 +249,7 @@ namespace YouTube_API
             this.tabPageChannelPages.Location = new System.Drawing.Point(4, 22);
             this.tabPageChannelPages.Name = "tabPageChannelPages";
             this.tabPageChannelPages.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageChannelPages.Size = new System.Drawing.Size(543, 257);
+            this.tabPageChannelPages.Size = new System.Drawing.Size(549, 260);
             this.tabPageChannelPages.TabIndex = 1;
             this.tabPageChannelPages.Text = "Страницы канала";
             // 
@@ -270,6 +296,7 @@ namespace YouTube_API
             this.groupBox1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tabPageChannelVideos.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
             this.tabPageChannelPages.ResumeLayout(false);
             this.tabPageChannelPages.PerformLayout();
             this.ResumeLayout(false);
@@ -279,7 +306,7 @@ namespace YouTube_API
 
         #endregion
 
-        private System.Windows.Forms.Button btnGetChannelVideoList;
+        private System.Windows.Forms.Button btnOpenChannel;
         private System.Windows.Forms.TextBox textBoxChannelName;
         private System.Windows.Forms.TextBox textBoxChannelId;
         private System.Windows.Forms.Label label1;
@@ -297,6 +324,8 @@ namespace YouTube_API
         private System.Windows.Forms.TabPage tabPageChannelPages;
         private System.Windows.Forms.TextBox textBoxChannelPages;
         private System.Windows.Forms.Button btnGetChannelPages;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Button btnNextPage;
     }
 }
 

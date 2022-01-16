@@ -8,7 +8,8 @@ namespace YouTube_API
 {
     public partial class Form1 : Form
     {
-        private JArray searchResult = null;
+        private JArray foundVideos = null;
+        private string nextPageToken = null;
 
         public Form1()
         {
@@ -20,10 +21,15 @@ namespace YouTube_API
             columnHeaderTitle.Width = listView1.Width - columnHeaderId.Width - 30;
         }
 
+        private void panel1_Resize(object sender, EventArgs e)
+        {
+            btnNextPage.Left = panel1.Width / 2 - btnNextPage.Width / 2;
+        }
+
         private void btnSaveList_Click(object sender, EventArgs e)
         {
             btnSaveList.Enabled = false;
-            if (searchResult == null || searchResult.Count == 0)
+            if (foundVideos == null || foundVideos.Count == 0)
             {
                 MessageBox.Show("Список пуст!", "Ошибка!",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -39,7 +45,7 @@ namespace YouTube_API
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 JObject json = new JObject();
-                json.Add(new JProperty("videos", searchResult));
+                json.Add(new JProperty("videos", foundVideos));
                 File.WriteAllText(sfd.FileName, json.ToString());
             }
             sfd.Dispose();
@@ -47,19 +53,21 @@ namespace YouTube_API
             btnSaveList.Enabled = true;
         }
 
-        private async void btnGetChannelVideoList_Click(object sender, EventArgs e)
+        private async void btnOpenChannel_Click(object sender, EventArgs e)
         {
-            btnGetChannelVideoList.Enabled = false;
+            btnOpenChannel.Enabled = false;
+            btnNextPage.Enabled = false;
             btnSaveList.Enabled = false;
             listView1.Items.Clear();
-            searchResult = null;
+            nextPageToken = null;
+            foundVideos = new JArray();
 
             string channelName = textBoxChannelName.Text;
             if (string.IsNullOrEmpty(channelName) || string.IsNullOrWhiteSpace(channelName))
             {
                 MessageBox.Show("Не введено название канала!", "Ошибка!",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
-                btnGetChannelVideoList.Enabled = true;
+                btnOpenChannel.Enabled = true;
                 btnSaveList.Enabled = true;
                 return;
             }
@@ -68,7 +76,7 @@ namespace YouTube_API
             {
                 MessageBox.Show("Не введён ID канала!", "Ошибка!",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
-                btnGetChannelVideoList.Enabled = true;
+                btnOpenChannel.Enabled = true;
                 btnSaveList.Enabled = true;
                 return;
             }
@@ -84,20 +92,22 @@ namespace YouTube_API
             {
                 sortingOrder = SortingOrder.Popularity;
             }
-            VideoListResult videoListResult =
-                await Task.Run(() => api.GetChannelVideoList(youTubeChannel, sortingOrder));
-            if (videoListResult.List == null || videoListResult.List.Count == 0)
+            VideoPageResult videoPageResult =
+                await Task.Run(() => api.GetVideosPage(youTubeChannel.Id, null, sortingOrder));
+            if (videoPageResult.List == null || videoPageResult.List.Count == 0)
             {
                 MessageBox.Show("Ничего не найдено!", "Ошибка!",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
-                btnGetChannelVideoList.Enabled = true;
+                btnOpenChannel.Enabled = true;
                 btnSaveList.Enabled = true;
                 return;
             }
-            if (videoListResult.ErrorCode == 200)
+            if (videoPageResult.ErrorCode == 200)
             {
-                foreach (JObject jInfo in videoListResult.List)
+                foreach (JObject jInfo in videoPageResult.List)
                 {
+                    foundVideos.Add(jInfo);
+
                     string id = jInfo.Value<string>("id");
                     string title = jInfo.Value<string>("title");
 
@@ -106,11 +116,62 @@ namespace YouTube_API
                     listView1.Items.Add(item);
                 }
 
-                searchResult = videoListResult.List;
+                nextPageToken = videoPageResult.ContinuationToken;
+                if (!string.IsNullOrEmpty(nextPageToken))
+                {
+                    btnNextPage.Enabled = true;
+                }
             }
 
-            btnGetChannelVideoList.Enabled = true;
+            btnOpenChannel.Enabled = true;
             btnSaveList.Enabled = true;
+        }
+
+        private async void btnNextPage_Click(object sender, EventArgs e)
+        {
+            btnNextPage.Enabled = false;
+            btnOpenChannel.Enabled = false;
+            if (string.IsNullOrEmpty(nextPageToken) || string.IsNullOrWhiteSpace(nextPageToken))
+            {
+                MessageBox.Show("Дальше ничего нет! Дальше только мрак и пустота!", "Ошибка!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                btnOpenChannel.Enabled = true;
+                return;
+            }
+
+            YouTubeApi api = new YouTubeApi();
+            VideoPageResult videoPageResult =
+                await Task.Run(() => api.GetVideosPage(null, nextPageToken, SortingOrder.Descending));
+            if (videoPageResult.List == null || videoPageResult.List.Count == 0)
+            {
+                MessageBox.Show("Ничего не найдено!", "Ошибка!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                btnOpenChannel.Enabled = true;
+                btnSaveList.Enabled = true;
+                return;
+            }
+            if (videoPageResult.ErrorCode == 200)
+            {
+                foreach (JObject jInfo in videoPageResult.List)
+                {
+                    foundVideos.Add(jInfo);
+
+                    string id = jInfo.Value<string>("id");
+                    string title = jInfo.Value<string>("title");
+
+                    ListViewItem item = new ListViewItem(id);
+                    item.SubItems.Add(title);
+                    listView1.Items.Add(item);
+                }
+
+                nextPageToken = videoPageResult.ContinuationToken;
+                if (!string.IsNullOrEmpty(nextPageToken))
+                {
+                    btnNextPage.Enabled = true;
+                }
+            }
+
+            btnOpenChannel.Enabled = true;
         }
 
         private async void btnGetChannelPages_Click(object sender, EventArgs e)
