@@ -319,7 +319,7 @@ namespace YouTube_API
                 {
                     JObject jGridVideoRenderer = jt.Value<JObject>();
                     string videoId = jGridVideoRenderer.Value<string>("videoId");
-                    if (GetSimplifyedVideoInfo(videoId, out JObject jVideoInfo) == 200)
+                    if (GetSimplifiedVideoInfo(videoId, out JObject jVideoInfo) == 200)
                     {
                         simplifiedList.Add(jVideoInfo);
                     }
@@ -345,7 +345,7 @@ namespace YouTube_API
             return errorCode;
         }
 
-        public int GetSimplifyedVideoInfo(string videoId, out JObject simplifyedVideoInfo)
+        public int GetSimplifiedVideoInfo(string videoId, out JObject simplifiedVideoInfo)
         {
             int errorCode = GetVideoInfo(videoId, out string info);
             if (errorCode == 200)
@@ -378,33 +378,33 @@ namespace YouTube_API
                 string datePublished = jMicroformatRenderer.Value<string>("publishDate");
                 string dateUploaded = jMicroformatRenderer.Value<string>("uploadDate");
 
-                simplifyedVideoInfo = new JObject();
-                simplifyedVideoInfo["title"] = videoTitle;
-                simplifyedVideoInfo["id"] = videoId;
-                simplifyedVideoInfo["url"] = $"{YOUTUBE_URL}/watch?v={videoId}";
-                simplifyedVideoInfo["lengthSeconds"] = lengthSeconds;
-                simplifyedVideoInfo["ownerChannelTitle"] = ownerChannelTitle;
-                simplifyedVideoInfo["ownerChannelId"] = ownerChannelId;
-                simplifyedVideoInfo["viewCount"] = viewCount;
-                simplifyedVideoInfo["category"] = category;
-                simplifyedVideoInfo["isPrivate"] = isPrivate;
-                simplifyedVideoInfo["isUnlisted"] = isUnlisted;
-                simplifyedVideoInfo["isFamilySafe"] = isFamilySafe;
-                simplifyedVideoInfo["isLiveContent"] = isLiveContent;
-                simplifyedVideoInfo["datePublished"] = datePublished;
-                simplifyedVideoInfo["dateUploaded"] = dateUploaded;
-                simplifyedVideoInfo["description"] = description;
-                simplifyedVideoInfo["shortDescription"] = shortDescription;
-                simplifyedVideoInfo.Add(new JProperty("thumbnails", jThumbnails));
+                simplifiedVideoInfo = new JObject();
+                simplifiedVideoInfo["title"] = videoTitle;
+                simplifiedVideoInfo["id"] = videoId;
+                simplifiedVideoInfo["url"] = $"{YOUTUBE_URL}/watch?v={videoId}";
+                simplifiedVideoInfo["lengthSeconds"] = lengthSeconds;
+                simplifiedVideoInfo["ownerChannelTitle"] = ownerChannelTitle;
+                simplifiedVideoInfo["ownerChannelId"] = ownerChannelId;
+                simplifiedVideoInfo["viewCount"] = viewCount;
+                simplifiedVideoInfo["category"] = category;
+                simplifiedVideoInfo["isPrivate"] = isPrivate;
+                simplifiedVideoInfo["isUnlisted"] = isUnlisted;
+                simplifiedVideoInfo["isFamilySafe"] = isFamilySafe;
+                simplifiedVideoInfo["isLiveContent"] = isLiveContent;
+                simplifiedVideoInfo["datePublished"] = datePublished;
+                simplifiedVideoInfo["dateUploaded"] = dateUploaded;
+                simplifiedVideoInfo["description"] = description;
+                simplifiedVideoInfo["shortDescription"] = shortDescription;
+                simplifiedVideoInfo.Add(new JProperty("thumbnails", jThumbnails));
                 jt = json.Value<JToken>("streamingData");
                 if (jt != null)
                 {
-                    simplifyedVideoInfo.Add(new JProperty("streamingData", jt));
+                    simplifiedVideoInfo.Add(new JProperty("streamingData", jt));
                 }
             }
             else
             {
-                simplifyedVideoInfo = null;
+                simplifiedVideoInfo = null;
             }
             return errorCode;
         }
