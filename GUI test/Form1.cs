@@ -3,8 +3,9 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json.Linq;
+using YouTube_API;
 
-namespace YouTube_API
+namespace GUI_test
 {
     public partial class Form1 : Form
     {

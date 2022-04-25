@@ -1,5 +1,5 @@
 ﻿
-namespace YouTube_API
+namespace GUI_test
 {
     partial class Form1
     {

@@ -1,10 +1,9 @@
 ﻿using System.IO;
 using System.Net;
-using System.Windows.Forms;
 
 namespace YouTube_API
 {
-    public class Utils
+    public static class Utils
     {
         public static int HttpsPost(string url, string body, out string responseString)
         {
@@ -59,24 +58,5 @@ namespace YouTube_API
             }
             return res;
         }
-
-        public static void SetClipboardText(string text)
-        {
-            bool res;
-            do
-            {
-                try
-                {
-                    Clipboard.SetText(text);
-                    res = true;
-                    return;
-                }
-                catch
-                {
-                    res = false;
-                }
-            } while (!res);
-        }
-
     }
 }

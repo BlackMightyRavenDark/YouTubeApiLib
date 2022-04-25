@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YouTube API", "YouTube API\YouTube API.csproj", "{F2F938A5-0CAA-442C-AF56-469C8F4B27F2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GUI test", "GUI test\GUI test.csproj", "{37F1018C-971C-4B60-9D82-62FCE8B04502}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{F2F938A5-0CAA-442C-AF56-469C8F4B27F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2F938A5-0CAA-442C-AF56-469C8F4B27F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2F938A5-0CAA-442C-AF56-469C8F4B27F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37F1018C-971C-4B60-9D82-62FCE8B04502}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37F1018C-971C-4B60-9D82-62FCE8B04502}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37F1018C-971C-4B60-9D82-62FCE8B04502}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37F1018C-971C-4B60-9D82-62FCE8B04502}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
