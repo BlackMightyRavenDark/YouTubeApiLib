@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Net;
 
 namespace YouTube_API
@@ -58,5 +60,81 @@ namespace YouTube_API
             }
             return res;
         }
+
+        public static string ExtractVideoIdFromUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url) || string.IsNullOrWhiteSpace(url))
+            {
+                return null;
+            }
+
+            Uri uri;
+            try
+            {
+                uri = new Uri(url);
+            }
+            catch (Exception ex)
+            {
+                //подразумевается, что юзер ввёл ID видео, а не ссылку.
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+                return url;
+            }
+
+            if (!uri.Host.ToLower().EndsWith("youtube.com"))
+            {
+                return null;
+            }
+
+            if (string.IsNullOrEmpty(uri.Query))
+            {
+                if (!string.IsNullOrEmpty(uri.AbsolutePath) && !string.IsNullOrWhiteSpace(uri.AbsolutePath) &&
+                    uri.AbsolutePath.StartsWith("/shorts/"))
+                {
+                    return uri.AbsolutePath.Substring(8);
+                }
+                return null;
+            }
+            Dictionary<string, string> dict = SplitUrlQueryToDictionary(uri.Query);
+            if (dict == null || !dict.ContainsKey("v"))
+            {
+                return null;
+            }
+
+            return dict["v"];
+        }
+
+        public static Dictionary<string, string> SplitUrlQueryToDictionary(string urlQuery)
+        {
+            if (string.IsNullOrEmpty(urlQuery) || string.IsNullOrWhiteSpace(urlQuery))
+            {
+                return null;
+            }
+            if (urlQuery[0] == '?')
+            {
+                urlQuery = urlQuery.Remove(0, 1);
+            }
+            return SplitStringToKeyValues(urlQuery, '&', '=');
+        }
+
+        public static Dictionary<string, string> SplitStringToKeyValues(
+            string inputString, char keySeparaor, char valueSeparator)
+        {
+            if (string.IsNullOrEmpty(inputString) || string.IsNullOrWhiteSpace(inputString))
+            {
+                return null;
+            }
+            string[] keyValues = inputString.Split(keySeparaor);
+            Dictionary<string, string> dict = new Dictionary<string, string>();
+            for (int i = 0; i < keyValues.Length; i++)
+            {
+                if (!string.IsNullOrEmpty(keyValues[i]) && !string.IsNullOrWhiteSpace(keyValues[i]))
+                {
+                    string[] t = keyValues[i].Split(valueSeparator);
+                    dict.Add(t[0], t[1]);
+                }
+            }
+            return dict;
+        }
+
     }
 }
