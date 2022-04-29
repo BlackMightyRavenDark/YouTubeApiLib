@@ -80,20 +80,35 @@ namespace YouTube_API
                 return url;
             }
 
-            if (!uri.Host.ToLower().EndsWith("youtube.com"))
+            if (!uri.Host.EndsWith("youtube.com", StringComparison.OrdinalIgnoreCase))
             {
                 return null;
             }
 
             if (string.IsNullOrEmpty(uri.Query))
             {
-                if (!string.IsNullOrEmpty(uri.AbsolutePath) && !string.IsNullOrWhiteSpace(uri.AbsolutePath) &&
-                    uri.AbsolutePath.StartsWith("/shorts/"))
+                if (!string.IsNullOrEmpty(uri.AbsolutePath) && !string.IsNullOrWhiteSpace(uri.AbsolutePath))
                 {
-                    return uri.AbsolutePath.Substring(8);
+                    string videoId = uri.AbsolutePath;
+                    if (videoId.StartsWith("/shorts/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        videoId = videoId.Substring(8);
+                    }
+                    else if (uri.AbsolutePath.StartsWith("/embed/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        videoId = videoId.Substring(7);
+                    }
+
+                    if (!string.IsNullOrEmpty(videoId) && videoId.Length > 11)
+                    {
+                        videoId = videoId.Substring(0, 11);
+                    }
+
+                    return videoId;
                 }
                 return null;
             }
+
             Dictionary<string, string> dict = SplitUrlQueryToDictionary(uri.Query);
             if (dict == null || !dict.ContainsKey("v"))
             {
