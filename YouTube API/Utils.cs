@@ -80,7 +80,8 @@ namespace YouTube_API
                 return url;
             }
 
-            if (!uri.Host.EndsWith("youtube.com", StringComparison.OrdinalIgnoreCase))
+            if (!uri.Host.EndsWith("youtube.com", StringComparison.OrdinalIgnoreCase) &&
+                !uri.Host.EndsWith("youtu.be", StringComparison.OrdinalIgnoreCase))
             {
                 return null;
             }
@@ -94,9 +95,14 @@ namespace YouTube_API
                     {
                         videoId = videoId.Substring(8);
                     }
-                    else if (uri.AbsolutePath.StartsWith("/embed/", StringComparison.OrdinalIgnoreCase))
+                    else if (videoId.StartsWith("/embed/", StringComparison.OrdinalIgnoreCase))
                     {
                         videoId = videoId.Substring(7);
+                    }
+
+                    if (videoId.StartsWith("/"))
+                    {
+                        videoId = videoId.Remove(0, 1);
                     }
 
                     if (!string.IsNullOrEmpty(videoId) && videoId.Length > 11)
