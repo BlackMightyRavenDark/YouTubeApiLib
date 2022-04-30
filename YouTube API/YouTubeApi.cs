@@ -1,5 +1,6 @@
 ﻿using System;
 using Newtonsoft.Json.Linq;
+using static YouTube_API.Utils;
 
 namespace YouTube_API
 {
@@ -345,6 +346,48 @@ namespace YouTube_API
             return errorCode;
         }
 
+        public YouTubeVideo GetVideo(string videoId)
+        {
+            int errorCode = GetVideoInfo(videoId, out string info);
+            if (errorCode == 200)
+            {
+                JObject json = JObject.Parse(info);
+                JObject jVideoDetails = json.Value<JObject>("videoDetails");
+                string videoTitle = jVideoDetails.Value<string>("title");
+                int lengthSeconds = int.Parse(jVideoDetails.Value<string>("lengthSeconds"));
+                TimeSpan length = TimeSpan.FromSeconds(lengthSeconds);
+                string ownerChannelTitle = jVideoDetails.Value<string>("author");
+                string ownerChannelId = jVideoDetails.Value<string>("channelId");
+                int viewCount = int.Parse(jVideoDetails.Value<string>("viewCount"));
+                bool isPrivate = jVideoDetails.Value<bool>("isPrivate");
+                bool isLiveContent = jVideoDetails.Value<bool>("isLiveContent");
+                JObject jMicroformatRenderer = json.Value<JObject>("microformat").Value<JObject>("playerMicroformatRenderer");
+                string description = null;
+                JToken jt = jMicroformatRenderer.Value<JToken>("description");
+                if (jt != null)
+                {
+                    jt = jt.Value<JToken>("simpleText");
+                    if (jt != null)
+                    {
+                        description = jt.Value<string>();
+                    }
+                }
+                bool isFamilySafe = jMicroformatRenderer.Value<bool>("isFamilySafe");
+                bool isUnlisted = jMicroformatRenderer.Value<bool>("isUnlisted");
+                string category = jMicroformatRenderer.Value<string>("category");
+                string published = jMicroformatRenderer.Value<string>("publishDate");
+                string uploaded = jMicroformatRenderer.Value<string>("uploadDate");
+                StringToDateTime(published, out DateTime datePublished);
+                StringToDateTime(uploaded, out DateTime dateUploaded);
+
+                YouTubeVideo youTubeVideo = new YouTubeVideo(
+                    videoTitle, videoId, length, dateUploaded, datePublished, ownerChannelTitle, ownerChannelId,
+                    description, viewCount, category, isPrivate, isUnlisted, isFamilySafe, isLiveContent, json, errorCode);
+                return youTubeVideo;
+            }
+            return YouTubeVideo.CreateEmpty(errorCode);
+        }
+
         public int GetSimplifiedVideoInfo(string videoId, out JObject simplifiedVideoInfo)
         {
             int errorCode = GetVideoInfo(videoId, out string info);
@@ -428,6 +471,7 @@ namespace YouTube_API
         public bool IsFamilySafe { get; private set; }
         public bool IsLiveContent { get; private set; }
         public JObject RawInfo { get; private set; }
+        public int ErrorCode { get; private set; }
 
         public YouTubeVideo(
             string title,
@@ -444,7 +488,8 @@ namespace YouTube_API
             bool isUnlisted,
             bool isFamilySafe,
             bool isLiveContent,
-            JObject rawInfo)
+            JObject rawInfo,
+            int errorCode)
         {
             Title = title;
             Id = id;
@@ -465,6 +510,13 @@ namespace YouTube_API
             IsFamilySafe = isFamilySafe;
             IsLiveContent = isLiveContent;
             RawInfo = rawInfo;
+            ErrorCode = errorCode;
+        }
+
+        public static YouTubeVideo CreateEmpty(int errorCode)
+        {
+            return new YouTubeVideo(null, null, TimeSpan.FromSeconds(0), DateTime.MaxValue, DateTime.MaxValue,
+                null, null, null, 0L, null, false, false, false, false, null, errorCode);
         }
     }
 

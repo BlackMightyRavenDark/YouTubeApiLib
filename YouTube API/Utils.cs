@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net;
 
@@ -155,6 +156,17 @@ namespace YouTube_API
                 }
             }
             return dict;
+        }
+
+        public static bool StringToDateTime(string inputString, out DateTime resDateTime, string format = "yyyy-MM-dd")
+        {
+            bool res = DateTime.TryParseExact(inputString, format,
+                CultureInfo.InvariantCulture, DateTimeStyles.None, out resDateTime);
+            if (!res)
+            {
+                resDateTime = DateTime.MaxValue;
+            }
+            return res;
         }
 
     }

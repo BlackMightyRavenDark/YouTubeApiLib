@@ -1,4 +1,5 @@
 ﻿using System;
+using YouTube_API;
 using static YouTube_API.Utils;
 
 namespace Console_test
@@ -14,9 +15,38 @@ namespace Console_test
 
             Console.WriteLine($"Video URL: {videoUrl}");
 
-            string t = $"Video ID: {(string.IsNullOrEmpty(videoId) ? "<ERROR>" : videoId)}";
-            Console.WriteLine(t);
-
+            if (!string.IsNullOrEmpty(videoId))
+            {
+                YouTubeApi api = new YouTubeApi();
+                YouTubeVideo video = api.GetVideo(videoId);
+                if (video.ErrorCode == 200)
+                {
+                    Console.WriteLine($"Title: {video.Title}");
+                    Console.WriteLine($"ID: {video.Id}");
+                    Console.WriteLine($"URL: {video.Url}");
+                    Console.WriteLine($"Uploaded: {video.DateUploaded:yyyy.MM.dd}");
+                    Console.WriteLine($"Published: {video.DatePublished:yyyy.MM.dd}");
+                    Console.WriteLine($"Length: {video.Length}");
+                    Console.WriteLine($"Channel title: {video.OwnerChannelTitle}");
+                    Console.WriteLine($"Channel ID: {video.OwnerChannelId}");
+                    Console.WriteLine($"Description: {video.Description}");
+                    Console.WriteLine($"View count: {video.ViewCount}");
+                    Console.WriteLine($"Category: {video.Category}");
+                    Console.WriteLine($"Private: {video.IsPrivate}");
+                    Console.WriteLine($"Unlisted: {video.IsUnlisted}");
+                    Console.WriteLine($"Family safe: {video.IsFamilySafe}");
+                    Console.WriteLine($"Live content: {video.IsLiveContent}");
+                    Console.WriteLine($"Raw info:\n{video.RawInfo}");
+                }
+                else
+                {
+                    Console.WriteLine($"Error {video.ErrorCode}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Video ID: <ERROR>");
+            }
             Console.ReadLine();
         }
     }
