@@ -353,37 +353,44 @@ namespace YouTube_API
             {
                 JObject json = JObject.Parse(info);
                 JObject jVideoDetails = json.Value<JObject>("videoDetails");
-                string videoTitle = jVideoDetails.Value<string>("title");
-                int lengthSeconds = int.Parse(jVideoDetails.Value<string>("lengthSeconds"));
-                TimeSpan length = TimeSpan.FromSeconds(lengthSeconds);
-                string ownerChannelTitle = jVideoDetails.Value<string>("author");
-                string ownerChannelId = jVideoDetails.Value<string>("channelId");
-                int viewCount = int.Parse(jVideoDetails.Value<string>("viewCount"));
-                bool isPrivate = jVideoDetails.Value<bool>("isPrivate");
-                bool isLiveContent = jVideoDetails.Value<bool>("isLiveContent");
-                JObject jMicroformatRenderer = json.Value<JObject>("microformat").Value<JObject>("playerMicroformatRenderer");
-                string description = null;
-                JToken jt = jMicroformatRenderer.Value<JToken>("description");
-                if (jt != null)
+                if (jVideoDetails != null)
                 {
-                    jt = jt.Value<JToken>("simpleText");
+                    string videoTitle = jVideoDetails.Value<string>("title");
+                    int lengthSeconds = int.Parse(jVideoDetails.Value<string>("lengthSeconds"));
+                    TimeSpan length = TimeSpan.FromSeconds(lengthSeconds);
+                    string ownerChannelTitle = jVideoDetails.Value<string>("author");
+                    string ownerChannelId = jVideoDetails.Value<string>("channelId");
+                    int viewCount = int.Parse(jVideoDetails.Value<string>("viewCount"));
+                    bool isPrivate = jVideoDetails.Value<bool>("isPrivate");
+                    bool isLiveContent = jVideoDetails.Value<bool>("isLiveContent");
+                    JObject jMicroformatRenderer = json.Value<JObject>("microformat").Value<JObject>("playerMicroformatRenderer");
+                    string description = null;
+                    JToken jt = jMicroformatRenderer.Value<JToken>("description");
                     if (jt != null)
                     {
-                        description = jt.Value<string>();
+                        jt = jt.Value<JToken>("simpleText");
+                        if (jt != null)
+                        {
+                            description = jt.Value<string>();
+                        }
                     }
-                }
-                bool isFamilySafe = jMicroformatRenderer.Value<bool>("isFamilySafe");
-                bool isUnlisted = jMicroformatRenderer.Value<bool>("isUnlisted");
-                string category = jMicroformatRenderer.Value<string>("category");
-                string published = jMicroformatRenderer.Value<string>("publishDate");
-                string uploaded = jMicroformatRenderer.Value<string>("uploadDate");
-                StringToDateTime(published, out DateTime datePublished);
-                StringToDateTime(uploaded, out DateTime dateUploaded);
+                    bool isFamilySafe = jMicroformatRenderer.Value<bool>("isFamilySafe");
+                    bool isUnlisted = jMicroformatRenderer.Value<bool>("isUnlisted");
+                    string category = jMicroformatRenderer.Value<string>("category");
+                    string published = jMicroformatRenderer.Value<string>("publishDate");
+                    string uploaded = jMicroformatRenderer.Value<string>("uploadDate");
+                    StringToDateTime(published, out DateTime datePublished);
+                    StringToDateTime(uploaded, out DateTime dateUploaded);
 
-                YouTubeVideo youTubeVideo = new YouTubeVideo(
-                    videoTitle, videoId, length, dateUploaded, datePublished, ownerChannelTitle, ownerChannelId,
-                    description, viewCount, category, isPrivate, isUnlisted, isFamilySafe, isLiveContent, json, errorCode);
-                return youTubeVideo;
+                    YouTubeVideo youTubeVideo = new YouTubeVideo(
+                        videoTitle, videoId, length, dateUploaded, datePublished, ownerChannelTitle, ownerChannelId,
+                        description, viewCount, category, isPrivate, isUnlisted, isFamilySafe, isLiveContent, json, errorCode);
+                    return youTubeVideo;
+                }
+                else
+                {
+                    errorCode = 400;
+                }
             }
             return YouTubeVideo.CreateEmpty(errorCode);
         }

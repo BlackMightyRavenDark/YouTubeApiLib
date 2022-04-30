@@ -40,6 +40,7 @@ namespace Console_test
                 }
                 else
                 {
+                    Console.WriteLine($"Video ID: {videoId}");
                     Console.WriteLine($"Error {video.ErrorCode}");
                 }
             }
