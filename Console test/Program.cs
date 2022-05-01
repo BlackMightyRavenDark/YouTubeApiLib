@@ -11,6 +11,9 @@ namespace Console_test
             //Magical Underwater World 4K | 2160p | 7304448660 bytes
             string videoUrl = "https://www.youtube.com/watch?v=7szcXCT-Oqw";
 
+            //Trick or treat, kingdom hearts, and beat saber. | 18+ | 1080p | 197233776 bytes
+            //string videoUrl = "https://www.youtube.com/watch?v=pQNRrnk63MQ";
+            
             string videoId = ExtractVideoIdFromUrl(videoUrl);
 
             Console.WriteLine($"Video URL: {videoUrl}");
@@ -19,7 +22,7 @@ namespace Console_test
             {
                 YouTubeApi api = new YouTubeApi();
                 YouTubeVideo video = api.GetVideo(videoId);
-                if (video.ErrorCode == 200)
+                if (video.Status.IsPlayable)
                 {
                     Console.WriteLine($"Title: {video.Title}");
                     Console.WriteLine($"ID: {video.Id}");
@@ -41,7 +44,7 @@ namespace Console_test
                 else
                 {
                     Console.WriteLine($"Video ID: {videoId}");
-                    Console.WriteLine($"Error {video.ErrorCode}");
+                    Console.WriteLine(video.Status.Reason);
                 }
             }
             else
