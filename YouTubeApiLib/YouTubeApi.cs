@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
-using static YouTube_API.Utils;
+using static YouTubeApiLib.Utils;
 
-namespace YouTube_API
+namespace YouTubeApiLib
 {
     public sealed class YouTubeApi
     {
@@ -12,16 +13,12 @@ namespace YouTube_API
         public const string API_V1_PLAYER_URL = "https://www.youtube.com/youtubei/v1/player";
         public const string YOUTUBE_CLIENT_VERSION = "2.20211221.00.00";
         public const string TAB_HOME_PARAMS_ID = "EghmZWF0dXJlZA%3D%3D";
-        public const string TAB_VIDEOS_ASCENDING_PARAMS_ID = "EgZ2aWRlb3MYAiAAMAE%3D";
         public const string TAB_VIDEOS_DESCENDING_PARAMS_ID = "EgZ2aWRlb3MYAyAAMAE%3D";
-        public const string TAB_VIDEOS_POPULARITY_PARAMS_ID = "EgZ2aWRlb3MYASAAMAE%3D";
-        public const string TAB_PLAYLISTS_DESCENDING_PARAMS_ID = "EglwbGF5bGlzdHMYAyABMAE%3D";
-        public const string TAB_PLAYLISTS_LAST_VIDEO_ADDED_PARAMS_ID = "EglwbGF5bGlzdHMYBCABMAE%3D";
         public const string TAB_COMMUNITY_PARAMS_ID = "Egljb21tdW5pdHk%3D";
         public const string TAB_CHANNELS_PARAMS_ID = "EghjaGFubmVscw%3D%3D";
         public const string TAB_ABOUT_PARAMS_ID = "EgVhYm91dA%3D%3D";
 
-        public static string GetBrowseEndpointParams(ChannelTab channelTab, SortingOrder itemsSortingOrder)
+        public static string GetBrowseEndpointParams(ChannelTab channelTab)
         {
             switch (channelTab)
             {
@@ -29,28 +26,7 @@ namespace YouTube_API
                     return TAB_HOME_PARAMS_ID;
 
                 case ChannelTab.Videos:
-                    switch (itemsSortingOrder)
-                    {
-                        case SortingOrder.Ascending:
-                            return TAB_VIDEOS_ASCENDING_PARAMS_ID;
-
-                        case SortingOrder.Descending:
-                            return TAB_VIDEOS_DESCENDING_PARAMS_ID;
-
-                        case SortingOrder.Popularity:
-                            return TAB_VIDEOS_POPULARITY_PARAMS_ID;
-                    }
-                    break;
-
-                case ChannelTab.Playlists:
-                    switch (itemsSortingOrder)
-                    {
-                        case SortingOrder.Descending:
-                            return TAB_PLAYLISTS_DESCENDING_PARAMS_ID;
-
-                        default:
-                            return TAB_PLAYLISTS_LAST_VIDEO_ADDED_PARAMS_ID;
-                    }
+                    return TAB_VIDEOS_DESCENDING_PARAMS_ID;
 
                 case ChannelTab.Community:
                     return TAB_COMMUNITY_PARAMS_ID;
@@ -65,10 +41,9 @@ namespace YouTube_API
             return null;
         }
 
-        public YouTubeChannelTabResult GetChannelTab(string channelId, ChannelTab channelTab,
-            SortingOrder itemsSortingOrder = SortingOrder.Descending)
+        public YouTubeChannelTabResult GetChannelTab(string channelId, ChannelTab channelTab)
         {
-            string browseParams = GetBrowseEndpointParams(channelTab, itemsSortingOrder);
+            string browseParams = GetBrowseEndpointParams(channelTab);
             return GetChannelTab(channelId, browseParams);
         }
 
@@ -76,7 +51,7 @@ namespace YouTube_API
         {
             string url = $"{API_V1_BROWSE_URL}?key={API_V1_KEY}";
             JObject body = GenerateChannelTabRequestBody(channelId, browseEndpointParams, null);
-            int errorCode = Utils.HttpsPost(url, body.ToString(), out string response);
+            int errorCode = HttpsPost(url, body.ToString(), out string response);
             if (errorCode == 200)
             {
                 JObject json = JObject.Parse(response);
@@ -122,17 +97,17 @@ namespace YouTube_API
             return null;
         }
 
-        public VideoPageResult GetVideosPage(string channelId, string pageToken, SortingOrder sortingOrder)
+        public VideoPageResult GetVideosPage(string channelId, string continuationToken)
         {
-            bool tokenExists = !string.IsNullOrEmpty(pageToken) && !string.IsNullOrWhiteSpace(pageToken);
-            string browseParams = !tokenExists ? GetBrowseEndpointParams(ChannelTab.Videos, sortingOrder) : null;
-            JObject body = GenerateChannelTabRequestBody(channelId, browseParams, pageToken);
+            bool tokenExists = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);
+            string browseParams = !tokenExists ? GetBrowseEndpointParams(ChannelTab.Videos) : null;
+            JObject body = GenerateChannelTabRequestBody(channelId, browseParams, continuationToken);
             string url = $"{API_V1_BROWSE_URL}?key={API_V1_KEY}";
-            int errorCode = Utils.HttpsPost(url, body.ToString(), out string response);
+            int errorCode = HttpsPost(url, body.ToString(), out string response);
             if (errorCode == 200)
             {
                 JObject json = JObject.Parse(response);
-                JArray jVideos;
+                JArray jGridVideoItems;
                 if (!tokenExists)
                 {
                     JObject jTabVideos = FindVideosTab(json);
@@ -140,31 +115,39 @@ namespace YouTube_API
                     {
                         return new VideoPageResult(null, null, 404);
                     }
-                    jVideos = FindItemsArray(jTabVideos, false);
+                    jGridVideoItems = FindItemsArray(jTabVideos, false);
                 }
                 else
                 {
-                    jVideos = FindItemsArray(json, true);
+                    jGridVideoItems = FindItemsArray(json, true);
                 }
-                if (jVideos == null || jVideos.Count == 0)
+                if (jGridVideoItems == null || jGridVideoItems.Count == 0)
                 {
                     return new VideoPageResult(null, null, 404);
                 }
 
-                JArray jParsedArray = ParseGridRendererItems(jVideos, out pageToken);
-                if (jParsedArray == null || jParsedArray.Count == 0)
+                List<string> videoIds = ExtractVideoIDsFromGridRendererItems(jGridVideoItems, out continuationToken);
+                if (videoIds == null || videoIds.Count == 0)
                 {
                     return new VideoPageResult(null, null, 404);
                 }
-                return new VideoPageResult(jParsedArray, pageToken, errorCode);
+                JArray jaSimplifiedVideoInfos = new JArray();
+                foreach (string videoId in videoIds)
+                {
+                    errorCode = GetSimplifiedVideoInfo(videoId, out JObject simplifiedVideoInfo);
+                    if (errorCode == 200)
+                    {
+                        jaSimplifiedVideoInfos.Add(simplifiedVideoInfo);
+                    }
+                }
+                return new VideoPageResult(jaSimplifiedVideoInfos, continuationToken, errorCode);
             }
             return new VideoPageResult(null, null, errorCode);
         }
 
-        public JObject GenerateChannelVideoListRequestBody(string channelId,
-            SortingOrder videosSortingOrder, string continuationToken)
+        public JObject GenerateChannelVideoListRequestBody(string channelId, string continuationToken)
         {
-            string browseParams = GetBrowseEndpointParams(ChannelTab.Videos, videosSortingOrder);
+            string browseParams = GetBrowseEndpointParams(ChannelTab.Videos);
             return GenerateChannelTabRequestBody(channelId, browseParams, continuationToken);
         }
 
@@ -215,19 +198,19 @@ namespace YouTube_API
             return json;
         }
 
-        public VideoListResult GetChannelVideoList(YouTubeChannel channel, SortingOrder sortingOrder)
+        public VideoListResult GetChannelVideoList(YouTubeChannel channel)
         {
-            return GetChannelVideoList(channel.Id, sortingOrder);
+            return GetChannelVideoList(channel.Id);
         }
 
-        public VideoListResult GetChannelVideoList(string channelId, SortingOrder sortingOrder)
+        public VideoListResult GetChannelVideoList(string channelId)
         {
             JArray resList = new JArray();
             string continuationToken = null;
             int errorCode;
             while (true)
             {
-                VideoPageResult videoPageResult = GetVideosPage(channelId, continuationToken, sortingOrder);
+                VideoPageResult videoPageResult = GetVideosPage(channelId, continuationToken);
                 errorCode = videoPageResult.ErrorCode;
                 if (errorCode != 200)
                 {
@@ -286,20 +269,33 @@ namespace YouTube_API
             {
                 if (token)
                 {
-                    return json.Value<JArray>("onResponseReceivedActions")[0]
-                        .Value<JObject>("appendContinuationItemsAction")
-                        .Value<JArray>("continuationItems");
+                    List<ITabPageParser> continuationParsers = new List<ITabPageParser>()
+                    {
+                        new TabPageVideoContinuationParser1(),
+                        new TabPageVideoContinuationParser2()
+                    };
+                    foreach (ITabPageParser continuationParser in continuationParsers)
+                    {
+                        JArray items = continuationParser.FindGridItems(json);
+                        if (items != null && items.Count > 0)
+                        {
+                            return items;
+                        }
+                    }
                 }
                 else
                 {
-                    return json.Value<JObject>("tabRenderer")
-                        .Value<JObject>("content")
-                        .Value<JObject>("sectionListRenderer")
-                        .Value<JArray>("contents")[0]
-                        .Value<JObject>("itemSectionRenderer")
-                        .Value<JArray>("contents")[0]
-                        .Value<JObject>("gridRenderer")
-                        .Value<JArray>("items");
+                    List<ITabPageParser> parsers = new List<ITabPageParser>() {
+                        new TabPageParserVideo1(), new TabPageParserVideo2()
+                    };
+                    foreach (ITabPageParser parser in parsers)
+                    {
+                        JArray items = parser.FindGridItems(json);
+                        if (items != null && items.Count > 0)
+                        {
+                            return items;
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -307,42 +303,78 @@ namespace YouTube_API
                 System.Diagnostics.Debug.WriteLine(ex.StackTrace);
                 return null;
             }
+
+            return null;
         }
 
-        private JArray ParseGridRendererItems(JArray items, out string continuationToken)
+        private string ExtractVideoIDsFromGridRendererItem(JObject gridVideoRendererItem)
         {
-            continuationToken = null;
-            JArray simplifiedList = new JArray();
-            foreach (JObject jObject in items)
+            JObject j = gridVideoRendererItem.Value<JObject>("gridVideoRenderer");
+            if (j != null)
             {
-                JToken jt = jObject.Value<JToken>("gridVideoRenderer");
-                if (jt != null)
+                return j.Value<string>("videoId");
+            }
+            else
+            {
+                j = gridVideoRendererItem.Value<JObject>("richItemRenderer");
+                if (j != null)
                 {
-                    JObject jGridVideoRenderer = jt.Value<JObject>();
-                    string videoId = jGridVideoRenderer.Value<string>("videoId");
-                    if (GetSimplifiedVideoInfo(videoId, out JObject jVideoInfo) == 200)
+                    j = j.Value<JObject>("content");
+                    if (j != null)
                     {
-                        simplifiedList.Add(jVideoInfo);
-                    }
-                }
-                else
-                {
-                    jt = jObject.Value<JToken>("continuationItemRenderer");
-                    if (jt != null)
-                    {
-                        JObject jContinuationItemRenderer = jt.Value<JObject>();
-                        continuationToken = jContinuationItemRenderer.Value<JObject>("continuationEndpoint").Value<JObject>("continuationCommand").Value<string>("token");
+                        j = j.Value<JObject>("videoRenderer");
+                        if (j != null)
+                        {
+                            return j.Value<string>("videoId");
+                        }
                     }
                 }
             }
-            return simplifiedList;
+            return null;
+        }
+
+        private List<string> ExtractVideoIDsFromGridRendererItems(
+            JArray gridVideoRendererItems, out string continuationToken)
+        {
+            continuationToken = null;
+            if (gridVideoRendererItems == null || gridVideoRendererItems.Count == 0)
+            {
+                return null;
+            }
+
+            List<string> idList = new List<string>();
+            foreach (JObject jItem in gridVideoRendererItems)
+            {
+                string videoId = ExtractVideoIDsFromGridRendererItem(jItem);
+                if (!string.IsNullOrEmpty(videoId) && !string.IsNullOrWhiteSpace(videoId))
+                {
+                    idList.Add(videoId);
+                }
+                else
+                {
+                    JObject jContinuationItemRenderer = jItem.Value<JObject>("continuationItemRenderer");
+                    if (jContinuationItemRenderer != null)
+                    {
+                        JObject j = jContinuationItemRenderer.Value<JObject>("continuationEndpoint");
+                        if (j != null)
+                        {
+                            j = j.Value<JObject>("continuationCommand");
+                            if (j != null)
+                            {
+                                continuationToken = j.Value<string>("token");
+                            }
+                        }
+                    }
+                }
+            }
+            return idList;
         }
 
         public int GetVideoInfo(string videoId, out string infoString)
         {
             JObject body = GenerateVideoInfoRequestBody(videoId);
             string url = $"{API_V1_PLAYER_URL}?key={API_V1_KEY}";
-            int errorCode = Utils.HttpsPost(url, body.ToString(), out infoString);
+            int errorCode = HttpsPost(url, body.ToString(), out infoString);
             return errorCode;
         }
 
@@ -640,23 +672,5 @@ namespace YouTube_API
         }
     }
 
-    public enum ChannelTab { Home, Videos, Playlists, Community, Channels, About }
-
-    public enum SortingOrder 
-    {
-        /// <summary>
-        /// Сортировка по дате. Старые видео сверху.
-        /// </summary>
-        Ascending,
-
-        /// <summary>
-        /// Сортировка по дате. Новые видео сверху.
-        /// </summary>
-        Descending,
-
-        /// <summary>
-        /// Сортировка по популярности.
-        /// </summary>
-        Popularity
-    }
+    public enum ChannelTab { Home, Videos, Community, Channels, About }
 }

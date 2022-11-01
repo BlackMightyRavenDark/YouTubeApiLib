@@ -3,7 +3,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 
-namespace YouTube_API
+namespace YouTubeApiLib
 {
     public sealed class FileDownloader
     {

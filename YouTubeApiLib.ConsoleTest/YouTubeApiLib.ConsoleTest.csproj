@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{05C89C0E-B28A-421E-AAE6-C2C59C15702C}</ProjectGuid>
+    <ProjectGuid>{EECA00FE-1C17-40AE-A2CB-5ED4707E9FED}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Console_test</RootNamespace>
-    <AssemblyName>Console test</AssemblyName>
+    <RootNamespace>YouTubeApiLib.ConsoleTest</RootNamespace>
+    <AssemblyName>YouTubeApiLib.ConsoleTest</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -52,6 +52,12 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\YouTubeApiLib\YouTubeApiLib.csproj">
+      <Project>{6d50ef12-6f8c-440b-8f73-911380244568}</Project>
+      <Name>YouTubeApiLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

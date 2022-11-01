@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30907.101
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YouTube API", "YouTube API\YouTube API.csproj", "{F2F938A5-0CAA-442C-AF56-469C8F4B27F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YouTubeApiLib", "YouTubeApiLib\YouTubeApiLib.csproj", "{6D50EF12-6F8C-440B-8F73-911380244568}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GUI test", "GUI test\GUI test.csproj", "{37F1018C-971C-4B60-9D82-62FCE8B04502}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YouTubeApiLib.ConsoleTest", "YouTubeApiLib.ConsoleTest\YouTubeApiLib.ConsoleTest.csproj", "{EECA00FE-1C17-40AE-A2CB-5ED4707E9FED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console test", "Console test\Console test.csproj", "{05C89C0E-B28A-421E-AAE6-C2C59C15702C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YouTubeApiLib.GuiTest", "YouTubeApiLib.GuiTest\YouTubeApiLib.GuiTest.csproj", "{5E5A55EB-1CCF-4DDC-BDD6-AF7245343645}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,18 +15,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F2F938A5-0CAA-442C-AF56-469C8F4B27F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F2F938A5-0CAA-442C-AF56-469C8F4B27F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F2F938A5-0CAA-442C-AF56-469C8F4B27F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F2F938A5-0CAA-442C-AF56-469C8F4B27F2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{37F1018C-971C-4B60-9D82-62FCE8B04502}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{37F1018C-971C-4B60-9D82-62FCE8B04502}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{37F1018C-971C-4B60-9D82-62FCE8B04502}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{37F1018C-971C-4B60-9D82-62FCE8B04502}.Release|Any CPU.Build.0 = Release|Any CPU
-		{05C89C0E-B28A-421E-AAE6-C2C59C15702C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{05C89C0E-B28A-421E-AAE6-C2C59C15702C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{05C89C0E-B28A-421E-AAE6-C2C59C15702C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{05C89C0E-B28A-421E-AAE6-C2C59C15702C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D50EF12-6F8C-440B-8F73-911380244568}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D50EF12-6F8C-440B-8F73-911380244568}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D50EF12-6F8C-440B-8F73-911380244568}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D50EF12-6F8C-440B-8F73-911380244568}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EECA00FE-1C17-40AE-A2CB-5ED4707E9FED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EECA00FE-1C17-40AE-A2CB-5ED4707E9FED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EECA00FE-1C17-40AE-A2CB-5ED4707E9FED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EECA00FE-1C17-40AE-A2CB-5ED4707E9FED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E5A55EB-1CCF-4DDC-BDD6-AF7245343645}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E5A55EB-1CCF-4DDC-BDD6-AF7245343645}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E5A55EB-1CCF-4DDC-BDD6-AF7245343645}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E5A55EB-1CCF-4DDC-BDD6-AF7245343645}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
