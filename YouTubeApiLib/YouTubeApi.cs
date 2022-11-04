@@ -55,49 +55,63 @@ namespace YouTubeApiLib
             if (errorCode == 200)
             {
                 JObject json = JObject.Parse(response);
-                JToken jt = json.Value<JToken>("contents");
-                if (jt == null)
-                {
-                    return new YouTubeChannelTabResult(null, 404);
-                }
-                jt = jt.Value<JObject>().Value<JObject>("twoColumnBrowseResultsRenderer").Value<JToken>("tabs");
-                if (jt == null)
+                if (json == null)
                 {
                     return new YouTubeChannelTabResult(null, 404);
                 }
 
-                JArray jTabs = jt.Value<JArray>();
-                JObject jSelectedTab = FindSelectedTab(jTabs);
-                if (jSelectedTab != null)
+                JObject j = json.Value<JObject>("contents");
+                if (j == null)
                 {
-                    string tabTitle = jSelectedTab.Value<string>("title");
-                    return new YouTubeChannelTabResult(new YouTubeChannelTab(tabTitle, jSelectedTab), errorCode);
+                    return new YouTubeChannelTabResult(null, 404);
                 }
+                j = j.Value<JObject>("twoColumnBrowseResultsRenderer");
+                if (j == null)
+                {
+                    return new YouTubeChannelTabResult(null, 404);
+                }
+                JArray jaTabs = j.Value<JArray>("tabs");
+                if (jaTabs == null || jaTabs.Count == 0)
+                {
+                    return new YouTubeChannelTabResult(null, 404);
+                }
+
+                JObject jSelectedTab = FindSelectedTab(jaTabs);
+                if (jSelectedTab == null)
+                {
+                    return new YouTubeChannelTabResult(null, 404);
+                }
+
+                string tabTitle = jSelectedTab.Value<string>("title");
+                return new YouTubeChannelTabResult(new YouTubeChannelTab(tabTitle, jSelectedTab), errorCode);
             }
+
             return new YouTubeChannelTabResult(null, errorCode);
         }
 
-        public static JObject FindSelectedTab(JArray jTabs)
+        public static JObject FindSelectedTab(JArray jaTabs)
         {
-            foreach (JObject jObject in jTabs)
+            foreach (JObject jObject in jaTabs)
             {
-                JToken jt = jObject.Value<JToken>("tabRenderer");
-                if (jt == null)
+                JObject j = jObject.Value<JObject>("tabRenderer");
+                if (j == null)
                 {
-                    jt = jObject.Value<JToken>("expandableTabRenderer");
+                    j = jObject.Value<JObject>("expandableTabRenderer");
                 }
 
-                JObject j = jt.Value<JObject>();
-                bool selected = j.Value<bool>("selected");
-                if (selected)
+                if (j != null)
                 {
-                    return j;
+                    bool selected = j.Value<bool>("selected");
+                    if (selected)
+                    {
+                        return j;
+                    }
                 }
             }
             return null;
         }
 
-        public VideoPageResult GetVideosPage(string channelId, string continuationToken)
+        public VideoPageResult GetVideoPage(string channelId, string continuationToken)
         {
             bool tokenExists = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);
             string browseParams = !tokenExists ? GetBrowseEndpointParams(ChannelTab.Videos) : null;
@@ -107,42 +121,11 @@ namespace YouTubeApiLib
             if (errorCode == 200)
             {
                 JObject json = JObject.Parse(response);
-                JArray jGridVideoItems;
-                if (!tokenExists)
-                {
-                    JObject jTabVideos = FindVideosTab(json);
-                    if (jTabVideos == null)
-                    {
-                        return new VideoPageResult(null, null, 404);
-                    }
-                    jGridVideoItems = FindItemsArray(jTabVideos, false);
-                }
-                else
-                {
-                    jGridVideoItems = FindItemsArray(json, true);
-                }
-                if (jGridVideoItems == null || jGridVideoItems.Count == 0)
-                {
-                    return new VideoPageResult(null, null, 404);
-                }
-
-                List<string> videoIds = ExtractVideoIDsFromGridRendererItems(jGridVideoItems, out continuationToken);
-                if (videoIds == null || videoIds.Count == 0)
-                {
-                    return new VideoPageResult(null, null, 404);
-                }
-                JArray jaSimplifiedVideoInfos = new JArray();
-                foreach (string videoId in videoIds)
-                {
-                    errorCode = GetSimplifiedVideoInfo(videoId, out JObject simplifiedVideoInfo);
-                    if (errorCode == 200)
-                    {
-                        jaSimplifiedVideoInfos.Add(simplifiedVideoInfo);
-                    }
-                }
-                return new VideoPageResult(jaSimplifiedVideoInfos, continuationToken, errorCode);
+                VideoPage videoPage = new VideoPage(json, tokenExists);
+                int count = videoPage.Parse();
+                return new VideoPageResult(videoPage, count > 0 ? 200 : 400);
             }
-            return new VideoPageResult(null, null, errorCode);
+            return new VideoPageResult(null, errorCode);
         }
 
         public JObject GenerateChannelVideoListRequestBody(string channelId, string continuationToken)
@@ -210,19 +193,23 @@ namespace YouTubeApiLib
             int errorCode;
             while (true)
             {
-                VideoPageResult videoPageResult = GetVideosPage(channelId, continuationToken);
+                VideoPageResult videoPageResult = GetVideoPage(channelId, continuationToken);
+
                 errorCode = videoPageResult.ErrorCode;
                 if (errorCode != 200)
                 {
                     break;
                 }
 
-                foreach (JObject j in videoPageResult.List)
+                foreach (string videoId in videoPageResult.VideoPage.VideoIds)
                 {
-                    resList.Add(j);
+                    if (GetSimplifiedVideoInfo(videoId, out JObject jInfo) == 200)
+                    {
+                        resList.Add(jInfo);
+                    }
                 }
-
-                continuationToken = videoPageResult.ContinuationToken;
+    
+                continuationToken = videoPageResult.VideoPage.ContinuationToken;
                 bool continuationTokenExists = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrEmpty(continuationToken);
                 if (!continuationTokenExists)
                 {
@@ -235,25 +222,29 @@ namespace YouTubeApiLib
             return new VideoListResult(resList, resList.Count > 0 ? 200 : errorCode);
         }
 
-        private JObject FindVideosTab(JObject root)
+        private static JObject FindVideosTab(JObject root)
         {
-            JToken jt = root.Value<JToken>("contents");
-            if (jt == null)
+            JObject j = root.Value<JObject>("contents");
+            if (j == null)
             {
                 return null;
             }
-            JObject jObject = jt.Value<JObject>().Value<JObject>("twoColumnBrowseResultsRenderer");
-            JArray tabs = jObject.Value<JArray>("tabs");
-            foreach (JObject jTab in tabs)
+            j = j.Value<JObject>("twoColumnBrowseResultsRenderer");
+            if (j == null)
             {
-                jt = jTab.Value<JToken>("tabRenderer");
-                if (jt == null)
+                return null;
+            }
+            JArray jaTabs = j.Value<JArray>("tabs");
+            foreach (JObject jTab in jaTabs)
+            {
+                j = jTab.Value<JObject>("tabRenderer");
+                if (j == null)
                 {
-                    jt = jTab.Value<JToken>("expandableTabRenderer");
+                    j = jTab.Value<JObject>("expandableTabRenderer");
                 }
-                if (jt != null)
+                if (j != null)
                 {
-                    string tabTitle = jt.Value<JObject>().Value<string>("title");
+                    string tabTitle = j.Value<string>("title");
                     if (tabTitle == "Videos")
                     {
                         return jTab;
@@ -263,7 +254,7 @@ namespace YouTubeApiLib
             return null;
         }
 
-        private JArray FindItemsArray(JObject json, bool token)
+        internal static JArray FindItemsArray(JObject json, bool token)
         {
             try
             {
@@ -285,15 +276,19 @@ namespace YouTubeApiLib
                 }
                 else
                 {
-                    List<ITabPageParser> parsers = new List<ITabPageParser>() {
-                        new TabPageParserVideo1(), new TabPageParserVideo2()
-                    };
-                    foreach (ITabPageParser parser in parsers)
+                    json = FindVideosTab(json);
+                    if (json != null)
                     {
-                        JArray items = parser.FindGridItems(json);
-                        if (items != null && items.Count > 0)
+                        List<ITabPageParser> parsers = new List<ITabPageParser>() {
+                            new TabPageParserVideo1(), new TabPageParserVideo2()
+                        };
+                        foreach (ITabPageParser parser in parsers)
                         {
-                            return items;
+                            JArray items = parser.FindGridItems(json);
+                            if (items != null && items.Count > 0)
+                            {
+                                return items;
+                            }
                         }
                     }
                 }
@@ -307,7 +302,7 @@ namespace YouTubeApiLib
             return null;
         }
 
-        private string ExtractVideoIDsFromGridRendererItem(JObject gridVideoRendererItem)
+        internal static string ExtractVideoIDsFromGridRendererItem(JObject gridVideoRendererItem)
         {
             JObject j = gridVideoRendererItem.Value<JObject>("gridVideoRenderer");
             if (j != null)
@@ -333,7 +328,7 @@ namespace YouTubeApiLib
             return null;
         }
 
-        private List<string> ExtractVideoIDsFromGridRendererItems(
+        internal static List<string> ExtractVideoIDsFromGridRendererItems(
             JArray gridVideoRendererItems, out string continuationToken)
         {
             continuationToken = null;
@@ -370,20 +365,20 @@ namespace YouTubeApiLib
             return idList;
         }
 
-        public int GetVideoInfo(string videoId, out string infoString)
+        public int GetRawVideoInfo(string videoId, out string rawInfoJsonString)
         {
             JObject body = GenerateVideoInfoRequestBody(videoId);
             string url = $"{API_V1_PLAYER_URL}?key={API_V1_KEY}";
-            int errorCode = HttpsPost(url, body.ToString(), out infoString);
+            int errorCode = HttpsPost(url, body.ToString(), out rawInfoJsonString);
             return errorCode;
         }
 
         public YouTubeVideo GetVideo(string videoId)
         {
-            int errorCode = GetVideoInfo(videoId, out string info);
+            int errorCode = GetRawVideoInfo(videoId, out string rawVideoInfo);
             if (errorCode == 200)
             {
-                JObject json = JObject.Parse(info);
+                JObject json = JObject.Parse(rawVideoInfo);
                 JObject jPlayabilityStatus = json.Value<JObject>("playabilityStatus");
                 YouTubeVideoPlayabilityStatus videoStatus = YouTubeVideoPlayabilityStatus.Parse(jPlayabilityStatus);
                 if (!videoStatus.IsPlayable)
@@ -437,10 +432,15 @@ namespace YouTubeApiLib
 
         public int GetSimplifiedVideoInfo(string videoId, out JObject simplifiedVideoInfo)
         {
-            int errorCode = GetVideoInfo(videoId, out string info);
+            int errorCode = GetRawVideoInfo(videoId, out string rawInfo);
             if (errorCode == 200)
             {
-                JObject json = JObject.Parse(info);
+                JObject json = JObject.Parse(rawInfo);
+                if (json == null)
+                {
+                    simplifiedVideoInfo = null;
+                    return 404;
+                }
                 JObject jVideoDetails = json.Value<JObject>("videoDetails");
                 JArray jThumbnails = jVideoDetails.Value<JObject>("thumbnail").Value<JArray>("thumbnails");
                 string videoTitle = jVideoDetails.Value<string>("title");
@@ -661,14 +661,45 @@ namespace YouTubeApiLib
         }
     }
 
-    public sealed class VideoPageResult : VideoListResult
+    public class VideoPage : IVideoPageParser
     {
+        public JObject RawData { get; private set; }
+        public List<string> VideoIds { get; private set; }
         public string ContinuationToken { get; private set; }
+        private bool _isContinuationToken;
 
-        public VideoPageResult(JArray videoList, string continuationToken, int errorCode)
-            : base(videoList, errorCode)
+        public VideoPage(JObject rawData, bool isContinuationToken)
         {
-            ContinuationToken = continuationToken;
+            RawData = rawData;
+            _isContinuationToken = isContinuationToken;
+        }
+
+        /// <summary>
+        /// Parse contained data.
+        /// </summary>
+        /// <returns>Video ID count</returns>
+        public int Parse()
+        {
+            JArray jaItems = YouTubeApi.FindItemsArray(RawData, _isContinuationToken);
+            if (jaItems == null)
+            {
+                return 0;
+            }
+            VideoIds = YouTubeApi.ExtractVideoIDsFromGridRendererItems(jaItems, out string token);
+            ContinuationToken = token;
+            return VideoIds != null ? VideoIds.Count : 0;
+        }
+    }
+
+    public sealed class VideoPageResult
+    {
+        public VideoPage VideoPage { get; private set; }
+        public int ErrorCode { get; private set; }
+
+        public VideoPageResult(VideoPage videoPage, int errorCode)
+        {
+            VideoPage = videoPage;
+            ErrorCode = errorCode;
         }
     }
 

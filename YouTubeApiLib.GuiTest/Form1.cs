@@ -83,8 +83,10 @@ namespace YouTubeApiLib.GuiTest
             YouTubeChannel youTubeChannel = new YouTubeChannel(channelId, channelName);
             YouTubeApi api = new YouTubeApi();
             VideoPageResult videoPageResult =
-                await Task.Run(() => api.GetVideosPage(youTubeChannel.Id, null));
-            if (videoPageResult.List == null || videoPageResult.List.Count == 0 || videoPageResult.ErrorCode != 200)
+                await Task.Run(() => api.GetVideoPage(youTubeChannel.Id, null));
+            if (videoPageResult == null || videoPageResult.ErrorCode != 200 ||
+                videoPageResult.VideoPage == null || videoPageResult.VideoPage.RawData == null ||
+                videoPageResult.VideoPage.VideoIds == null)
             {
                 MessageBox.Show("Ничего не найдено!", "Ошибка!",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -93,19 +95,29 @@ namespace YouTubeApiLib.GuiTest
                 return;
             }
 
-            foreach (JObject jInfo in videoPageResult.List)
+            await Task.Run(() =>
             {
-                foundVideos.Add(jInfo);
+                foreach (string videoId in videoPageResult.VideoPage.VideoIds)
+                {
+                    int errorCode = api.GetSimplifiedVideoInfo(videoId, out JObject jInfo);
+                    if (errorCode == 200)
+                    {
+                        string id = jInfo.Value<string>("id");
+                        string title = jInfo.Value<string>("title");
 
-                string id = jInfo.Value<string>("id");
-                string title = jInfo.Value<string>("title");
+                        Invoke((MethodInvoker)delegate
+                        {
+                            foundVideos.Add(jInfo);
 
-                ListViewItem item = new ListViewItem(id);
-                item.SubItems.Add(title);
-                listView1.Items.Add(item);
-            }
+                            ListViewItem item = new ListViewItem(id);
+                            item.SubItems.Add(title);
+                            listView1.Items.Add(item);
+                        });
+                    }
+                }
+            });
 
-            nextPageToken = videoPageResult.ContinuationToken;
+            nextPageToken = videoPageResult.VideoPage.ContinuationToken;
             if (!string.IsNullOrEmpty(nextPageToken) && !string.IsNullOrWhiteSpace(nextPageToken))
             {
                 btnNextPage.Enabled = true;
@@ -128,8 +140,9 @@ namespace YouTubeApiLib.GuiTest
             }
 
             YouTubeApi api = new YouTubeApi();
-            VideoPageResult videoPageResult = await Task.Run(() => api.GetVideosPage(null, nextPageToken));
-            if (videoPageResult.List == null || videoPageResult.List.Count == 0)
+            VideoPageResult videoPageResult = await Task.Run(() => api.GetVideoPage(null, nextPageToken));
+            if (videoPageResult.ErrorCode != 200 || videoPageResult.VideoPage == null ||
+                videoPageResult.VideoPage.VideoIds.Count == 0)
             {
                 MessageBox.Show("Ничего не найдено!", "Ошибка!",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -137,25 +150,33 @@ namespace YouTubeApiLib.GuiTest
                 btnSaveList.Enabled = true;
                 return;
             }
-            if (videoPageResult.ErrorCode == 200)
+
+            await Task.Run(() =>
             {
-                foreach (JObject jInfo in videoPageResult.List)
+                foreach (string videoId in videoPageResult.VideoPage.VideoIds)
                 {
-                    foundVideos.Add(jInfo);
+                    int errorCode = api.GetSimplifiedVideoInfo(videoId, out JObject jInfo);
+                    if (errorCode == 200)
+                    {
+                        string id = jInfo.Value<string>("id");
+                        string title = jInfo.Value<string>("title");
 
-                    string id = jInfo.Value<string>("id");
-                    string title = jInfo.Value<string>("title");
+                        Invoke((MethodInvoker)delegate
+                        {
+                            foundVideos.Add(jInfo);
 
-                    ListViewItem item = new ListViewItem(id);
-                    item.SubItems.Add(title);
-                    listView1.Items.Add(item);
+                            ListViewItem item = new ListViewItem(id);
+                            item.SubItems.Add(title);
+                            listView1.Items.Add(item);
+                        });
+                    }
                 }
+            });
 
-                nextPageToken = videoPageResult.ContinuationToken;
-                if (!string.IsNullOrEmpty(nextPageToken))
-                {
-                    btnNextPage.Enabled = true;
-                }
+            nextPageToken = videoPageResult.VideoPage.ContinuationToken;
+            if (!string.IsNullOrEmpty(nextPageToken))
+            {
+                btnNextPage.Enabled = true;
             }
 
             btnOpenChannel.Enabled = true;
