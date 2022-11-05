@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -8,6 +9,67 @@ namespace YouTubeApiLib
 {
     public static class Utils
     {
+        public static SimplifiedVideoInfoResult ParseRawVideoInfo(RawVideoInfo rawVideoInfo)
+        {
+            JObject jVideoDetails = rawVideoInfo.RawData.Value<JObject>("videoDetails");
+            if (jVideoDetails == null)
+            {
+                return new SimplifiedVideoInfoResult(null, 404);
+            }
+            string videoTitle = jVideoDetails.Value<string>("title");
+            string videoId = jVideoDetails.Value<string>("videoId");
+            string shortDescription = jVideoDetails.Value<string>("shortDescription");
+            int lengthSeconds = int.Parse(jVideoDetails.Value<string>("lengthSeconds"));
+            string ownerChannelTitle = jVideoDetails.Value<string>("author");
+            string ownerChannelId = jVideoDetails.Value<string>("channelId");
+            int viewCount = int.Parse(jVideoDetails.Value<string>("viewCount"));
+            bool isPrivate = jVideoDetails.Value<bool>("isPrivate");
+            bool isLiveContent = jVideoDetails.Value<bool>("isLiveContent");
+            JObject jMicroformatRenderer = rawVideoInfo.RawData.Value<JObject>("microformat").Value<JObject>("playerMicroformatRenderer");
+            string description = null;
+            JToken jt = jMicroformatRenderer.Value<JToken>("description");
+            if (jt != null)
+            {
+                jt = jt.Value<JToken>("simpleText");
+                if (jt != null)
+                {
+                    description = jt.Value<string>();
+                }
+            }
+            bool isFamilySafe = jMicroformatRenderer.Value<bool>("isFamilySafe");
+            bool isUnlisted = jMicroformatRenderer.Value<bool>("isUnlisted");
+            string category = jMicroformatRenderer.Value<string>("category");
+            string datePublished = jMicroformatRenderer.Value<string>("publishDate");
+            string dateUploaded = jMicroformatRenderer.Value<string>("uploadDate");
+
+            JObject simplifiedVideoInfo = new JObject();
+            simplifiedVideoInfo["title"] = videoTitle;
+            simplifiedVideoInfo["id"] = videoId;
+            simplifiedVideoInfo["url"] = $"{YouTubeApi.YOUTUBE_URL}/watch?v={videoId}";
+            simplifiedVideoInfo["lengthSeconds"] = lengthSeconds;
+            simplifiedVideoInfo["ownerChannelTitle"] = ownerChannelTitle;
+            simplifiedVideoInfo["ownerChannelId"] = ownerChannelId;
+            simplifiedVideoInfo["viewCount"] = viewCount;
+            simplifiedVideoInfo["category"] = category;
+            simplifiedVideoInfo["isPrivate"] = isPrivate;
+            simplifiedVideoInfo["isUnlisted"] = isUnlisted;
+            simplifiedVideoInfo["isFamilySafe"] = isFamilySafe;
+            simplifiedVideoInfo["isLiveContent"] = isLiveContent;
+            simplifiedVideoInfo["datePublished"] = datePublished;
+            simplifiedVideoInfo["dateUploaded"] = dateUploaded;
+            simplifiedVideoInfo["description"] = description;
+            simplifiedVideoInfo["shortDescription"] = shortDescription;
+
+            JObject jThumbnail = jVideoDetails.Value<JObject>("thumbnail");
+            JArray jaThumbnails = jThumbnail?.Value<JArray>("thumbnails");
+            simplifiedVideoInfo["thumbnails"] = jaThumbnails;
+
+            JObject jStreamingData = rawVideoInfo.RawData.Value<JObject>("streamingData");
+            simplifiedVideoInfo["streamingData"] = jStreamingData;
+
+            return new SimplifiedVideoInfoResult(new SimplifiedVideoInfo(simplifiedVideoInfo), 200);
+        }
+
         public static int HttpsPost(string url, string body, out string responseString)
         {
             responseString = "Client error";

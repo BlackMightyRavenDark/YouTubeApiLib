@@ -20,7 +20,8 @@ namespace YouTubeApiLib
         public bool IsUnlisted { get; private set; }
         public bool IsFamilySafe { get; private set; }
         public bool IsLiveContent { get; private set; }
-        public JObject RawInfo { get; private set; }
+        public RawVideoInfo RawInfo { get; private set; }
+        public SimplifiedVideoInfo SimplifiedInfo { get; private set; }
         public YouTubeVideoPlayabilityStatus Status { get; private set; }
 
         public YouTubeVideo(
@@ -38,7 +39,8 @@ namespace YouTubeApiLib
             bool isUnlisted,
             bool isFamilySafe,
             bool isLiveContent,
-            JObject rawInfo,
+            RawVideoInfo rawInfo,
+            SimplifiedVideoInfo simplifiedInfo,
             YouTubeVideoPlayabilityStatus status)
         {
             Title = title;
@@ -60,13 +62,14 @@ namespace YouTubeApiLib
             IsFamilySafe = isFamilySafe;
             IsLiveContent = isLiveContent;
             RawInfo = rawInfo;
+            SimplifiedInfo = simplifiedInfo;
             Status = status;
         }
 
         public static YouTubeVideo CreateEmpty(YouTubeVideoPlayabilityStatus status)
         {
             return new YouTubeVideo(null, null, TimeSpan.FromSeconds(0), DateTime.MaxValue, DateTime.MaxValue,
-                null, null, null, 0L, null, false, false, false, false, null, status);
+                null, null, null, 0L, null, false, false, false, false, null, null, status);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json.Linq;
@@ -7,7 +8,7 @@ namespace YouTubeApiLib.GuiTest
 {
     public partial class Form1 : Form
     {
-        private JArray foundVideos = null;
+        private List<SimplifiedVideoInfo> foundVideos;
         private string nextPageToken = null;
 
         public Form1()
@@ -43,8 +44,13 @@ namespace YouTubeApiLib.GuiTest
             sfd.DefaultExt = ".json";
             if (sfd.ShowDialog() == DialogResult.OK)
             {
+                JArray jArray = new JArray();
+                foreach (SimplifiedVideoInfo simplifiedVideoInfo in foundVideos)
+                {
+                    jArray.Add(simplifiedVideoInfo.Info);
+                }
                 JObject json = new JObject();
-                json.Add(new JProperty("videos", foundVideos));
+                json.Add(new JProperty("videos", jArray));
                 System.IO.File.WriteAllText(sfd.FileName, json.ToString());
             }
             sfd.Dispose();
@@ -59,7 +65,7 @@ namespace YouTubeApiLib.GuiTest
             btnSaveList.Enabled = false;
             listView1.Items.Clear();
             nextPageToken = null;
-            foundVideos = new JArray();
+            foundVideos = new List<SimplifiedVideoInfo>();
 
             string channelName = textBoxChannelName.Text;
             if (string.IsNullOrEmpty(channelName) || string.IsNullOrWhiteSpace(channelName))
@@ -99,15 +105,15 @@ namespace YouTubeApiLib.GuiTest
             {
                 foreach (string videoId in videoIdPageResult.VideoPage.VideoIds)
                 {
-                    int errorCode = api.GetSimplifiedVideoInfo(videoId, out JObject jInfo);
-                    if (errorCode == 200)
+                    SimplifiedVideoInfoResult simplifiedVideoInfoResult = api.GetSimplifiedVideoInfo(videoId);
+                    if (simplifiedVideoInfoResult.ErrorCode == 200)
                     {
-                        string id = jInfo.Value<string>("id");
-                        string title = jInfo.Value<string>("title");
+                        string id = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("id");
+                        string title = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("title");
 
                         Invoke((MethodInvoker)delegate
                         {
-                            foundVideos.Add(jInfo);
+                            foundVideos.Add(simplifiedVideoInfoResult.SimplifiedVideoInfo);
 
                             ListViewItem item = new ListViewItem(id);
                             item.SubItems.Add(title);
@@ -155,15 +161,15 @@ namespace YouTubeApiLib.GuiTest
             {
                 foreach (string videoId in videoIdPageResult.VideoPage.VideoIds)
                 {
-                    int errorCode = api.GetSimplifiedVideoInfo(videoId, out JObject jInfo);
-                    if (errorCode == 200)
+                    SimplifiedVideoInfoResult simplifiedVideoInfoResult = api.GetSimplifiedVideoInfo(videoId);
+                    if (simplifiedVideoInfoResult.ErrorCode == 200)
                     {
-                        string id = jInfo.Value<string>("id");
-                        string title = jInfo.Value<string>("title");
+                        string id = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("id");
+                        string title = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("title");
 
                         Invoke((MethodInvoker)delegate
                         {
-                            foundVideos.Add(jInfo);
+                            foundVideos.Add(simplifiedVideoInfoResult.SimplifiedVideoInfo);
 
                             ListViewItem item = new ListViewItem(id);
                             item.SubItems.Add(title);
