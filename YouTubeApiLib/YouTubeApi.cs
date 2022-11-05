@@ -41,13 +41,13 @@ namespace YouTubeApiLib
             return null;
         }
 
-        public YouTubeChannelTabResult GetChannelTab(string channelId, ChannelTab channelTab)
+        public YouTubeChannelTabResult GetChannelTab(YouTubeChannel youTubeChannel, ChannelTab channelTab)
         {
             string browseParams = GetBrowseEndpointParams(channelTab);
-            return GetChannelTab(channelId, browseParams);
+            return GetChannelTab(youTubeChannel.Id, browseParams);
         }
 
-        public YouTubeChannelTabResult GetChannelTab(string channelId, string browseEndpointParams)
+        private YouTubeChannelTabResult GetChannelTab(string channelId, string browseEndpointParams)
         {
             string url = $"{API_V1_BROWSE_URL}?key={API_V1_KEY}";
             JObject body = GenerateChannelTabRequestBody(channelId, browseEndpointParams, null);
@@ -111,7 +111,12 @@ namespace YouTubeApiLib
             return null;
         }
 
-        public VideoPageResult GetVideoPage(string channelId, string continuationToken)
+        public VideoIdPageResult GetVideoIdPage(YouTubeChannel youTubeChannel, string continuationToken)
+        {
+            return GetVideoIdPage(youTubeChannel?.Id, continuationToken);
+        }
+
+        private VideoIdPageResult GetVideoIdPage(string channelId, string continuationToken)
         {
             bool tokenExists = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);
             string browseParams = !tokenExists ? GetBrowseEndpointParams(ChannelTab.Videos) : null;
@@ -121,11 +126,11 @@ namespace YouTubeApiLib
             if (errorCode == 200)
             {
                 JObject json = JObject.Parse(response);
-                VideoPage videoPage = new VideoPage(json, tokenExists);
-                int count = videoPage.Parse();
-                return new VideoPageResult(videoPage, count > 0 ? 200 : 400);
+                VideoIdPage videoIdPage = new VideoIdPage(json, tokenExists);
+                int count = videoIdPage.Parse();
+                return new VideoIdPageResult(videoIdPage, count > 0 ? 200 : 400);
             }
-            return new VideoPageResult(null, errorCode);
+            return new VideoIdPageResult(null, errorCode);
         }
 
         public JObject GenerateChannelVideoListRequestBody(string channelId, string continuationToken)
@@ -186,22 +191,22 @@ namespace YouTubeApiLib
             return GetChannelVideoList(channel.Id);
         }
 
-        public VideoListResult GetChannelVideoList(string channelId)
+        private VideoListResult GetChannelVideoList(string channelId)
         {
             JArray resList = new JArray();
             string continuationToken = null;
             int errorCode;
             while (true)
             {
-                VideoPageResult videoPageResult = GetVideoPage(channelId, continuationToken);
+                VideoIdPageResult videoIdPageResult = GetVideoIdPage(channelId, continuationToken);
 
-                errorCode = videoPageResult.ErrorCode;
+                errorCode = videoIdPageResult.ErrorCode;
                 if (errorCode != 200)
                 {
                     break;
                 }
 
-                foreach (string videoId in videoPageResult.VideoPage.VideoIds)
+                foreach (string videoId in videoIdPageResult.VideoPage.VideoIds)
                 {
                     if (GetSimplifiedVideoInfo(videoId, out JObject jInfo) == 200)
                     {
@@ -209,7 +214,7 @@ namespace YouTubeApiLib
                     }
                 }
     
-                continuationToken = videoPageResult.VideoPage.ContinuationToken;
+                continuationToken = videoIdPageResult.VideoPage.ContinuationToken;
                 bool continuationTokenExists = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrEmpty(continuationToken);
                 if (!continuationTokenExists)
                 {
@@ -661,14 +666,14 @@ namespace YouTubeApiLib
         }
     }
 
-    public class VideoPage : IVideoPageParser
+    public class VideoIdPage : IVideoPageParser
     {
         public JObject RawData { get; private set; }
         public List<string> VideoIds { get; private set; }
         public string ContinuationToken { get; private set; }
         private bool _isContinuationToken;
 
-        public VideoPage(JObject rawData, bool isContinuationToken)
+        public VideoIdPage(JObject rawData, bool isContinuationToken)
         {
             RawData = rawData;
             _isContinuationToken = isContinuationToken;
@@ -691,12 +696,12 @@ namespace YouTubeApiLib
         }
     }
 
-    public sealed class VideoPageResult
+    public sealed class VideoIdPageResult
     {
-        public VideoPage VideoPage { get; private set; }
+        public VideoIdPage VideoPage { get; private set; }
         public int ErrorCode { get; private set; }
 
-        public VideoPageResult(VideoPage videoPage, int errorCode)
+        public VideoIdPageResult(VideoIdPage videoPage, int errorCode)
         {
             VideoPage = videoPage;
             ErrorCode = errorCode;

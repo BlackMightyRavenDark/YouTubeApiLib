@@ -82,11 +82,11 @@ namespace YouTubeApiLib.GuiTest
 
             YouTubeChannel youTubeChannel = new YouTubeChannel(channelId, channelName);
             YouTubeApi api = new YouTubeApi();
-            VideoPageResult videoPageResult =
-                await Task.Run(() => api.GetVideoPage(youTubeChannel.Id, null));
-            if (videoPageResult == null || videoPageResult.ErrorCode != 200 ||
-                videoPageResult.VideoPage == null || videoPageResult.VideoPage.RawData == null ||
-                videoPageResult.VideoPage.VideoIds == null)
+            VideoIdPageResult videoIdPageResult =
+                await Task.Run(() => api.GetVideoIdPage(youTubeChannel, null));
+            if (videoIdPageResult == null || videoIdPageResult.ErrorCode != 200 ||
+                videoIdPageResult.VideoPage == null || videoIdPageResult.VideoPage.RawData == null ||
+                videoIdPageResult.VideoPage.VideoIds == null)
             {
                 MessageBox.Show("Ничего не найдено!", "Ошибка!",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -97,7 +97,7 @@ namespace YouTubeApiLib.GuiTest
 
             await Task.Run(() =>
             {
-                foreach (string videoId in videoPageResult.VideoPage.VideoIds)
+                foreach (string videoId in videoIdPageResult.VideoPage.VideoIds)
                 {
                     int errorCode = api.GetSimplifiedVideoInfo(videoId, out JObject jInfo);
                     if (errorCode == 200)
@@ -117,7 +117,7 @@ namespace YouTubeApiLib.GuiTest
                 }
             });
 
-            nextPageToken = videoPageResult.VideoPage.ContinuationToken;
+            nextPageToken = videoIdPageResult.VideoPage.ContinuationToken;
             if (!string.IsNullOrEmpty(nextPageToken) && !string.IsNullOrWhiteSpace(nextPageToken))
             {
                 btnNextPage.Enabled = true;
@@ -140,9 +140,9 @@ namespace YouTubeApiLib.GuiTest
             }
 
             YouTubeApi api = new YouTubeApi();
-            VideoPageResult videoPageResult = await Task.Run(() => api.GetVideoPage(null, nextPageToken));
-            if (videoPageResult.ErrorCode != 200 || videoPageResult.VideoPage == null ||
-                videoPageResult.VideoPage.VideoIds.Count == 0)
+            VideoIdPageResult videoIdPageResult = await Task.Run(() => api.GetVideoIdPage(null, nextPageToken));
+            if (videoIdPageResult.ErrorCode != 200 || videoIdPageResult.VideoPage == null ||
+                videoIdPageResult.VideoPage.VideoIds.Count == 0)
             {
                 MessageBox.Show("Ничего не найдено!", "Ошибка!",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -153,7 +153,7 @@ namespace YouTubeApiLib.GuiTest
 
             await Task.Run(() =>
             {
-                foreach (string videoId in videoPageResult.VideoPage.VideoIds)
+                foreach (string videoId in videoIdPageResult.VideoPage.VideoIds)
                 {
                     int errorCode = api.GetSimplifiedVideoInfo(videoId, out JObject jInfo);
                     if (errorCode == 200)
@@ -173,7 +173,7 @@ namespace YouTubeApiLib.GuiTest
                 }
             });
 
-            nextPageToken = videoPageResult.VideoPage.ContinuationToken;
+            nextPageToken = videoIdPageResult.VideoPage.ContinuationToken;
             if (!string.IsNullOrEmpty(nextPageToken))
             {
                 btnNextPage.Enabled = true;
@@ -204,6 +204,8 @@ namespace YouTubeApiLib.GuiTest
                 return;
             }
 
+            YouTubeChannel youTubeChannel = new YouTubeChannel(channelId, channelName);
+
             JObject jResult = new JObject();
 
             int count = await Task.Run(() =>
@@ -213,7 +215,7 @@ namespace YouTubeApiLib.GuiTest
                 for (int i = (int)ChannelTab.Home; i < (int)ChannelTab.About; ++i)
                 {
                     ChannelTab tab = (ChannelTab)i;
-                    YouTubeChannelTabResult channelTabResult = api.GetChannelTab(channelId, tab);
+                    YouTubeChannelTabResult channelTabResult = api.GetChannelTab(youTubeChannel, tab);
                     string tabTitle = tab.ToString();
                     if (channelTabResult.ErrorCode == 200)
                     {
