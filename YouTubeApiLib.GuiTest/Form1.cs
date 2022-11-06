@@ -8,7 +8,7 @@ namespace YouTubeApiLib.GuiTest
 {
     public partial class Form1 : Form
     {
-        private List<SimplifiedVideoInfo> foundVideos;
+        private List<YouTubeVideo> foundVideos;
         private string nextPageToken = null;
 
         public Form1()
@@ -45,9 +45,9 @@ namespace YouTubeApiLib.GuiTest
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 JArray jArray = new JArray();
-                foreach (SimplifiedVideoInfo simplifiedVideoInfo in foundVideos)
+                foreach (YouTubeVideo video in foundVideos)
                 {
-                    jArray.Add(simplifiedVideoInfo.Info);
+                    jArray.Add(video.SimplifiedInfo.Info);
                 }
                 JObject json = new JObject();
                 json.Add(new JProperty("videos", jArray));
@@ -65,7 +65,7 @@ namespace YouTubeApiLib.GuiTest
             btnSaveList.Enabled = false;
             listView1.Items.Clear();
             nextPageToken = null;
-            foundVideos = new List<SimplifiedVideoInfo>();
+            foundVideos = new List<YouTubeVideo>();
 
             string channelName = textBoxChannelName.Text;
             if (string.IsNullOrEmpty(channelName) || string.IsNullOrWhiteSpace(channelName))
@@ -88,11 +88,9 @@ namespace YouTubeApiLib.GuiTest
 
             YouTubeChannel youTubeChannel = new YouTubeChannel(channelId, channelName);
             YouTubeApi api = new YouTubeApi();
-            VideoIdPageResult videoIdPageResult =
-                await Task.Run(() => api.GetVideoIdPage(youTubeChannel, null));
-            if (videoIdPageResult == null || videoIdPageResult.ErrorCode != 200 ||
-                videoIdPageResult.VideoPage == null || videoIdPageResult.VideoPage.RawData == null ||
-                videoIdPageResult.VideoPage.VideoIds == null)
+            VideoPageResult videoPageResult =
+                await Task.Run(() => api.GetVideoPage(youTubeChannel, null));
+            if (videoPageResult.ErrorCode != 200 || videoPageResult.VideoPage.Videos.Count == 0)
             {
                 MessageBox.Show("Ничего не найдено!", "Ошибка!",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -101,29 +99,16 @@ namespace YouTubeApiLib.GuiTest
                 return;
             }
 
-            await Task.Run(() =>
+            foreach (YouTubeVideo video in videoPageResult.VideoPage.Videos)
             {
-                foreach (string videoId in videoIdPageResult.VideoPage.VideoIds)
-                {
-                    SimplifiedVideoInfoResult simplifiedVideoInfoResult = api.GetSimplifiedVideoInfo(videoId);
-                    if (simplifiedVideoInfoResult.ErrorCode == 200)
-                    {
-                        string id = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("id");
-                        string title = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("title");
+                foundVideos.Add(video);
 
-                        Invoke((MethodInvoker)delegate
-                        {
-                            foundVideos.Add(simplifiedVideoInfoResult.SimplifiedVideoInfo);
+                ListViewItem item = new ListViewItem(video.Id);
+                item.SubItems.Add(video.Title);
+                listView1.Items.Add(item);
+            }
 
-                            ListViewItem item = new ListViewItem(id);
-                            item.SubItems.Add(title);
-                            listView1.Items.Add(item);
-                        });
-                    }
-                }
-            });
-
-            nextPageToken = videoIdPageResult.VideoPage.ContinuationToken;
+            nextPageToken = videoPageResult.VideoPage.ContinuationToken;
             if (!string.IsNullOrEmpty(nextPageToken) && !string.IsNullOrWhiteSpace(nextPageToken))
             {
                 btnNextPage.Enabled = true;
@@ -146,9 +131,8 @@ namespace YouTubeApiLib.GuiTest
             }
 
             YouTubeApi api = new YouTubeApi();
-            VideoIdPageResult videoIdPageResult = await Task.Run(() => api.GetVideoIdPage(null, nextPageToken));
-            if (videoIdPageResult.ErrorCode != 200 || videoIdPageResult.VideoPage == null ||
-                videoIdPageResult.VideoPage.VideoIds.Count == 0)
+            VideoPageResult videoPageResult = await Task.Run(() => api.GetVideoPage(null, nextPageToken));
+            if (videoPageResult.ErrorCode != 200 || videoPageResult.VideoPage.Videos.Count == 0)
             {
                 MessageBox.Show("Ничего не найдено!", "Ошибка!",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -157,30 +141,17 @@ namespace YouTubeApiLib.GuiTest
                 return;
             }
 
-            await Task.Run(() =>
+            foreach (YouTubeVideo video in videoPageResult.VideoPage.Videos)
             {
-                foreach (string videoId in videoIdPageResult.VideoPage.VideoIds)
-                {
-                    SimplifiedVideoInfoResult simplifiedVideoInfoResult = api.GetSimplifiedVideoInfo(videoId);
-                    if (simplifiedVideoInfoResult.ErrorCode == 200)
-                    {
-                        string id = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("id");
-                        string title = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("title");
+                foundVideos.Add(video);
 
-                        Invoke((MethodInvoker)delegate
-                        {
-                            foundVideos.Add(simplifiedVideoInfoResult.SimplifiedVideoInfo);
+                ListViewItem item = new ListViewItem(video.Id);
+                item.SubItems.Add(video.Title);
+                listView1.Items.Add(item);
+            }
 
-                            ListViewItem item = new ListViewItem(id);
-                            item.SubItems.Add(title);
-                            listView1.Items.Add(item);
-                        });
-                    }
-                }
-            });
-
-            nextPageToken = videoIdPageResult.VideoPage.ContinuationToken;
-            if (!string.IsNullOrEmpty(nextPageToken))
+            nextPageToken = videoPageResult.VideoPage.ContinuationToken;
+            if (!string.IsNullOrEmpty(nextPageToken) && !string.IsNullOrWhiteSpace(nextPageToken))
             {
                 btnNextPage.Enabled = true;
             }

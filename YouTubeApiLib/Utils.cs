@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using Newtonsoft.Json.Linq;
 
 namespace YouTubeApiLib
 {
@@ -68,6 +68,51 @@ namespace YouTubeApiLib
             simplifiedVideoInfo["streamingData"] = jStreamingData;
 
             return new SimplifiedVideoInfoResult(new SimplifiedVideoInfo(simplifiedVideoInfo), 200);
+        }
+
+        public static YouTubeVideo MakeYouTubeVideo(RawVideoInfo rawVideoInfo)
+        {
+            SimplifiedVideoInfoResult simplifiedVideoInfoResult = ParseRawVideoInfo(rawVideoInfo);
+            if (simplifiedVideoInfoResult.ErrorCode != 200)
+            {
+                return YouTubeVideo.CreateEmpty(new YouTubeVideoPlayabilityStatus(null, "Not parsed", 400, null));
+            }
+
+            return MakeYouTubeVideo(rawVideoInfo, simplifiedVideoInfoResult.SimplifiedVideoInfo);
+        }
+
+        public static YouTubeVideo MakeYouTubeVideo(RawVideoInfo rawVideoInfo, SimplifiedVideoInfo simplifiedVideoInfo)
+        {
+            string videoTitle = simplifiedVideoInfo.Info.Value<string>("title");
+            string videoId = simplifiedVideoInfo.Info.Value<string>("id");
+            int lengthSeconds = int.Parse(simplifiedVideoInfo.Info.Value<string>("lengthSeconds"));
+            TimeSpan length = TimeSpan.FromSeconds(lengthSeconds);
+            string ownerChannelTitle = simplifiedVideoInfo.Info.Value<string>("author");
+            string ownerChannelId = simplifiedVideoInfo.Info.Value<string>("channelId");
+            int viewCount = int.Parse(simplifiedVideoInfo.Info.Value<string>("viewCount"));
+            bool isPrivate = simplifiedVideoInfo.Info.Value<bool>("isPrivate");
+            bool isLiveContent = simplifiedVideoInfo.Info.Value<bool>("isLiveContent");
+            string description = simplifiedVideoInfo.Info.Value<string>("description");
+            if (string.IsNullOrEmpty(description))
+            {
+                description = simplifiedVideoInfo.Info.Value<string>("shortDescription");
+            }
+            bool isFamilySafe = simplifiedVideoInfo.Info.Value<bool>("isFamilySafe");
+            bool isUnlisted = simplifiedVideoInfo.Info.Value<bool>("isUnlisted");
+            string category = simplifiedVideoInfo.Info.Value<string>("category");
+            string published = simplifiedVideoInfo.Info.Value<string>("publishDate");
+            string uploaded = simplifiedVideoInfo.Info.Value<string>("uploadDate");
+            StringToDateTime(published, out DateTime datePublished);
+            StringToDateTime(uploaded, out DateTime dateUploaded);
+
+            JObject jPlayabilityStatus = rawVideoInfo.RawData.Value<JObject>("playabilityStatus");
+            YouTubeVideoPlayabilityStatus videoStatus = YouTubeVideoPlayabilityStatus.Parse(jPlayabilityStatus);
+
+            YouTubeVideo youTubeVideo = new YouTubeVideo(
+                videoTitle, videoId, length, dateUploaded, datePublished, ownerChannelTitle,
+                ownerChannelId, description, viewCount, category, isPrivate, isUnlisted,
+                isFamilySafe, isLiveContent, rawVideoInfo, simplifiedVideoInfo, videoStatus);
+            return youTubeVideo;
         }
 
         public static int HttpsPost(string url, string body, out string responseString)

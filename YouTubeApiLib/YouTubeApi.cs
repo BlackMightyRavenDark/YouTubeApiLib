@@ -111,9 +111,37 @@ namespace YouTubeApiLib
             return null;
         }
 
+        public VideoPageResult GetVideoPage(YouTubeChannel youTubeChannel, string continuationToken)
+        {
+            return GetVideoPage(youTubeChannel?.Id, continuationToken);
+        }
+
         public VideoIdPageResult GetVideoIdPage(YouTubeChannel youTubeChannel, string continuationToken)
         {
             return GetVideoIdPage(youTubeChannel?.Id, continuationToken);
+        }
+
+        private VideoPageResult GetVideoPage(string channelId, string continuationToken)
+        {
+            VideoIdPageResult videoIdPageResult = GetVideoIdPage(channelId, continuationToken);
+            if (videoIdPageResult.ErrorCode == 200)
+            {
+                List<YouTubeVideo> videos = new List<YouTubeVideo>();
+                foreach (string videoId in videoIdPageResult.VideoIdPage.VideoIds)
+                {
+                    RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId);
+                    if (rawVideoInfoResult.ErrorCode == 200)
+                    {
+                        YouTubeVideo video = MakeYouTubeVideo(rawVideoInfoResult.RawVideoInfo);
+                        if (video != null && video.Status != null)
+                        {
+                            videos.Add(video);
+                        }
+                    }
+                }
+                return new VideoPageResult(new VideoPage(videos, videoIdPageResult.VideoIdPage.ContinuationToken), 200);
+            }
+            return new VideoPageResult(null, videoIdPageResult.ErrorCode);
         }
 
         private VideoIdPageResult GetVideoIdPage(string channelId, string continuationToken)
@@ -206,7 +234,7 @@ namespace YouTubeApiLib
                     break;
                 }
 
-                foreach (string videoId in videoIdPageResult.VideoPage.VideoIds)
+                foreach (string videoId in videoIdPageResult.VideoIdPage.VideoIds)
                 {
                     SimplifiedVideoInfoResult simplifiedVideoInfoResult = GetSimplifiedVideoInfo(videoId);
                     if (simplifiedVideoInfoResult.ErrorCode == 200)
@@ -215,7 +243,7 @@ namespace YouTubeApiLib
                     }
                 }
     
-                continuationToken = videoIdPageResult.VideoPage.ContinuationToken;
+                continuationToken = videoIdPageResult.VideoIdPage.ContinuationToken;
                 bool continuationTokenExists = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrEmpty(continuationToken);
                 if (!continuationTokenExists)
                 {
@@ -392,47 +420,7 @@ namespace YouTubeApiLib
             RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId);
             if (rawVideoInfoResult.ErrorCode == 200)
             {
-                JObject jPlayabilityStatus = rawVideoInfoResult.RawVideoInfo.RawData.Value<JObject>("playabilityStatus");
-                YouTubeVideoPlayabilityStatus videoStatus = YouTubeVideoPlayabilityStatus.Parse(jPlayabilityStatus);
-                if (!videoStatus.IsPlayable)
-                {
-                    return YouTubeVideo.CreateEmpty(videoStatus);
-                }
-
-                SimplifiedVideoInfoResult simplifiedVideoInfoResult = ParseRawVideoInfo(rawVideoInfoResult.RawVideoInfo);
-                if (simplifiedVideoInfoResult.ErrorCode != 200)
-                {
-                    return YouTubeVideo.CreateEmpty(new YouTubeVideoPlayabilityStatus(null, "Not parsed", 400, null));
-                }
-
-                string videoTitle = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("title");
-                int lengthSeconds = int.Parse(simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("lengthSeconds"));
-                TimeSpan length = TimeSpan.FromSeconds(lengthSeconds);
-                string ownerChannelTitle = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("author");
-                string ownerChannelId = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("channelId");
-                int viewCount = int.Parse(simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("viewCount"));
-
-                bool isPrivate = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<bool>("isPrivate");
-                bool isLiveContent = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<bool>("isLiveContent");
-                string description = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("description");
-                if (string.IsNullOrEmpty(description))
-                {
-                    description = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("shortDescription");
-                }
-                bool isFamilySafe = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<bool>("isFamilySafe");
-                bool isUnlisted = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<bool>("isUnlisted");
-                string category = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("category");
-                string published = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("publishDate");
-                string uploaded = simplifiedVideoInfoResult.SimplifiedVideoInfo.Info.Value<string>("uploadDate");
-                StringToDateTime(published, out DateTime datePublished);
-                StringToDateTime(uploaded, out DateTime dateUploaded);
-
-                YouTubeVideo youTubeVideo = new YouTubeVideo(
-                    videoTitle, videoId, length, dateUploaded, datePublished, ownerChannelTitle,
-                    ownerChannelId, description, viewCount, category, isPrivate, isUnlisted,
-                    isFamilySafe, isLiveContent, rawVideoInfoResult.RawVideoInfo,
-                    simplifiedVideoInfoResult.SimplifiedVideoInfo, videoStatus);
-                return youTubeVideo;
+                return MakeYouTubeVideo(rawVideoInfoResult.RawVideoInfo);
             }
             return YouTubeVideo.CreateEmpty(new YouTubeVideoPlayabilityStatus(null, null, rawVideoInfoResult.ErrorCode, null));
         }
