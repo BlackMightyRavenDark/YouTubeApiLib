@@ -13,11 +13,11 @@ namespace YouTubeApiLib.ConsoleTest
             //Trick or treat, kingdom hearts, and beat saber. | 18+ | 1080p | 197233776 bytes
             //string videoUrl = "https://www.youtube.com/watch?v=pQNRrnk63MQ";
 
-            string videoId = ExtractVideoIdFromUrl(videoUrl);
-
             Console.WriteLine($"Video URL: {videoUrl}");
 
-            if (!string.IsNullOrEmpty(videoId))
+            VideoId videoId = ExtractVideoIdFromUrl(videoUrl);
+
+            if (videoId != null)
             {
                 YouTubeApi api = new YouTubeApi();
                 YouTubeVideo video = api.GetVideo(videoId);
@@ -43,7 +43,10 @@ namespace YouTubeApiLib.ConsoleTest
                 else
                 {
                     Console.WriteLine($"Video ID: {videoId}");
-                    Console.WriteLine(video.Status.Reason);
+                    Console.WriteLine("ERROR! Video is not playable!");
+                    string reason = !string.IsNullOrEmpty(video.Status.Reason) && !string.IsNullOrWhiteSpace(video.Status.Reason) ?
+                        video.Status.Reason : "Unknown";
+                    Console.WriteLine($"Reason: {reason}");
                 }
             }
             else

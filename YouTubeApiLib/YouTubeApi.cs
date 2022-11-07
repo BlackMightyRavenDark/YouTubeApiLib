@@ -4,7 +4,7 @@ namespace YouTubeApiLib
 {
     public sealed class YouTubeApi
     {
-        public YouTubeVideo GetVideo(string videoId)
+        public YouTubeVideo GetVideo(VideoId videoId)
         {
             RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId);
             if (rawVideoInfoResult.ErrorCode == 200)
@@ -14,9 +14,9 @@ namespace YouTubeApiLib
             return YouTubeVideo.CreateEmpty(new YouTubeVideoPlayabilityStatus(null, null, rawVideoInfoResult.ErrorCode, null));
         }
 
-        public RawVideoInfoResult GetRawVideoInfo(string videoId)
+        public RawVideoInfoResult GetRawVideoInfo(VideoId videoId)
         {
-            return Utils.GetRawVideoInfo(videoId);
+            return Utils.GetRawVideoInfo(videoId.Id);
         }
 
         public SimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId)
