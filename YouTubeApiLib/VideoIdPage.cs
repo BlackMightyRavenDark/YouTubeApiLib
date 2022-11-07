@@ -22,12 +22,12 @@ namespace YouTubeApiLib
         /// <returns>Video ID count</returns>
         public int Parse()
         {
-            JArray jaItems = YouTubeApi.FindItemsArray(RawData, _isContinuationToken);
+            JArray jaItems = Utils.FindItemsArray(RawData, _isContinuationToken);
             if (jaItems == null)
             {
                 return 0;
             }
-            VideoIds = YouTubeApi.ExtractVideoIDsFromGridRendererItems(jaItems, out string token);
+            VideoIds = Utils.ExtractVideoIDsFromGridRendererItems(jaItems, out string token);
             ContinuationToken = token;
             return VideoIds != null ? VideoIds.Count : 0;
         }

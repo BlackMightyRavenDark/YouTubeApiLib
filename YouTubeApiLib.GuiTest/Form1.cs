@@ -189,9 +189,9 @@ namespace YouTubeApiLib.GuiTest
             {
                 int n = 0;
                 YouTubeApi api = new YouTubeApi();
-                for (int i = (int)ChannelTab.Home; i < (int)ChannelTab.About; ++i)
+                for (int i = (int)Utils.ChannelTab.Home; i < (int)Utils.ChannelTab.About; ++i)
                 {
-                    ChannelTab tab = (ChannelTab)i;
+                    Utils.ChannelTab tab = (Utils.ChannelTab)i;
                     YouTubeChannelTabResult channelTabResult = api.GetChannelTab(youTubeChannel, tab);
                     string tabTitle = tab.ToString();
                     if (channelTabResult.ErrorCode == 200)
