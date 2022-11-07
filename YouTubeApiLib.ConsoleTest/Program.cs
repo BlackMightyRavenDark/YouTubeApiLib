@@ -38,7 +38,8 @@ namespace YouTubeApiLib.ConsoleTest
                     Console.WriteLine($"Unlisted: {video.IsUnlisted}");
                     Console.WriteLine($"Family safe: {video.IsFamilySafe}");
                     Console.WriteLine($"Live content: {video.IsLiveContent}");
-                    Console.WriteLine($"Raw info:\n{video.RawInfo}");
+                    Console.Write($"Raw info: ");
+                    Console.WriteLine(video.RawInfo != null ? $"\n{video.RawInfo}" : "null");
                 }
                 else
                 {

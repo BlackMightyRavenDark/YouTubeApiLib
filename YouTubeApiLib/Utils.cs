@@ -244,8 +244,8 @@ namespace YouTubeApiLib
             string videoId = simplifiedVideoInfo.Info.Value<string>("id");
             int lengthSeconds = int.Parse(simplifiedVideoInfo.Info.Value<string>("lengthSeconds"));
             TimeSpan length = TimeSpan.FromSeconds(lengthSeconds);
-            string ownerChannelTitle = simplifiedVideoInfo.Info.Value<string>("author");
-            string ownerChannelId = simplifiedVideoInfo.Info.Value<string>("channelId");
+            string ownerChannelTitle = simplifiedVideoInfo.Info.Value<string>("ownerChannelTitle");
+            string ownerChannelId = simplifiedVideoInfo.Info.Value<string>("ownerChannelId");
             int viewCount = int.Parse(simplifiedVideoInfo.Info.Value<string>("viewCount"));
             bool isPrivate = simplifiedVideoInfo.Info.Value<bool>("isPrivate");
             bool isLiveContent = simplifiedVideoInfo.Info.Value<bool>("isLiveContent");
@@ -257,8 +257,8 @@ namespace YouTubeApiLib
             bool isFamilySafe = simplifiedVideoInfo.Info.Value<bool>("isFamilySafe");
             bool isUnlisted = simplifiedVideoInfo.Info.Value<bool>("isUnlisted");
             string category = simplifiedVideoInfo.Info.Value<string>("category");
-            string published = simplifiedVideoInfo.Info.Value<string>("publishDate");
-            string uploaded = simplifiedVideoInfo.Info.Value<string>("uploadDate");
+            string published = simplifiedVideoInfo.Info.Value<string>("datePublished");
+            string uploaded = simplifiedVideoInfo.Info.Value<string>("dateUploaded");
             StringToDateTime(published, out DateTime datePublished);
             StringToDateTime(uploaded, out DateTime dateUploaded);
 

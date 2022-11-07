@@ -10,5 +10,10 @@ namespace YouTubeApiLib
         {
             RawData = rawData;
         }
+
+        public override string ToString()
+        {
+            return RawData != null ? RawData.ToString() : "null";
+        }
     }
 }
