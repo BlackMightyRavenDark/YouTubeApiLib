@@ -187,20 +187,26 @@ namespace YouTubeApiLib.GuiTest
 
             int count = await Task.Run(() =>
             {
-                int n = 0;
-                YouTubeApi api = new YouTubeApi();
-                for (int i = (int)Utils.ChannelTab.Home; i < (int)Utils.ChannelTab.About; ++i)
+                List<YouTubeChannelTabPage> pages = new List<YouTubeChannelTabPage>()
                 {
-                    Utils.ChannelTab tab = (Utils.ChannelTab)i;
-                    YouTubeChannelTabResult channelTabResult = api.GetChannelTab(youTubeChannel, tab);
-                    string tabTitle = tab.ToString();
+                    YouTubeChannelTabPages.Home,
+                    YouTubeChannelTabPages.Videos,
+                    YouTubeChannelTabPages.Community,
+                    YouTubeChannelTabPages.Channels,
+                    YouTubeChannelTabPages.About
+                };
+                int foundCount = 0;
+                YouTubeApi api = new YouTubeApi();
+                foreach (YouTubeChannelTabPage channelTabPage in pages)
+                {
+                    YouTubeChannelTabResult channelTabResult = api.GetChannelTab(youTubeChannel, channelTabPage);
                     if (channelTabResult.ErrorCode == 200)
                     {
-                        n++;
-                        jResult.Add(new JProperty(tabTitle, channelTabResult.Tab.Json));
+                        foundCount++;
+                        jResult.Add(new JProperty(channelTabPage.Title, channelTabResult.Tab.Json));
                     }
                 }
-                return n;
+                return foundCount;
             });
 
             if (count > 0)

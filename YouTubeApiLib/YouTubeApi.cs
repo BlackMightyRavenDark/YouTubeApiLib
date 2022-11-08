@@ -39,10 +39,10 @@ namespace YouTubeApiLib
             return Utils.GetVideoPage(youTubeChannel?.Id, continuationToken);
         }
 
-        public YouTubeChannelTabResult GetChannelTab(YouTubeChannel youTubeChannel, ChannelTab channelTab)
+        public YouTubeChannelTabResult GetChannelTab(
+            YouTubeChannel youTubeChannel, YouTubeChannelTabPage youTubeChannelTabPage)
         {
-            string browseParams = GetBrowseEndpointParams(channelTab);
-            return Utils.GetChannelTab(youTubeChannel.Id, browseParams);
+            return Utils.GetChannelTab(youTubeChannel.Id, youTubeChannelTabPage);
         }
     }
 }

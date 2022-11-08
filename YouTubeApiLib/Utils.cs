@@ -14,45 +14,14 @@ namespace YouTubeApiLib
         public const string API_V1_BROWSE_URL = "https://www.youtube.com/youtubei/v1/browse";
         public const string API_V1_PLAYER_URL = "https://www.youtube.com/youtubei/v1/player";
         public const string YOUTUBE_CLIENT_VERSION = "2.20211221.00.00";
-        public const string TAB_HOME_PARAMS_ID = "EghmZWF0dXJlZA%3D%3D";
-        public const string TAB_VIDEOS_DESCENDING_PARAMS_ID = "EgZ2aWRlb3MYAyAAMAE%3D";
-        public const string TAB_COMMUNITY_PARAMS_ID = "Egljb21tdW5pdHk%3D";
-        public const string TAB_CHANNELS_PARAMS_ID = "EghjaGFubmVscw%3D%3D";
-        public const string TAB_ABOUT_PARAMS_ID = "EgVhYm91dA%3D%3D";
-
-        public enum ChannelTab { Home, Videos, Community, Channels, About }
-
-        public static string GetBrowseEndpointParams(ChannelTab channelTab)
-        {
-            switch (channelTab)
-            {
-                case ChannelTab.Home:
-                    return TAB_HOME_PARAMS_ID;
-
-                case ChannelTab.Videos:
-                    return TAB_VIDEOS_DESCENDING_PARAMS_ID;
-
-                case ChannelTab.Community:
-                    return TAB_COMMUNITY_PARAMS_ID;
-
-                case ChannelTab.Channels:
-                    return TAB_CHANNELS_PARAMS_ID;
-
-                case ChannelTab.About:
-                    return TAB_ABOUT_PARAMS_ID;
-            }
-
-            return null;
-        }
 
         public static JObject GenerateChannelVideoListRequestBody(string channelId, string continuationToken)
         {
-            string browseParams = GetBrowseEndpointParams(ChannelTab.Videos);
-            return GenerateChannelTabRequestBody(channelId, browseParams, continuationToken);
+            return GenerateChannelTabRequestBody(channelId, YouTubeChannelTabPages.Videos, continuationToken);
         }
 
         public static JObject GenerateChannelTabRequestBody(string channelId,
-            string browseEndpointParams, string continuationToken)
+            YouTubeChannelTabPage youTubeChannelTabPage, string continuationToken)
         {
             JObject jClient = new JObject();
             jClient["hl"] = "en";
@@ -68,10 +37,7 @@ namespace YouTubeApiLib
             json["browseId"] = channelId;
             if (string.IsNullOrEmpty(continuationToken) || string.IsNullOrWhiteSpace(continuationToken))
             {
-                if (!string.IsNullOrEmpty(browseEndpointParams) && !string.IsNullOrWhiteSpace(browseEndpointParams))
-                {
-                    json["params"] = browseEndpointParams;
-                }
+                json["params"] = youTubeChannelTabPage.ParamsId;
             }
             else
             {
@@ -124,10 +90,10 @@ namespace YouTubeApiLib
             return new SimplifiedVideoInfoResult(null, rawVideoInfoResult.ErrorCode);
         }
 
-        internal static YouTubeChannelTabResult GetChannelTab(string channelId, string browseEndpointParams)
+        internal static YouTubeChannelTabResult GetChannelTab(string channelId, YouTubeChannelTabPage channelTabPage)
         {
             string url = $"{API_V1_BROWSE_URL}?key={API_V1_KEY}";
-            JObject body = GenerateChannelTabRequestBody(channelId, browseEndpointParams, null);
+            JObject body = GenerateChannelTabRequestBody(channelId, channelTabPage, null);
             int errorCode = HttpsPost(url, body.ToString(), out string response);
             if (errorCode == 200)
             {
@@ -297,14 +263,13 @@ namespace YouTubeApiLib
 
         internal static VideoIdPageResult GetVideoIdPage(string channelId, string continuationToken)
         {
-            bool tokenExists = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);
-            string browseParams = !tokenExists ? GetBrowseEndpointParams(ChannelTab.Videos) : null;
-            JObject body = GenerateChannelTabRequestBody(channelId, browseParams, continuationToken);
+            JObject body = GenerateChannelTabRequestBody(channelId, YouTubeChannelTabPages.Videos, continuationToken);
             string url = $"{API_V1_BROWSE_URL}?key={API_V1_KEY}";
             int errorCode = HttpsPost(url, body.ToString(), out string response);
             if (errorCode == 200)
             {
                 JObject json = JObject.Parse(response);
+                bool tokenExists = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);
                 VideoIdPage videoIdPage = new VideoIdPage(json, tokenExists);
                 int count = videoIdPage.Parse();
                 return new VideoIdPageResult(videoIdPage, count > 0 ? 200 : 400);
