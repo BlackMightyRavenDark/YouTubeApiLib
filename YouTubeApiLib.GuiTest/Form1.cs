@@ -202,7 +202,7 @@ namespace YouTubeApiLib.GuiTest
                 foreach (YouTubeChannelTabPage channelTabPage in pages)
                 {
                     YouTubeChannelTabResult channelTabResult = api.GetChannelTab(youTubeChannel, channelTabPage);
-                    jResult.Add(new JProperty(channelTabPage.Title, channelTabResult.Tab?.Json));
+                    jResult.Add(new JProperty(channelTabPage.Title, channelTabResult.ChannelTab?.Json));
                 }
             });
 

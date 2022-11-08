@@ -103,37 +103,20 @@ namespace YouTubeApiLib
                     return new YouTubeChannelTabResult(null, 404);
                 }
 
-                JObject j = json.Value<JObject>("contents");
-                if (j == null)
-                {
-                    return new YouTubeChannelTabResult(null, 404);
-                }
-                j = j.Value<JObject>("twoColumnBrowseResultsRenderer");
-                if (j == null)
-                {
-                    return new YouTubeChannelTabResult(null, 404);
-                }
-                JArray jaTabs = j.Value<JArray>("tabs");
-                if (jaTabs == null || jaTabs.Count == 0)
+                YouTubeChannelTab selectedTab = FindSelectedChannelTab(json);
+                if (selectedTab == null)
                 {
                     return new YouTubeChannelTabResult(null, 404);
                 }
 
-                JObject jSelectedTab = FindSelectedTab(jaTabs);
-                if (jSelectedTab == null)
-                {
-                    return new YouTubeChannelTabResult(null, 404);
-                }
-
-                string tabTitle = jSelectedTab.Value<string>("title");
-                if (tabTitle != channelTabPage.Title)
+                if (selectedTab.Title != channelTabPage.Title)
                 {
                     // If the requested tab is not exists,
                     // API returns the "Home" tab content.
                     return new YouTubeChannelTabResult(null, 404);
                 }
 
-                return new YouTubeChannelTabResult(new YouTubeChannelTab(tabTitle, jSelectedTab), errorCode);
+                return new YouTubeChannelTabResult(selectedTab, errorCode);
             }
 
             return new YouTubeChannelTabResult(null, errorCode);
@@ -384,7 +367,32 @@ namespace YouTubeApiLib
             return idList;
         }
 
-        public static JObject FindSelectedTab(JArray jaTabs)
+        public static JArray FindTabItems(JObject megaRoot)
+        {
+            JObject j = megaRoot.Value<JObject>("contents");
+            if (j == null)
+            {
+                return null;
+            }
+            j = j.Value<JObject>("twoColumnBrowseResultsRenderer");
+            if (j == null)
+            {
+                return null;
+            }
+            return j.Value<JArray>("tabs");
+        }
+
+        public static YouTubeChannelTab FindSelectedChannelTab(JObject megaRoot)
+        {
+            JArray jaTabs = FindTabItems(megaRoot);
+            if (jaTabs == null || jaTabs.Count == 0)
+            {
+                return null;
+            }
+            return FindSelectedChannelTab(jaTabs);
+        }
+        
+        public static YouTubeChannelTab FindSelectedChannelTab(JArray jaTabs)
         {
             foreach (JObject jObject in jaTabs)
             {
@@ -399,29 +407,25 @@ namespace YouTubeApiLib
                     bool selected = j.Value<bool>("selected");
                     if (selected)
                     {
-                        return j;
+                        string tabTitle = j.Value<string>("title");
+                        return new YouTubeChannelTab(tabTitle, jObject);
                     }
                 }
             }
             return null;
         }
 
-        private static JObject FindVideosTab(JObject root)
+        private static YouTubeChannelTab FindChannelTab(
+            YouTubeChannelTabPage channelTabPage, JObject megaRoot)
         {
-            JObject j = root.Value<JObject>("contents");
-            if (j == null)
+            JArray jaTabs = FindTabItems(megaRoot);
+            if (jaTabs == null || jaTabs.Count == 0)
             {
                 return null;
             }
-            j = j.Value<JObject>("twoColumnBrowseResultsRenderer");
-            if (j == null)
-            {
-                return null;
-            }
-            JArray jaTabs = j.Value<JArray>("tabs");
             foreach (JObject jTab in jaTabs)
             {
-                j = jTab.Value<JObject>("tabRenderer");
+                JObject j = jTab.Value<JObject>("tabRenderer");
                 if (j == null)
                 {
                     j = jTab.Value<JObject>("expandableTabRenderer");
@@ -429,9 +433,9 @@ namespace YouTubeApiLib
                 if (j != null)
                 {
                     string tabTitle = j.Value<string>("title");
-                    if (tabTitle == "Videos")
+                    if (tabTitle == channelTabPage.Title)
                     {
-                        return jTab;
+                        return new YouTubeChannelTab(tabTitle, jTab);
                     }
                 }
             }
@@ -460,15 +464,15 @@ namespace YouTubeApiLib
                 }
                 else
                 {
-                    json = FindVideosTab(json);
-                    if (json != null)
+                    YouTubeChannelTab tabVideos = FindChannelTab(YouTubeChannelTabPages.Videos, json);
+                    if (tabVideos != null)
                     {
                         List<ITabPageParser> parsers = new List<ITabPageParser>() {
                             new TabPageParserVideo1(), new TabPageParserVideo2()
                         };
                         foreach (ITabPageParser parser in parsers)
                         {
-                            JArray items = parser.FindGridItems(json);
+                            JArray items = parser.FindGridItems(tabVideos.Json);
                             if (items != null && items.Count > 0)
                             {
                                 return items;
