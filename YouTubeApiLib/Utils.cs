@@ -126,6 +126,13 @@ namespace YouTubeApiLib
                 }
 
                 string tabTitle = jSelectedTab.Value<string>("title");
+                if (tabTitle != channelTabPage.Title)
+                {
+                    // If the requested tab is not exists,
+                    // API returns the "Home" tab content.
+                    return new YouTubeChannelTabResult(null, 404);
+                }
+
                 return new YouTubeChannelTabResult(new YouTubeChannelTab(tabTitle, jSelectedTab), errorCode);
             }
 

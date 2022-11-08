@@ -185,39 +185,28 @@ namespace YouTubeApiLib.GuiTest
 
             JObject jResult = new JObject();
 
-            int count = await Task.Run(() =>
+            await Task.Run(() =>
             {
                 List<YouTubeChannelTabPage> pages = new List<YouTubeChannelTabPage>()
                 {
                     YouTubeChannelTabPages.Home,
                     YouTubeChannelTabPages.Videos,
+                    YouTubeChannelTabPages.Shorts,
+                    YouTubeChannelTabPages.Live,
+                    YouTubeChannelTabPages.Playlists,
                     YouTubeChannelTabPages.Community,
                     YouTubeChannelTabPages.Channels,
                     YouTubeChannelTabPages.About
                 };
-                int foundCount = 0;
                 YouTubeApi api = new YouTubeApi();
                 foreach (YouTubeChannelTabPage channelTabPage in pages)
                 {
                     YouTubeChannelTabResult channelTabResult = api.GetChannelTab(youTubeChannel, channelTabPage);
-                    if (channelTabResult.ErrorCode == 200)
-                    {
-                        foundCount++;
-                        jResult.Add(new JProperty(channelTabPage.Title, channelTabResult.Tab.Json));
-                    }
+                    jResult.Add(new JProperty(channelTabPage.Title, channelTabResult.Tab?.Json));
                 }
-                return foundCount;
             });
 
-            if (count > 0)
-            {
-                textBoxChannelPages.Text = jResult.ToString();
-            }
-            else
-            {
-                MessageBox.Show("Ничего не найдено!", "Ошибка!",
-                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            }
+            textBoxChannelPages.Text = jResult.ToString();
 
             btnGetChannelPages.Enabled = true;
         }
