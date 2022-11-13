@@ -119,6 +119,7 @@
             this.listView1.TabIndex = 5;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
+            this.listView1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listView1_MouseDoubleClick);
             this.listView1.Resize += new System.EventHandler(this.listView1_Resize);
             // 
             // columnHeaderId
@@ -199,7 +200,7 @@
             this.tabPageChannelPages.Location = new System.Drawing.Point(4, 22);
             this.tabPageChannelPages.Name = "tabPageChannelPages";
             this.tabPageChannelPages.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageChannelPages.Size = new System.Drawing.Size(549, 260);
+            this.tabPageChannelPages.Size = new System.Drawing.Size(549, 316);
             this.tabPageChannelPages.TabIndex = 1;
             this.tabPageChannelPages.Text = "Страницы канала";
             // 

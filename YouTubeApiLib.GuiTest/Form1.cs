@@ -105,6 +105,8 @@ namespace YouTubeApiLib.GuiTest
 
                 ListViewItem item = new ListViewItem(video.Id);
                 item.SubItems.Add(video.Title);
+                item.Tag = video;
+                
                 listView1.Items.Add(item);
             }
 
@@ -147,6 +149,8 @@ namespace YouTubeApiLib.GuiTest
 
                 ListViewItem item = new ListViewItem(video.Id);
                 item.SubItems.Add(video.Title);
+                item.Tag = video;
+
                 listView1.Items.Add(item);
             }
 
@@ -209,6 +213,24 @@ namespace YouTubeApiLib.GuiTest
             textBoxChannelPages.Text = jResult.ToString();
 
             btnGetChannelPages.Enabled = true;
+        }
+
+        private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left && listView1.SelectedIndices != null &&
+                listView1.SelectedIndices.Count > 0)
+            {
+                int id = listView1.SelectedIndices[0];
+                if (id >= 0 && id < listView1.Items.Count)
+                {
+                    YouTubeVideo video = listView1.Items[id].Tag as YouTubeVideo;
+                    if (video != null)
+                    {
+                        FormVideoInfo formVideoInfo = new FormVideoInfo(video);
+                        formVideoInfo.ShowDialog();
+                    }
+                }
+            }
         }
     }
 }
