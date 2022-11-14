@@ -46,6 +46,11 @@ namespace YouTubeApiLib
             return json;
         }
 
+        public static string GetVideoUrl(string videoId)
+        {
+            return $"{YOUTUBE_URL}/watch?v={videoId}";
+        }
+
         public static JObject GenerateVideoInfoRequestBody(string videoId)
         {
             JObject jClient = new JObject();
@@ -158,7 +163,7 @@ namespace YouTubeApiLib
             JObject simplifiedVideoInfo = new JObject();
             simplifiedVideoInfo["title"] = videoTitle;
             simplifiedVideoInfo["id"] = videoId;
-            simplifiedVideoInfo["url"] = $"{YOUTUBE_URL}/watch?v={videoId}";
+            simplifiedVideoInfo["url"] = GetVideoUrl(videoId);
             simplifiedVideoInfo["lengthSeconds"] = lengthSeconds;
             simplifiedVideoInfo["ownerChannelTitle"] = ownerChannelTitle;
             simplifiedVideoInfo["ownerChannelId"] = ownerChannelId;

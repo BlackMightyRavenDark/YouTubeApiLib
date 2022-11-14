@@ -13,11 +13,10 @@ namespace YouTubeApiLib.GuiTest
 
         public void SetVideoInfo(YouTubeVideo video)
         {
-            string videoUrl = $"{Utils.YOUTUBE_URL}/watch?v={video.Id}";
             string fullInfo =
                 $"Название видео: {video.Title}\r\n" +
                 $"ID видео: {video.Id}\r\n" +
-                $"Ссылка на видео: {videoUrl}\r\n" +
+                $"Ссылка на видео: {video.Url}\r\n" +
                 $"Дата загрузки: {video.DateUploaded:dd.MM.yyyy}\r\n" +
                 $"Дата публикации: {video.DatePublished:dd.MM.yyyy}\r\n" +
                 $"Продолжительность видео: {video.Length:h':'mm':'ss}\r\n" +

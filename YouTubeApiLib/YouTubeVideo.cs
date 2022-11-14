@@ -1,5 +1,4 @@
 ﻿using System;
-using Newtonsoft.Json.Linq;
 
 namespace YouTubeApiLib
 {
@@ -45,10 +44,8 @@ namespace YouTubeApiLib
         {
             Title = title;
             Id = id;
-            if (!string.IsNullOrEmpty(id) && !string.IsNullOrWhiteSpace(id))
-            {
-                Url = $"https://www.youtube.com/watch?v={id}";
-            }
+            Url = !string.IsNullOrEmpty(id) && !string.IsNullOrWhiteSpace(id) ?
+                Utils.GetVideoUrl(id) : null;
             Length = length;
             DateUploaded = dateUploaded;
             DatePublished = datePublished;
