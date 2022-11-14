@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace YouTubeApiLib
 {
@@ -19,6 +20,7 @@ namespace YouTubeApiLib
         public bool IsUnlisted { get; private set; }
         public bool IsFamilySafe { get; private set; }
         public bool IsLiveContent { get; private set; }
+        public List<YouTubeVideoThumbnail> ThumbnailUrls { get; private set; }
         public RawVideoInfo RawInfo { get; private set; }
         public SimplifiedVideoInfo SimplifiedInfo { get; private set; }
         public YouTubeVideoPlayabilityStatus Status { get; private set; }
@@ -38,6 +40,7 @@ namespace YouTubeApiLib
             bool isUnlisted,
             bool isFamilySafe,
             bool isLiveContent,
+            List<YouTubeVideoThumbnail> thumbnailUrls,
             RawVideoInfo rawInfo,
             SimplifiedVideoInfo simplifiedInfo,
             YouTubeVideoPlayabilityStatus status)
@@ -58,6 +61,7 @@ namespace YouTubeApiLib
             IsUnlisted = isUnlisted;
             IsFamilySafe = isFamilySafe;
             IsLiveContent = isLiveContent;
+            ThumbnailUrls = thumbnailUrls;
             RawInfo = rawInfo;
             SimplifiedInfo = simplifiedInfo;
             Status = status;
@@ -66,7 +70,7 @@ namespace YouTubeApiLib
         public static YouTubeVideo CreateEmpty(YouTubeVideoPlayabilityStatus status)
         {
             return new YouTubeVideo(null, null, TimeSpan.FromSeconds(0), DateTime.MaxValue, DateTime.MaxValue,
-                null, null, null, 0L, null, false, false, false, false, null, null, status);
+                null, null, null, 0L, null, false, false, false, false, null, null, null, status);
         }
     }
 }

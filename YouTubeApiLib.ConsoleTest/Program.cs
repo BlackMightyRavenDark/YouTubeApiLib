@@ -38,6 +38,19 @@ namespace YouTubeApiLib.ConsoleTest
                     Console.WriteLine($"Unlisted: {video.IsUnlisted}");
                     Console.WriteLine($"Family safe: {video.IsFamilySafe}");
                     Console.WriteLine($"Live content: {video.IsLiveContent}");
+                    Console.Write("Thumbnails: ");
+                    if (video.ThumbnailUrls != null && video.ThumbnailUrls.Count > 0)
+                    {
+                        Console.WriteLine("");
+                        foreach (YouTubeVideoThumbnail videoThumbnail in video.ThumbnailUrls)
+                        {
+                            Console.WriteLine(videoThumbnail.ToString());
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("null");
+                    }
                     Console.Write($"Raw info: ");
                     Console.WriteLine(video.RawInfo != null ? $"\n{video.RawInfo}" : "null");
                 }

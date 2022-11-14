@@ -29,6 +29,14 @@ namespace YouTubeApiLib.GuiTest
                 $"Доступ только по ссылке: {BoolToString(video.IsUnlisted)}\r\n" +
                 $"Видео 18+: {BoolToString(!video.IsFamilySafe)}\r\n" +
                 $"Видео было прямой трансляцией: {BoolToString(video.IsLiveContent)}\r\n";
+            if (video.ThumbnailUrls != null && video.ThumbnailUrls.Count > 0)
+            {
+                fullInfo += "Эскизы (thumbnails):\r\n";
+                foreach (YouTubeVideoThumbnail videoThumbnail in video.ThumbnailUrls)
+                {
+                    fullInfo += $"{videoThumbnail}\r\n";
+                }
+            }
 
             textBoxFullInfo.Text = fullInfo;
         }

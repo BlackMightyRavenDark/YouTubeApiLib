@@ -134,6 +134,17 @@ namespace YouTubeApiLib
             {
                 return new SimplifiedVideoInfoResult(null, 404);
             }
+            JObject jMicroformat = rawVideoInfo.RawData.Value<JObject>("microformat");
+            if (jMicroformat == null)
+            {
+                return new SimplifiedVideoInfoResult(null, 404);
+            }
+            JObject jMicroformatRenderer = jMicroformat.Value<JObject>("playerMicroformatRenderer");
+            if (jMicroformatRenderer == null)
+            {
+                return new SimplifiedVideoInfoResult(null, 404);
+            }
+
             string videoTitle = jVideoDetails.Value<string>("title");
             string videoId = jVideoDetails.Value<string>("videoId");
             string shortDescription = jVideoDetails.Value<string>("shortDescription");
@@ -143,16 +154,11 @@ namespace YouTubeApiLib
             int viewCount = int.Parse(jVideoDetails.Value<string>("viewCount"));
             bool isPrivate = jVideoDetails.Value<bool>("isPrivate");
             bool isLiveContent = jVideoDetails.Value<bool>("isLiveContent");
-            JObject jMicroformatRenderer = rawVideoInfo.RawData.Value<JObject>("microformat").Value<JObject>("playerMicroformatRenderer");
             string description = null;
-            JToken jt = jMicroformatRenderer.Value<JToken>("description");
-            if (jt != null)
+            JObject jDescription = jMicroformatRenderer.Value<JObject>("description");
+            if (jDescription != null)
             {
-                jt = jt.Value<JToken>("simpleText");
-                if (jt != null)
-                {
-                    description = jt.Value<string>();
-                }
+                description = jDescription.Value<string>("simpleText");
             }
             bool isFamilySafe = jMicroformatRenderer.Value<bool>("isFamilySafe");
             bool isUnlisted = jMicroformatRenderer.Value<bool>("isUnlisted");
@@ -178,9 +184,8 @@ namespace YouTubeApiLib
             simplifiedVideoInfo["description"] = description;
             simplifiedVideoInfo["shortDescription"] = shortDescription;
 
-            JObject jThumbnail = jVideoDetails.Value<JObject>("thumbnail");
-            JArray jaThumbnails = jThumbnail?.Value<JArray>("thumbnails");
-            simplifiedVideoInfo["thumbnails"] = jaThumbnails;
+            List<YouTubeVideoThumbnail> videoThumbnails = GetThumbnailUrls(jMicroformat, videoId);
+            simplifiedVideoInfo["thumbnails"] = ThumbnailsToJson(videoThumbnails);
 
             JObject jStreamingData = rawVideoInfo.RawData.Value<JObject>("streamingData");
             simplifiedVideoInfo["streamingData"] = jStreamingData;
@@ -223,13 +228,27 @@ namespace YouTubeApiLib
             StringToDateTime(published, out DateTime datePublished);
             StringToDateTime(uploaded, out DateTime dateUploaded);
 
+            List<YouTubeVideoThumbnail> videoThumbnails = null;
+            JArray jaThumbnails = simplifiedVideoInfo.Info.Value<JArray>("thumbnails");
+            if (jaThumbnails != null && jaThumbnails.Count > 0)
+            {
+                videoThumbnails = new List<YouTubeVideoThumbnail>();
+                foreach (JObject jThumbnail in jaThumbnails)
+                {
+                    string id = jThumbnail.Value<string>("id");
+                    string url = jThumbnail.Value<string>("url");
+                    videoThumbnails.Add(new YouTubeVideoThumbnail(id, url));
+                }
+            }
+
             JObject jPlayabilityStatus = rawVideoInfo.RawData.Value<JObject>("playabilityStatus");
             YouTubeVideoPlayabilityStatus videoStatus = YouTubeVideoPlayabilityStatus.Parse(jPlayabilityStatus);
 
             YouTubeVideo youTubeVideo = new YouTubeVideo(
                 videoTitle, videoId, length, dateUploaded, datePublished, ownerChannelTitle,
                 ownerChannelId, description, viewCount, category, isPrivate, isUnlisted,
-                isFamilySafe, isLiveContent, rawVideoInfo, simplifiedVideoInfo, videoStatus);
+                isFamilySafe, isLiveContent, videoThumbnails,
+                rawVideoInfo, simplifiedVideoInfo, videoStatus);
             return youTubeVideo;
         }
 
@@ -493,6 +512,111 @@ namespace YouTubeApiLib
             }
 
             return null;
+        }
+
+        internal static List<YouTubeVideoThumbnail> GetThumbnailUrls(JObject jMicroformat, string videoId)
+        {
+            List<YouTubeVideoThumbnail> possibleThumbnails = new List<YouTubeVideoThumbnail>()
+            {
+                new YouTubeVideoThumbnail("maxresdefault", $"https://i.ytimg.com/vi/{videoId}/maxresdefault.jpg"),
+                new YouTubeVideoThumbnail("hqdefault", $"https://i.ytimg.com/vi/{videoId}/hqdefault.jpg"),
+                new YouTubeVideoThumbnail("mqdefault", $"https://i.ytimg.com/vi/{videoId}/mqdefault.jpg"),
+                new YouTubeVideoThumbnail("sddefault", $"https://i.ytimg.com/vi/{videoId}/sddefault.jpg"),
+                new YouTubeVideoThumbnail("default", $"https://i.ytimg.com/vi/{videoId}/default.jpg")
+            };
+            List<YouTubeVideoThumbnail> thumbnails = ExtractThumbnailsFromMicroformat(jMicroformat);
+            foreach (YouTubeVideoThumbnail thumbnail in thumbnails)
+            {
+                bool found = false;
+                foreach (YouTubeVideoThumbnail thumbnail2 in possibleThumbnails)
+                {
+                    if (thumbnail.Url == thumbnail2.Url)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    possibleThumbnails.Add(thumbnail);
+                }
+            }
+
+            List<YouTubeVideoThumbnail> resList = new List<YouTubeVideoThumbnail>();
+            foreach (YouTubeVideoThumbnail thumbnail in possibleThumbnails)
+            {
+                //TODO: Check the URL availability
+                //But it's extremely slow operation :(
+                resList.Add(thumbnail);
+            }
+
+            return resList;
+        }
+
+        private static List<YouTubeVideoThumbnail> ExtractThumbnailsFromMicroformat(JObject jMicroformat)
+        {
+            if (jMicroformat != null)
+            {
+                JObject jMicroformatRenderer = jMicroformat.Value<JObject>("playerMicroformatRenderer");
+                return ExtractThumbnailsFromMicroformatRenderer(jMicroformatRenderer);
+            }
+            return null;
+        }
+
+        private static List<YouTubeVideoThumbnail> ExtractThumbnailsFromMicroformatRenderer(JObject jMicroformatRenderer)
+        {
+            List<YouTubeVideoThumbnail> resList = new List<YouTubeVideoThumbnail>();
+            if (jMicroformatRenderer != null)
+            {
+                JObject jThumbnail = jMicroformatRenderer.Value<JObject>("thumbnail");
+                if (jThumbnail != null)
+                {
+                    JArray jaThumbnails = jThumbnail.Value<JArray>("thumbnails");
+                    if (jaThumbnails != null && jaThumbnails.Count > 0)
+                    {
+                        foreach (JObject j in jaThumbnails)
+                        {
+                            string url = j.Value<string>("url");
+                            if (!string.IsNullOrEmpty(url) && !string.IsNullOrWhiteSpace(url))
+                            {
+                                if (url.Contains("?"))
+                                {
+                                    url = url.Substring(0, url.IndexOf("?"));
+                                }
+                                if (url.Contains("vi_webp"))
+                                {
+                                    url = url.Replace("vi_webp", "vi").Replace(".webp", ".jpg");
+                                }
+
+                                bool found = false;
+                                foreach (YouTubeVideoThumbnail thumbnail in resList)
+                                {
+                                    if (thumbnail.Url == url)
+                                    {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (!found)
+                                {
+                                    resList.Add(new YouTubeVideoThumbnail("Unnamed", url));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return resList;
+        }
+
+        private static JArray ThumbnailsToJson(IEnumerable<YouTubeVideoThumbnail> videoThumbnails)
+        {
+            JArray jsonArr = new JArray();
+            foreach (YouTubeVideoThumbnail thumbnail in videoThumbnails)
+            {
+                jsonArr.Add(thumbnail.ToJson());
+            }
+            return jsonArr;
         }
 
         public static int HttpsPost(string url, string body, out string responseString)
