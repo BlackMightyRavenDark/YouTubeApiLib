@@ -51,6 +51,28 @@ namespace YouTubeApiLib.ConsoleTest
                     {
                         Console.WriteLine("null");
                     }
+                    Console.Write("Download URLs: ");
+                    if (video.MediaTracks != null && video.MediaTracks.Count > 0)
+                    {
+                        Console.WriteLine("");
+                        // Quick drafted code may display incorrect field values!
+                        // Some of the displayed values can be a big mistake!
+                        // The displayed information can be also incomplete in current commit!
+                        foreach (YouTubeMediaTrack track in video.MediaTracks)
+                        {
+                            YouTubeVideoTrack videoTrack = track as YouTubeVideoTrack;
+                            string trackType = videoTrack.IsContainer ? "CONTAINER" : "VIDEO";
+                            string info = $"{trackType} | ID {videoTrack.FormatId} | {videoTrack.VideoWidth}x{videoTrack.VideoHeight} | " +
+                                $"{videoTrack.FrameRate} fps | {videoTrack.ContentLength} bytes | {videoTrack.FileExtension}";
+                            string url = string.IsNullOrEmpty(videoTrack.Url) || string.IsNullOrWhiteSpace(videoTrack.Url) ? "null" : videoTrack.Url;
+                            Console.WriteLine(info);
+                            Console.WriteLine($"URL: {url}");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("null or empty");
+                    }
                     Console.Write($"Raw info: ");
                     Console.WriteLine(video.RawInfo != null ? $"\n{video.RawInfo}" : "null");
                 }
