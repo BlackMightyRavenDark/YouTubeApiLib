@@ -71,7 +71,7 @@ namespace YouTubeApiLib.ConsoleTest
                             {
                                 YouTubeMediaTrackContainer container = track as YouTubeMediaTrackContainer;
                                 info = $"CONTAINER | ID {container.FormatId} | {container.VideoWidth}x{container.VideoHeight} | " +
-                                    $"{container} fps | {container.ContentLength} bytes | {container.FileExtension}";
+                                    $"{container.VideoFrameRate} fps | {container.FileExtension}";
                             }
                             string url = string.IsNullOrEmpty(track.FileUrl) || string.IsNullOrWhiteSpace(track.FileUrl) ? "null" : track.FileUrl;
                             Console.WriteLine(info);

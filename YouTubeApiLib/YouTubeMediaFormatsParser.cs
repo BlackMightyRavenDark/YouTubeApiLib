@@ -95,7 +95,7 @@ namespace YouTubeApiLib
                     string mimeType = jFormat.Value<string>("mimeType");
                     ParseMime(mimeType, out string mimeCodecs, out string mimeExt);
                     string fileExtension = !string.IsNullOrEmpty(mimeExt) && !string.IsNullOrWhiteSpace(mimeExt) ?
-                        (mimeExt.ToLower() == "mp4" ? "m4v" : "webm") : "dat"; //maybe wrong
+                        mimeExt.ToLower() : "mp4"; //It's possible to be wrong for some videos.
                     int formatId = jFormat.Value<int>("itag");
                     int bitrate = jFormat.Value<int>("bitrate");
                     int averageBitrate = jFormat.Value<int>("averageBitrate");
