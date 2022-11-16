@@ -14,16 +14,12 @@ namespace YouTubeApiLib
         public long ContentLength { get; private set; }
         public string Quality { get; private set; }
         public string QualityLabel { get; private set; }
-        public string AudioQuality { get; private set; }
-        public int AudioSampleRate { get; private set; }
-        public int AudioChannelCount { get; private set; }
         public int ApproxDurationMs { get; private set; }
         public string ProjectionType { get; private set; }
-        public string Url { get; private set; }
+        public string FileUrl { get; private set; }
         public string CipherSignatureEncrypted { get; private set; }
-        public string CipherEncryptedUrl { get; private set; }
+        public string CipherEncryptedFileUrl { get; private set; }
         public string FileExtension { get; private set; }
-        public bool IsContainer { get; private set; }
         public bool IsDashManifest { get; private set; }
         public bool IsHlsManifest { get; private set; }
         public bool IsCiphered { get; private set; }
@@ -38,25 +34,20 @@ namespace YouTubeApiLib
             long contentLength,
             string quality,
             string qualityLabel,
-            string audioQuality,
-            int audioSampleRate,
-            int audioChannelCount,
             int approxDurationMs,
             string projectionType,
-            string url,
+            string fileUrl,
             string cipherSignatureEncrypted,
-            string cipherEncryptedUrl,
+            string cipherEncryptedFileUrl,
             string mimeType,
             string mimeExt,
             string mimeCodecs,
             string fileExtension,
-            bool isContainer,
             bool isDashManifest,
             bool isHlsManifest,
             bool isCiphered,
             List<string> dashUrls,
-            List<string> hlsUrls
-            )
+            List<string> hlsUrls)
         {
             FormatId = formatId;
             Bitrate = bitrate;
@@ -65,19 +56,15 @@ namespace YouTubeApiLib
             ContentLength = contentLength;
             Quality = quality;
             QualityLabel = qualityLabel;
-            AudioQuality = audioQuality;
-            AudioSampleRate = audioSampleRate;
-            AudioChannelCount = audioChannelCount;
             ApproxDurationMs = approxDurationMs;
             ProjectionType = projectionType;
-            Url = url;
+            FileUrl = fileUrl;
             CipherSignatureEncrypted = cipherSignatureEncrypted;
-            CipherEncryptedUrl = cipherEncryptedUrl;
+            CipherEncryptedFileUrl = cipherEncryptedFileUrl;
             MimeType = mimeType;
             MimeExt = mimeExt;
             MimeCodecs = mimeCodecs;
             FileExtension = fileExtension;
-            IsContainer = isContainer;
             IsDashManifest = isDashManifest;
             IsHlsManifest = isHlsManifest;
             IsCiphered = isCiphered;

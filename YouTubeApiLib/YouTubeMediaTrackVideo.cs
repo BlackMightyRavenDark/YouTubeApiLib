@@ -2,13 +2,13 @@
 
 namespace YouTubeApiLib
 {
-    public class YouTubeVideoTrack : YouTubeMediaTrack
+    public class YouTubeMediaTrackVideo : YouTubeMediaTrack
     {
         public int VideoWidth { get; private set; }
         public int VideoHeight { get; private set; }
         public int FrameRate { get; private set; }
 
-        public YouTubeVideoTrack(
+        public YouTubeMediaTrackVideo(
             int formatId,
             int videoWidth, int videoHeight,
             int frameRate,
@@ -18,30 +18,25 @@ namespace YouTubeApiLib
             long contentLength,
             string quality,
             string qualityLabel,
-            string audioQuality,
-            int audioSampleRate,
-            int audioChannelCount,
             int approxDurationMs,
             string projectionType,
-            string url,
+            string fileUrl,
             string cipherSignatureEncrypted,
-            string cipherEncryptedUrl,
+            string cipherEncryptedFileUrl,
             string mimeType,
             string mimeExt,
             string mimeCodecs,
             string fileExtension,
-            bool isContainer,
             bool isDashManifest,
             bool isHlsManifest,
             bool isCiphered,
             List<string> dashUrls,
-            List<string> hlsUrls
-            )
+            List<string> hlsUrls)
             : base(formatId, bitrate, averageBitrate, lastModified, contentLength,
-                  quality, qualityLabel, audioQuality, audioSampleRate, audioChannelCount,
-                  approxDurationMs, projectionType, url, cipherSignatureEncrypted,
-                  cipherEncryptedUrl, mimeType, mimeExt, mimeCodecs, fileExtension,
-                  isContainer, isDashManifest, isHlsManifest, isCiphered, dashUrls, hlsUrls)
+                  quality, qualityLabel, approxDurationMs, projectionType, fileUrl,
+                  cipherSignatureEncrypted, cipherEncryptedFileUrl,
+                  mimeType, mimeExt, mimeCodecs, fileExtension,
+                  isDashManifest, isHlsManifest, isCiphered, dashUrls, hlsUrls)
         {
             VideoWidth = videoWidth;
             VideoHeight = videoHeight;

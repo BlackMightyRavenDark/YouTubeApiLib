@@ -57,10 +57,6 @@ namespace YouTubeApiLib
                                 contentLength = -1;
                             }
                         }
-                        bool isContainer = false;
-                        string audioQuality = null;
-                        int audioSampleRate = -1;
-                        int audioChannelCount = -1;
                         int approxDurationMs = -1;
                         string cipherSignatureEncrypted = null;
                         string cipherEncryptedUrl = null;
@@ -80,13 +76,12 @@ namespace YouTubeApiLib
                             url = jFormat.Value<string>("url");
                         }
 
-                        YouTubeMediaTrack video = new YouTubeVideoTrack(
+                        YouTubeMediaTrack video = new YouTubeMediaTrackVideo(
                             formatId, videoWidth, videoHeight, videoFrameRate, bitrate, averageBitrate,
-                            lastModified, contentLength, quality, qualityLabel,
-                            audioQuality, audioSampleRate, audioChannelCount, approxDurationMs,
+                            lastModified, contentLength, quality, qualityLabel, approxDurationMs,
                             projectionType, url, cipherSignatureEncrypted, cipherEncryptedUrl,
                             mimeType, mimeExt, mimeCodecs, fileExtension,
-                            isContainer, isDash, isHls, isCiphered, null, null);
+                            isDash, isHls, isCiphered, null, null);
                         resList.AddLast(video);
                     }
                 }
@@ -100,7 +95,7 @@ namespace YouTubeApiLib
                     string mimeType = jFormat.Value<string>("mimeType");
                     ParseMime(mimeType, out string mimeCodecs, out string mimeExt);
                     string fileExtension = !string.IsNullOrEmpty(mimeExt) && !string.IsNullOrWhiteSpace(mimeExt) ?
-                        (mimeExt.ToLower() == "mp4" ? "m4v" : "webm") : "dat";
+                        (mimeExt.ToLower() == "mp4" ? "m4v" : "webm") : "dat"; //maybe wrong
                     int formatId = jFormat.Value<int>("itag");
                     int bitrate = jFormat.Value<int>("bitrate");
                     int averageBitrate = jFormat.Value<int>("averageBitrate");
@@ -145,15 +140,14 @@ namespace YouTubeApiLib
                     {
                         url = jFormat.Value<string>("url");
                     }
-                    bool isContainer = true;
 
-                    YouTubeMediaTrack video = new YouTubeVideoTrack(
+                    YouTubeMediaTrack video = new YouTubeMediaTrackContainer(
                         formatId, videoWidth, videoHeight, videoFrameRate, bitrate, averageBitrate,
                         lastModified, contentLength, quality, qualityLabel,
                         audioQuality, audioSampleRate, audioChannelCount, approxDurationMs,
                         projectionType, url, cipherSignatureEncrypted, cipherEncryptedUrl,
                         mimeType, mimeExt, mimeCodecs, fileExtension,
-                        isContainer, isDash, isHls, isCiphered, null, null);
+                        isDash, isHls, isCiphered, null, null);
                     resList.AddLast(video);
                 }
             }

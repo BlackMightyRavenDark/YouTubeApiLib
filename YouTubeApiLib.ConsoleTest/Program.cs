@@ -60,11 +60,20 @@ namespace YouTubeApiLib.ConsoleTest
                         // The displayed information can be also incomplete in current commit!
                         foreach (YouTubeMediaTrack track in video.MediaTracks)
                         {
-                            YouTubeVideoTrack videoTrack = track as YouTubeVideoTrack;
-                            string trackType = videoTrack.IsContainer ? "CONTAINER" : "VIDEO";
-                            string info = $"{trackType} | ID {videoTrack.FormatId} | {videoTrack.VideoWidth}x{videoTrack.VideoHeight} | " +
-                                $"{videoTrack.FrameRate} fps | {videoTrack.ContentLength} bytes | {videoTrack.FileExtension}";
-                            string url = string.IsNullOrEmpty(videoTrack.Url) || string.IsNullOrWhiteSpace(videoTrack.Url) ? "null" : videoTrack.Url;
+                            string info;
+                            if (track is YouTubeMediaTrackVideo)
+                            {
+                                YouTubeMediaTrackVideo videoTrack = track as YouTubeMediaTrackVideo;
+                                info = $"VIDEO | ID {videoTrack.FormatId} | {videoTrack.VideoWidth}x{videoTrack.VideoHeight} | " +
+                                    $"{videoTrack.FrameRate} fps | {videoTrack.ContentLength} bytes | {videoTrack.FileExtension}";
+                            }
+                            else
+                            {
+                                YouTubeMediaTrackContainer container = track as YouTubeMediaTrackContainer;
+                                info = $"CONTAINER | ID {container.FormatId} | {container.VideoWidth}x{container.VideoHeight} | " +
+                                    $"{container} fps | {container.ContentLength} bytes | {container.FileExtension}";
+                            }
+                            string url = string.IsNullOrEmpty(track.FileUrl) || string.IsNullOrWhiteSpace(track.FileUrl) ? "null" : track.FileUrl;
                             Console.WriteLine(info);
                             Console.WriteLine($"URL: {url}");
                         }
