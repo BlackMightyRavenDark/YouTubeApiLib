@@ -84,6 +84,60 @@ namespace YouTubeApiLib
                             isDash, isHls, isCiphered, null, null);
                         resList.AddLast(video);
                     }
+                    else if (mimeType.Contains("audio"))
+                    {
+                        int formatId = jFormat.Value<int>("itag");
+                        ParseMime(mimeType, out string mimeCodecs, out string mimeExt);
+                        string fileExtension = !string.IsNullOrEmpty(mimeExt) && !string.IsNullOrWhiteSpace(mimeExt) ?
+                            (mimeExt.ToLower() == "mp4" ? "m4a" : "weba") : "dat";
+                        int bitrate = jFormat.Value<int>("bitrate");
+                        int averageBitrate = jFormat.Value<int>("averageBitrate");
+                        string quality = jFormat.Value<string>("quality");
+                        string qualityLabel = jFormat.Value<string>("qualityLabel");
+                        string lastModified = jFormat.Value<string>("lastModified");
+                        long contentLength = -1L;
+                        JToken jt = jFormat.Value<JToken>("contentLength");
+                        if (jt != null)
+                        {
+                            string contentLengthString = jt.Value<string>();
+                            if (!long.TryParse(contentLengthString, out contentLength))
+                            {
+                                contentLength = -1;
+                            }
+                        }
+                        int approxDurationMs = -1;
+                        string cipherSignatureEncrypted = null;
+                        string cipherEncryptedUrl = null;
+                        bool isCiphered = false;
+                        string url = null;
+                        jt = jFormat.Value<JToken>("signatureCipher");
+                        if (jt != null)
+                        {
+                            string t = jt.Value<string>();
+                            Dictionary<string, string> dict = Utils.SplitStringToKeyValues(t, '&', '=');
+                            cipherSignatureEncrypted = WebUtility.UrlDecode(dict["s"]);
+                            cipherEncryptedUrl = WebUtility.UrlDecode(dict["url"]);
+                            isCiphered = true;
+                        }
+                        else
+                        {
+                            url = jFormat.Value<string>("url");
+                        }
+
+                        string audioQuality = jFormat.Value<string>("audioQuality");
+                        int audioSampleRate = int.Parse(jFormat.Value<string>("audioSampleRate"));
+                        int audioChannelCount = jFormat.Value<int>("audioChannels");
+                        double loudnessDb = jFormat.Value<double>("loudnessDb");
+
+                        YouTubeMediaTrack audio = new YouTubeMediaTrackAudio(
+                            formatId, bitrate, averageBitrate, lastModified, contentLength,
+                            quality, qualityLabel, audioQuality, audioSampleRate,
+                            audioChannelCount, loudnessDb, approxDurationMs, url,
+                            cipherSignatureEncrypted, cipherEncryptedUrl,
+                            mimeType, mimeExt, mimeCodecs, fileExtension,
+                            isDash, isHls, isCiphered, null, null);
+                        resList.AddLast(audio);
+                    }
                 }
             }
 

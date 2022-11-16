@@ -67,11 +67,22 @@ namespace YouTubeApiLib.ConsoleTest
                                 info = $"VIDEO | ID {videoTrack.FormatId} | {videoTrack.VideoWidth}x{videoTrack.VideoHeight} | " +
                                     $"{videoTrack.FrameRate} fps | {videoTrack.ContentLength} bytes | {videoTrack.FileExtension}";
                             }
-                            else
+                            else if (track is YouTubeMediaTrackAudio)
+                            {
+                                YouTubeMediaTrackAudio audio = track as YouTubeMediaTrackAudio;
+                                info = $"AUDIO | ID {audio.FormatId} | {audio.SampleRate} Hz | {audio.ChannelCount} ch | " +
+                                    $"{audio.AudioQuality} | {audio.FileExtension}";
+                            }
+                            else if (track is YouTubeMediaTrackContainer)
                             {
                                 YouTubeMediaTrackContainer container = track as YouTubeMediaTrackContainer;
                                 info = $"CONTAINER | ID {container.FormatId} | {container.VideoWidth}x{container.VideoHeight} | " +
                                     $"{container.VideoFrameRate} fps | {container.FileExtension}";
+                            }
+                            else
+                            {
+                                Console.WriteLine("ERROR! Unknown track type!");
+                                continue;
                             }
                             string url = string.IsNullOrEmpty(track.FileUrl) || string.IsNullOrWhiteSpace(track.FileUrl) ? "null" : track.FileUrl;
                             Console.WriteLine(info);
