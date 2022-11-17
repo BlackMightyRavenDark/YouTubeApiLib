@@ -23,6 +23,7 @@ namespace YouTubeApiLib
         public bool IsDashManifest { get; private set; }
         public bool IsHlsManifest { get; private set; }
         public bool IsCiphered { get; private set; }
+        public string DashManifestUrl { get; private set; }
         public List<string> DashUrls { get; private set; }
         public List<string> HlsUrls { get; private set; }
 
@@ -46,6 +47,7 @@ namespace YouTubeApiLib
             bool isDashManifest,
             bool isHlsManifest,
             bool isCiphered,
+            string dashManifestUrl,
             List<string> dashUrls,
             List<string> hlsUrls)
         {
@@ -68,6 +70,7 @@ namespace YouTubeApiLib
             IsDashManifest = isDashManifest;
             IsHlsManifest = isHlsManifest;
             IsCiphered = isCiphered;
+            DashManifestUrl = dashManifestUrl;
             DashUrls = dashUrls;
             HlsUrls = hlsUrls;
         }

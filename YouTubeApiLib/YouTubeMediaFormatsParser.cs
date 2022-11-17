@@ -17,6 +17,14 @@ namespace YouTubeApiLib
 
             LinkedList<YouTubeMediaTrack> resList = new LinkedList<YouTubeMediaTrack>();
             bool isDash = false;
+            string dashManifestUrl = null;
+            JToken jtDash = jStreamingData.Value<JToken>("dashManifestUrl");
+            if (jtDash != null)
+            {
+                isDash = true;
+                dashManifestUrl = jtDash.Value<string>();
+                //TODO: Download and parse DASH manifest
+            }
             bool isHls = false;
 
             JArray jaAdaptiveFormats = jStreamingData.Value<JArray>("adaptiveFormats");
@@ -31,7 +39,6 @@ namespace YouTubeApiLib
                         continue;
                     }
 
-                    //TODO: Implement other track types detection
                     if (mimeType.Contains("video"))
                     {
                         int formatId = jFormat.Value<int>("itag");
@@ -81,7 +88,7 @@ namespace YouTubeApiLib
                             lastModified, contentLength, quality, qualityLabel, approxDurationMs,
                             projectionType, url, cipherSignatureEncrypted, cipherEncryptedUrl,
                             mimeType, mimeExt, mimeCodecs, fileExtension,
-                            isDash, isHls, isCiphered, null, null);
+                            isDash, isHls, isCiphered, dashManifestUrl, null, null);
                         resList.AddLast(video);
                     }
                     else if (mimeType.Contains("audio"))
@@ -135,7 +142,7 @@ namespace YouTubeApiLib
                             audioChannelCount, loudnessDb, approxDurationMs, url,
                             cipherSignatureEncrypted, cipherEncryptedUrl,
                             mimeType, mimeExt, mimeCodecs, fileExtension,
-                            isDash, isHls, isCiphered, null, null);
+                            isDash, isHls, isCiphered, dashManifestUrl, null, null);
                         resList.AddLast(audio);
                     }
                 }
@@ -201,7 +208,7 @@ namespace YouTubeApiLib
                         audioQuality, audioSampleRate, audioChannelCount, approxDurationMs,
                         projectionType, url, cipherSignatureEncrypted, cipherEncryptedUrl,
                         mimeType, mimeExt, mimeCodecs, fileExtension,
-                        isDash, isHls, isCiphered, null, null);
+                        isDash, isHls, isCiphered, dashManifestUrl, null, null);
                     resList.AddLast(video);
                 }
             }

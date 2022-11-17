@@ -20,6 +20,8 @@ namespace YouTubeApiLib
         public bool IsUnlisted { get; private set; }
         public bool IsFamilySafe { get; private set; }
         public bool IsLiveContent { get; private set; }
+        public bool IsDashed => GetIsDashed();
+        public string DashManifestUrl => GetDashManifestUrl();
         public List<YouTubeVideoThumbnail> ThumbnailUrls { get; private set; }
         public LinkedList<YouTubeMediaTrack> MediaTracks { get; private set; }
         public RawVideoInfo RawInfo { get; private set; }
@@ -74,6 +76,18 @@ namespace YouTubeApiLib
         {
             return new YouTubeVideo(null, null, TimeSpan.FromSeconds(0), DateTime.MaxValue, DateTime.MaxValue,
                 null, null, null, 0L, null, false, false, false, false, null, null, null, null, status);
+        }
+
+        private bool GetIsDashed()
+        {
+            return MediaTracks != null && MediaTracks.Count > 0 && MediaTracks.First.Value.IsDashManifest;
+        }
+
+        private string GetDashManifestUrl()
+        {
+            YouTubeMediaTrack track = MediaTracks != null && MediaTracks.Count > 0 ? MediaTracks.First.Value : null;
+            return track != null ? track.DashManifestUrl : null;
+
         }
     }
 }

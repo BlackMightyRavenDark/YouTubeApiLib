@@ -32,13 +32,14 @@ namespace YouTubeApiLib
             bool isDash,
             bool isHls,
             bool isCiphered,
+            string dashManifestUrl,
             List<string> dashUrls,
             List<string> hlsUrls)
             : base(formatId, bitrate, averageBitrate, lastModified, contentLength,
                   quality, qualityLabel, approxDurationMs, null, fileUrl,
                   cipherSignatureEncrypted, cipherEncryptedFileUrl,
                   mimeType, mimeExt, mimeCodecs, fileExtension,
-                  isDash, isHls, isCiphered, dashUrls, hlsUrls)
+                  isDash, isHls, isCiphered, dashManifestUrl, dashUrls, hlsUrls)
         {
             AudioQuality = audioQuality;
             SampleRate = sampleRate;

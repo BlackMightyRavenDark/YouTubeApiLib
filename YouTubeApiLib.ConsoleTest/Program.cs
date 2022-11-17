@@ -8,10 +8,13 @@ namespace YouTubeApiLib.ConsoleTest
         static void Main(string[] args)
         {
             //Magical Underwater World 4K | 2160p | 7304448660 bytes
-            string videoUrl = "https://www.youtube.com/watch?v=7szcXCT-Oqw";
+            //string videoUrl = "https://www.youtube.com/watch?v=7szcXCT-Oqw";
 
             //Trick or treat, kingdom hearts, and beat saber. | 18+ | 1080p | 197233776 bytes
             //string videoUrl = "https://www.youtube.com/watch?v=pQNRrnk63MQ";
+
+            //коопим с Колясиком : Fighting Force | 1080p | DASH
+            string videoUrl = "https://www.youtube.com/watch?v=Z9c9SbfGvec";
 
             Console.WriteLine($"Video URL: {videoUrl}");
 
@@ -38,6 +41,11 @@ namespace YouTubeApiLib.ConsoleTest
                     Console.WriteLine($"Unlisted: {video.IsUnlisted}");
                     Console.WriteLine($"Family safe: {video.IsFamilySafe}");
                     Console.WriteLine($"Live content: {video.IsLiveContent}");
+                    Console.WriteLine($"Is DASH manifest present: {video.IsDashed}");
+                    if (video.IsDashed)
+                    {
+                        Console.WriteLine($"DASH manifest URL: {video.DashManifestUrl}");
+                    }
                     Console.Write("Thumbnails: ");
                     if (video.ThumbnailUrls != null && video.ThumbnailUrls.Count > 0)
                     {
