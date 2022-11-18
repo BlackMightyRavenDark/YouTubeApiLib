@@ -353,6 +353,7 @@ namespace YouTubeApiLib
                                 }
                             }
 
+                            //TODO: Reduce memory usage
                             YouTubeMediaTrack video = new YouTubeMediaTrackVideo(
                                 formatId, videoWidth, videoHeight, videoFrameRate, videoBitrate, videoBitrate,
                                 null, -1, null, null, -1, null, null, null, null,
@@ -455,6 +456,7 @@ namespace YouTubeApiLib
                                 }
                             }
 
+                            //TODO: Reduce memory usage
                             YouTubeMediaTrack audio = new YouTubeMediaTrackAudio(
                                 formatId, audioBitrate, audioBitrate, null, -1, null, null, null,
                                 audioSampleRate, audioChannelCount, 0.0, -1, null, null, null,
