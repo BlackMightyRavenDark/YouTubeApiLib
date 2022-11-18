@@ -72,14 +72,16 @@ namespace YouTubeApiLib.ConsoleTest
                             if (track is YouTubeMediaTrackVideo)
                             {
                                 YouTubeMediaTrackVideo videoTrack = track as YouTubeMediaTrackVideo;
-                                info = $"VIDEO | ID {videoTrack.FormatId} | {videoTrack.VideoWidth}x{videoTrack.VideoHeight} | " +
+                                string trackType = videoTrack.IsDashManifest ? "DASH VIDEO" : "VIDEO";
+                                info = $"{trackType} | ID {videoTrack.FormatId} | {videoTrack.VideoWidth}x{videoTrack.VideoHeight} | " +
                                     $"{videoTrack.FrameRate} fps | {videoTrack.ContentLength} bytes | {videoTrack.FileExtension}";
                             }
                             else if (track is YouTubeMediaTrackAudio)
                             {
-                                YouTubeMediaTrackAudio audio = track as YouTubeMediaTrackAudio;
-                                info = $"AUDIO | ID {audio.FormatId} | {audio.SampleRate} Hz | {audio.ChannelCount} ch | " +
-                                    $"{audio.AudioQuality} | {audio.FileExtension}";
+                                YouTubeMediaTrackAudio audioTrack = track as YouTubeMediaTrackAudio;
+                                string trackType = audioTrack.IsDashManifest ? "DASH AUDIO" : "AUDIO";
+                                info = $"{trackType} | ID {audioTrack.FormatId} | {audioTrack.SampleRate} Hz | " +
+                                    $"{audioTrack.ChannelCount} ch | { audioTrack.AudioQuality} | {audioTrack.FileExtension}";
                             }
                             else if (track is YouTubeMediaTrackContainer)
                             {
@@ -92,9 +94,17 @@ namespace YouTubeApiLib.ConsoleTest
                                 Console.WriteLine("ERROR! Unknown track type!");
                                 continue;
                             }
-                            string url = string.IsNullOrEmpty(track.FileUrl) || string.IsNullOrWhiteSpace(track.FileUrl) ? "null" : track.FileUrl;
                             Console.WriteLine(info);
-                            Console.WriteLine($"URL: {url}");
+                            if (track.IsDashManifest)
+                            {
+                                string dashChunkCountString = track.DashUrls != null ? track.DashUrls.Count.ToString() : "null";
+                                Console.WriteLine($"DASH chunk URL count: {dashChunkCountString}");
+                            }
+                            else
+                            {
+                                string url = string.IsNullOrEmpty(track.FileUrl) || string.IsNullOrWhiteSpace(track.FileUrl) ? "null" : track.FileUrl;
+                                Console.WriteLine($"URL: {url}");
+                            }
                         }
                     }
                     else

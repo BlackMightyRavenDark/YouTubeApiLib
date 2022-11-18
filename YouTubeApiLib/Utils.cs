@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using Newtonsoft.Json.Linq;
+using MultiThreadedDownloaderLib;
 
 namespace YouTubeApiLib
 {
@@ -737,6 +738,13 @@ namespace YouTubeApiLib
             }
 
             return new VideoId(dict["v"]);
+        }
+
+        public static int DownloadString(string url, out string response)
+        {
+            FileDownloader d = new FileDownloader();
+            d.Url = url;
+            return d.DownloadString(out response);
         }
 
         public static Dictionary<string, string> SplitUrlQueryToDictionary(string urlQuery)
