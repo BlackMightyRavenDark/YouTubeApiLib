@@ -255,8 +255,6 @@ namespace YouTubeApiLib
             {
                 return null;
             }
-
-            bool isDash = true;
             LinkedList<YouTubeMediaTrack> resList = new LinkedList<YouTubeMediaTrack>();
 
             foreach (XmlNode nodeAdaptationSet in nodePeriod)
@@ -355,10 +353,9 @@ namespace YouTubeApiLib
                             DashUrlList dashUrlList = new DashUrlList(baseUrl, dashChunkUrls);
 
                             YouTubeMediaTrack video = new YouTubeMediaTrackVideo(
-                                formatId, videoWidth, videoHeight, videoFrameRate, videoBitrate, videoBitrate,
-                                null, -1, null, null, -1, null, null, null, null,
+                                formatId, videoWidth, videoHeight, videoFrameRate, videoBitrate,
                                 mimeType, mimeExtLowerCased, videoCodecs, fileExtension,
-                                isDash, false, false, dashManifestUrl, dashUrlList, null);
+                                dashManifestUrl, dashUrlList);
                             resList.AddLast(video);
                         }
                     }
@@ -458,10 +455,9 @@ namespace YouTubeApiLib
                             DashUrlList dashUrlList = new DashUrlList(baseUrl, dashChunkUrls);
 
                             YouTubeMediaTrack audio = new YouTubeMediaTrackAudio(
-                                formatId, audioBitrate, audioBitrate, null, -1, null, null, null,
-                                audioSampleRate, audioChannelCount, 0.0, -1, null, null, null,
+                                formatId, audioBitrate, audioSampleRate, audioChannelCount,
                                 mimeType, mimeExtLowerCased, audioCodecs, fileExtension,
-                                isDash, false, false, dashManifestUrl, dashUrlList, null);
+                                dashManifestUrl, dashUrlList);
                             resList.AddLast(audio);
                         }
                     }

@@ -43,5 +43,27 @@ namespace YouTubeApiLib
             VideoHeight = videoHeight;
             FrameRate = frameRate;
         }
+
+        //Simplified constructor for DASH video track
+        public YouTubeMediaTrackVideo(
+            int formatId,
+            int videoWidth, int videoHeight,
+            int frameRate,
+            int bitrate,
+            string mimeType,
+            string mimeExt,
+            string mimeCodecs,
+            string fileExtension,
+            string dashManifestUrl,
+            DashUrlList dashUrls)
+            : base(formatId, bitrate, bitrate, null, -1L,
+                  null, null, -1, null, null, null, null,
+                  mimeType, mimeExt, mimeCodecs, fileExtension,
+                  true, false, false, dashManifestUrl, dashUrls, null)
+        {
+            VideoWidth = videoWidth;
+            VideoHeight = videoHeight;
+            FrameRate = frameRate;
+        }
     }
 }
