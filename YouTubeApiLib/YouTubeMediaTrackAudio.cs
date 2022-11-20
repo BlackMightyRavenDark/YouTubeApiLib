@@ -33,7 +33,7 @@ namespace YouTubeApiLib
             bool isHls,
             bool isCiphered,
             string dashManifestUrl,
-            List<string> dashUrls,
+            DashUrlList dashUrls,
             List<string> hlsUrls)
             : base(formatId, bitrate, averageBitrate, lastModified, contentLength,
                   quality, qualityLabel, approxDurationMs, null, fileUrl,

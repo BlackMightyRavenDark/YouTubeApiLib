@@ -24,7 +24,7 @@ namespace YouTubeApiLib
         public bool IsHlsManifest { get; private set; }
         public bool IsCiphered { get; private set; }
         public string DashManifestUrl { get; private set; }
-        public List<string> DashUrls { get; private set; }
+        public DashUrlList DashUrls { get; private set; }
         public List<string> HlsUrls { get; private set; }
 
         public YouTubeMediaTrack(
@@ -48,7 +48,7 @@ namespace YouTubeApiLib
             bool isHlsManifest,
             bool isCiphered,
             string dashManifestUrl,
-            List<string> dashUrls,
+            DashUrlList dashUrls,
             List<string> hlsUrls)
         {
             FormatId = formatId;

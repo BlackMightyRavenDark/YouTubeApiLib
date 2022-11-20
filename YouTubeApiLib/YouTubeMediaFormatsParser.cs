@@ -337,7 +337,7 @@ namespace YouTubeApiLib
                                 XmlAttribute attrSourceUrl = nodeInitialization.Attributes["sourceURL"];
                                 if (attrSourceUrl != null)
                                 {
-                                    dashChunkUrls.Add(baseUrl + attrSourceUrl.Value);
+                                    dashChunkUrls.Add(attrSourceUrl.Value);
                                 }
                             }
                             else
@@ -348,17 +348,17 @@ namespace YouTubeApiLib
                             {
                                 if (nodeSegment.Name == "SegmentURL")
                                 {
-                                    string segmentUrl = baseUrl + nodeSegment.Attributes["media"]?.Value;
-                                    dashChunkUrls.Add(segmentUrl);
+                                    string segmentUrlPartial = nodeSegment.Attributes["media"]?.Value;
+                                    dashChunkUrls.Add(segmentUrlPartial);
                                 }
                             }
+                            DashUrlList dashUrlList = new DashUrlList(baseUrl, dashChunkUrls);
 
-                            //TODO: Reduce memory usage
                             YouTubeMediaTrack video = new YouTubeMediaTrackVideo(
                                 formatId, videoWidth, videoHeight, videoFrameRate, videoBitrate, videoBitrate,
                                 null, -1, null, null, -1, null, null, null, null,
                                 mimeType, mimeExtLowerCased, videoCodecs, fileExtension,
-                                isDash, false, false, dashManifestUrl, dashChunkUrls, null);
+                                isDash, false, false, dashManifestUrl, dashUrlList, null);
                             resList.AddLast(video);
                         }
                     }
@@ -439,7 +439,7 @@ namespace YouTubeApiLib
                                 XmlAttribute attrSourceUrl = nodeInitialization.Attributes["sourceURL"];
                                 if (attrSourceUrl != null)
                                 {
-                                    dashChunkUrls.Add(baseUrl + attrSourceUrl.Value);
+                                    dashChunkUrls.Add(attrSourceUrl.Value);
                                 }
                             }
                             else
@@ -451,17 +451,17 @@ namespace YouTubeApiLib
                             {
                                 if (nodeSegment.Name == "SegmentURL")
                                 {
-                                    string segmentUrl = baseUrl + nodeSegment.Attributes["media"]?.Value;
+                                    string segmentUrl = nodeSegment.Attributes["media"]?.Value;
                                     dashChunkUrls.Add(segmentUrl);
                                 }
                             }
+                            DashUrlList dashUrlList = new DashUrlList(baseUrl, dashChunkUrls);
 
-                            //TODO: Reduce memory usage
                             YouTubeMediaTrack audio = new YouTubeMediaTrackAudio(
                                 formatId, audioBitrate, audioBitrate, null, -1, null, null, null,
                                 audioSampleRate, audioChannelCount, 0.0, -1, null, null, null,
                                 mimeType, mimeExtLowerCased, audioCodecs, fileExtension,
-                                isDash, false, false, dashManifestUrl, dashChunkUrls, null);
+                                isDash, false, false, dashManifestUrl, dashUrlList, null);
                             resList.AddLast(audio);
                         }
                     }
