@@ -7,9 +7,9 @@ namespace YouTubeApiLib
 {
     public static class YouTubeMediaFormatsParser
     {
-        public static LinkedList<YouTubeMediaTrack> Parse(JObject jStreamingData)
+        public static LinkedList<YouTubeMediaTrack> Parse(StreamingData streamingData)
         {
-            if (jStreamingData == null)
+            if (streamingData == null || streamingData.RawData == null)
             {
                 return null;
             }
@@ -19,7 +19,7 @@ namespace YouTubeApiLib
             LinkedList<YouTubeMediaTrack> resList = new LinkedList<YouTubeMediaTrack>();
             bool isDash = false;
             string dashManifestUrl = null;
-            JToken jtDash = jStreamingData.Value<JToken>("dashManifestUrl");
+            JToken jtDash = streamingData.RawData.Value<JToken>("dashManifestUrl");
             if (jtDash != null)
             {
                 dashManifestUrl = jtDash.Value<string>();
@@ -38,7 +38,7 @@ namespace YouTubeApiLib
             }
             bool isHls = false;
 
-            JArray jaAdaptiveFormats = jStreamingData.Value<JArray>("adaptiveFormats");
+            JArray jaAdaptiveFormats = streamingData.RawData.Value<JArray>("adaptiveFormats");
             if (jaAdaptiveFormats != null)
             {
                 foreach (JObject jFormat in jaAdaptiveFormats)
@@ -159,7 +159,7 @@ namespace YouTubeApiLib
                 }
             }
 
-            JArray jaFormats = jStreamingData.Value<JArray>("formats");
+            JArray jaFormats = streamingData.RawData.Value<JArray>("formats");
             if (jaFormats != null)
             {
                 foreach (JObject jFormat in jaFormats)

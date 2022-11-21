@@ -630,12 +630,8 @@ namespace YouTubeApiLib
                 return null;
             }
             JObject jStreamingData = rawVideoInfo.RawData.Value<JObject>("streamingData");
-            return ParseMediaTracks(jStreamingData);
-        }
-
-        internal static LinkedList<YouTubeMediaTrack> ParseMediaTracks(JObject jStreamingData)
-        {
-            return YouTubeMediaFormatsParser.Parse(jStreamingData);
+            StreamingData streamingData = new StreamingData(jStreamingData);
+            return streamingData.Parse();
         }
 
         public static int HttpsPost(string url, string body, out string responseString)
