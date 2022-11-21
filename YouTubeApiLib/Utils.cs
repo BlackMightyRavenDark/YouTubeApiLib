@@ -242,8 +242,7 @@ namespace YouTubeApiLib
                 }
             }
 
-            JObject jStreamingData = rawVideoInfo.RawData.Value<JObject>("streamingData");
-            LinkedList<YouTubeMediaTrack> mediaTracks = YouTubeMediaFormatsParser.Parse(jStreamingData);
+            LinkedList<YouTubeMediaTrack> mediaTracks = ParseMediaTracks(rawVideoInfo);
 
             JObject jPlayabilityStatus = rawVideoInfo.RawData.Value<JObject>("playabilityStatus");
             YouTubeVideoPlayabilityStatus videoStatus = YouTubeVideoPlayabilityStatus.Parse(jPlayabilityStatus);
@@ -621,6 +620,17 @@ namespace YouTubeApiLib
                 jsonArr.Add(thumbnail.ToJson());
             }
             return jsonArr;
+        }
+
+        internal static LinkedList<YouTubeMediaTrack> ParseMediaTracks(RawVideoInfo rawVideoInfo)
+        {
+            JObject jStreamingData = rawVideoInfo.RawData.Value<JObject>("streamingData");
+            return ParseMediaTracks(jStreamingData);
+        }
+
+        internal static LinkedList<YouTubeMediaTrack> ParseMediaTracks(JObject jStreamingData)
+        {
+            return YouTubeMediaFormatsParser.Parse(jStreamingData);
         }
 
         public static int HttpsPost(string url, string body, out string responseString)

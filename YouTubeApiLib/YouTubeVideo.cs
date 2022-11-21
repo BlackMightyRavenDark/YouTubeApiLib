@@ -89,5 +89,36 @@ namespace YouTubeApiLib
             return new YouTubeVideo(null, null, TimeSpan.FromSeconds(0), DateTime.MaxValue, DateTime.MaxValue,
                 null, null, null, 0L, null, false, false, false, false, null, null, null, null, status);
         }
+
+        /// <summary>
+        /// Reparse the downloadable formats info.
+        /// Warming!!! You will lost the current media track list!
+        /// </summary>
+        public void UpdateMediaFormats(RawVideoInfo rawVideoInfo)
+        {
+            MediaTracks = Utils.ParseMediaTracks(rawVideoInfo);
+        }
+
+        /// <summary>
+        /// Redownload and reparse the downloadable formats info.
+        /// Warming!!! You will lost the current media track list!
+        /// </summary>
+        /// <returns>HTTP error code.</returns>
+        public int UpdateMediaFormats()
+        {
+            MediaTracks = null;
+            RawVideoInfoResult rawVideoInfoResult = Utils.GetRawVideoInfo(Id);
+            if (rawVideoInfoResult != null)
+            {
+                RawInfo = rawVideoInfoResult.RawVideoInfo;
+                if (rawVideoInfoResult.ErrorCode == 200)
+                {
+                    UpdateMediaFormats(rawVideoInfoResult.RawVideoInfo);
+                    return 200;
+                }
+                return rawVideoInfoResult.ErrorCode;
+            }
+            return 404;
+        }
     }
 }
