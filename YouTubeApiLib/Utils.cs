@@ -625,6 +625,10 @@ namespace YouTubeApiLib
 
         internal static LinkedList<YouTubeMediaTrack> ParseMediaTracks(RawVideoInfo rawVideoInfo)
         {
+            if (rawVideoInfo == null || rawVideoInfo.RawData == null)
+            {
+                return null;
+            }
             JObject jStreamingData = rawVideoInfo.RawData.Value<JObject>("streamingData");
             return ParseMediaTracks(jStreamingData);
         }
