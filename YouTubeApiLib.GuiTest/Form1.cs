@@ -88,6 +88,7 @@ namespace YouTubeApiLib.GuiTest
 
             YouTubeChannel youTubeChannel = new YouTubeChannel(channelId, channelName);
             YouTubeApi api = new YouTubeApi();
+            YouTubeApi.getMediaTracksInfoImmediately = false;
             VideoPageResult videoPageResult =
                 await Task.Run(() => api.GetVideoPage(youTubeChannel, null));
             if (videoPageResult.ErrorCode != 200 || videoPageResult.VideoPage.Videos.Count == 0)
@@ -133,6 +134,7 @@ namespace YouTubeApiLib.GuiTest
             }
 
             YouTubeApi api = new YouTubeApi();
+            YouTubeApi.getMediaTracksInfoImmediately = false;
             VideoPageResult videoPageResult = await Task.Run(() => api.GetVideoPage(null, nextPageToken));
             if (videoPageResult.ErrorCode != 200 || videoPageResult.VideoPage.Videos.Count == 0)
             {

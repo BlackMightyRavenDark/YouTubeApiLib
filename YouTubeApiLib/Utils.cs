@@ -242,7 +242,8 @@ namespace YouTubeApiLib
                 }
             }
 
-            LinkedList<YouTubeMediaTrack> mediaTracks = ParseMediaTracks(rawVideoInfo);
+            LinkedList<YouTubeMediaTrack> mediaTracks =
+                YouTubeApi.getMediaTracksInfoImmediately ? ParseMediaTracks(rawVideoInfo) : null;
 
             JObject jPlayabilityStatus = rawVideoInfo.RawData.Value<JObject>("playabilityStatus");
             YouTubeVideoPlayabilityStatus videoStatus = YouTubeVideoPlayabilityStatus.Parse(jPlayabilityStatus);

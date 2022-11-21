@@ -4,6 +4,8 @@ namespace YouTubeApiLib
 {
     public sealed class YouTubeApi
     {
+        public static bool getMediaTracksInfoImmediately = false;
+
         public YouTubeVideo GetVideo(VideoId videoId)
         {
             RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId);

@@ -23,9 +23,14 @@ namespace YouTubeApiLib.ConsoleTest
             if (videoId != null)
             {
                 YouTubeApi api = new YouTubeApi();
+                YouTubeApi.getMediaTracksInfoImmediately = true;
                 YouTubeVideo video = api.GetVideo(videoId);
                 if (video.Status.IsPlayable)
                 {
+                    if (!YouTubeApi.getMediaTracksInfoImmediately)
+                    {
+                        video.UpdateMediaFormats(video.RawInfo);
+                    }
                     Console.WriteLine($"Title: {video.Title}");
                     Console.WriteLine($"ID: {video.Id}");
                     Console.WriteLine($"URL: {video.Url}");
