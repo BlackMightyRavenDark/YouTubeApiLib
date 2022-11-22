@@ -11,10 +11,13 @@ namespace YouTubeApiLib.ConsoleTest
             //string videoUrl = "https://www.youtube.com/watch?v=7szcXCT-Oqw";
 
             //Trick or treat, kingdom hearts, and beat saber. | 18+ | 1080p | 197233776 bytes
-            string videoUrl = "https://www.youtube.com/watch?v=pQNRrnk63MQ";
+            //string videoUrl = "https://www.youtube.com/watch?v=pQNRrnk63MQ";
 
             //коопим с Колясиком : Fighting Force | 1080p | DASH
             //string videoUrl = "https://www.youtube.com/watch?v=Z9c9SbfGvec";
+
+            //NASA Live: Official Stream of NASA TV | HLS
+            string videoUrl = "https://www.youtube.com/watch?v=21X5lGlDOfg";
 
             Console.WriteLine($"Video URL: {videoUrl}");
 
@@ -44,6 +47,11 @@ namespace YouTubeApiLib.ConsoleTest
                 Console.WriteLine($"Unlisted: {video.IsUnlisted}");
                 Console.WriteLine($"Family safe: {video.IsFamilySafe}");
                 Console.WriteLine($"Live content: {video.IsLiveContent}");
+                Console.WriteLine($"Is broadcasting now: {video.IsLiveNow}");
+                if (video.IsLiveNow)
+                {
+                    Console.WriteLine($"HLS manifest URL: {video.HlsManifestUrl}");
+                }
                 Console.WriteLine($"Is DASH manifest present: {video.IsDashed}");
                 if (video.IsDashed)
                 {

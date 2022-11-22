@@ -43,7 +43,7 @@ namespace YouTubeApiLib
                   quality, qualityLabel, approxDurationMs, projectionType, fileUrl,
                   cipherSignatureEncrypted, cipherEncryptedFileUrl,
                   mimeType, mimeExt, mimeCodecs, fileExtension,
-                  isDashManifest, isHlsManifest, isCiphered, dashManifestUrl, dashUrls, hlsUrls)
+                  isDashManifest, isHlsManifest, isCiphered, dashManifestUrl, dashUrls, null, hlsUrls)
         {
             VideoWidth = videoWidth;
             VideoHeight = videoHeight;

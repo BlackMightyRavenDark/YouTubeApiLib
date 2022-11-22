@@ -20,8 +20,17 @@ namespace YouTubeApiLib
         public bool IsUnlisted { get; private set; }
         public bool IsFamilySafe { get; private set; }
         public bool IsLiveContent { get; private set; }
+
+        /// <summary>
+        /// Warning! This value can be always TRUE for some videos!
+        /// E.G. when the broadcast is finished, but not yet fully processed by YouTube.
+        /// This is a YouTube API bug.
+        /// </summary>
+        public bool IsLiveNow { get; private set; }
+
         public bool IsDashed { get; private set; }
         public string DashManifestUrl { get; private set; }
+        public string HlsManifestUrl { get; private set; }
         public List<YouTubeVideoThumbnail> ThumbnailUrls { get; private set; }
         public LinkedList<YouTubeMediaTrack> MediaTracks { get; private set; }
         public RawVideoInfo RawInfo { get; private set; }
@@ -76,11 +85,14 @@ namespace YouTubeApiLib
             {
                 IsDashed = track.IsDashManifest;
                 DashManifestUrl = track.DashManifestUrl;
+                HlsManifestUrl = track.HlsManifestUrl;
+                IsLiveNow = !string.IsNullOrEmpty(HlsManifestUrl) && !string.IsNullOrWhiteSpace(HlsManifestUrl);
             }
             else
             {
                 IsDashed = false;
                 DashManifestUrl = null;
+                HlsManifestUrl = null;
             }
         }
 

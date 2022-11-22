@@ -32,12 +32,13 @@ namespace YouTubeApiLib
             bool isCiphered,
             string dashManifestUrl,
             DashUrlList dashUrls,
+            string hlsManifestUrl,
             List<string> hlsUrls)
             : base(formatId, bitrate, averageBitrate, lastModified, contentLength,
                   quality, qualityLabel, approxDurationMs, projectionType, fileUrl,
                   cipherSignatureEncrypted, cipherEncryptedFileUrl,
                   mimeType, mimeExt, mimeCodecs, fileExtension,
-                  isDashManifest, isHlsManifest, isCiphered, dashManifestUrl, dashUrls, hlsUrls)
+                  isDashManifest, isHlsManifest, isCiphered, dashManifestUrl, dashUrls, hlsManifestUrl, hlsUrls)
         {
             VideoWidth = videoWidth;
             VideoHeight = videoHeight;
@@ -59,7 +60,7 @@ namespace YouTubeApiLib
             : base(formatId, bitrate, bitrate, null, -1L,
                   null, null, -1, null, null, null, null,
                   mimeType, mimeExt, mimeCodecs, fileExtension,
-                  true, false, false, dashManifestUrl, dashUrls, null)
+                  true, false, false, dashManifestUrl, dashUrls, null, null)
         {
             VideoWidth = videoWidth;
             VideoHeight = videoHeight;

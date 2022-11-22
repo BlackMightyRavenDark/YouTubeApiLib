@@ -25,6 +25,7 @@ namespace YouTubeApiLib
         public bool IsCiphered { get; private set; }
         public string DashManifestUrl { get; private set; }
         public DashUrlList DashUrls { get; private set; }
+        public string HlsManifestUrl { get; private set; }
         public List<string> HlsUrls { get; private set; }
 
         public YouTubeMediaTrack(
@@ -49,6 +50,7 @@ namespace YouTubeApiLib
             bool isCiphered,
             string dashManifestUrl,
             DashUrlList dashUrls,
+            string hlsManifestUrl,
             List<string> hlsUrls)
         {
             FormatId = formatId;
@@ -72,7 +74,13 @@ namespace YouTubeApiLib
             IsCiphered = isCiphered;
             DashManifestUrl = dashManifestUrl;
             DashUrls = dashUrls;
+            HlsManifestUrl = hlsManifestUrl;
             HlsUrls = hlsUrls;
+        }
+
+        internal void SetHlsUrl(string url)
+        {
+            HlsManifestUrl = url;
         }
 
         public virtual string GetShortInfo()
