@@ -8,7 +8,7 @@ namespace YouTubeApiLib
         private readonly List<string> _PartialUrlList;
 
         public int Count => _PartialUrlList != null ? _PartialUrlList.Count : -1;
-        public string this[int id] { get { return $"{_BaseUrl}/{_PartialUrlList[id]}"; } }
+        public string this[int id] { get { return _BaseUrl + _PartialUrlList[id]; } }
 
         public DashUrlList(string baseUrl, List<string> partialUrlList)
         {
