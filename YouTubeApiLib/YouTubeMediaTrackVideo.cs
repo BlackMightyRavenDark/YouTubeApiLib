@@ -77,5 +77,37 @@ namespace YouTubeApiLib
             VideoHeight = broadcast.VideoHeight;
             FrameRate = broadcast.FrameRate;
         }
+
+        //Simplified constructor for non-DASH and non-HLS video track
+        public YouTubeMediaTrackVideo(
+            int formatId,
+            int videoWidth, int videoHeight,
+            int frameRate,
+            int bitrate,
+            int averageBitrate,
+            string lastModified,
+            long contentLength,
+            string quality,
+            string qualityLabel,
+            int approxDurationMs,
+            string projectionType,
+            string fileUrl,
+            string cipherSignatureEncrypted,
+            string cipherEncryptedFileUrl,
+            string mimeType,
+            string mimeExt,
+            string mimeCodecs,
+            string fileExtension,
+            bool isCiphered)
+            : base(formatId, bitrate, averageBitrate, lastModified, contentLength,
+                  quality, qualityLabel, approxDurationMs, projectionType, fileUrl,
+                  cipherSignatureEncrypted, cipherEncryptedFileUrl,
+                  mimeType, mimeExt, mimeCodecs, fileExtension, false, false,
+                  isCiphered, null, null, null, null)
+        {
+            VideoWidth = videoWidth;
+            VideoHeight = videoHeight;
+            FrameRate = frameRate;
+        }
     }
 }

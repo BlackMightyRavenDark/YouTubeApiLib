@@ -69,5 +69,39 @@ namespace YouTubeApiLib
             ChannelCount = channelCount;
             LoudnessDb = 0.0;
         }
+
+        //Simplified constructor for non-DASH audio track
+        public YouTubeMediaTrackAudio(
+            int formatId,
+            int bitrate,
+            int averageBitrate,
+            string lastModified,
+            long contentLength,
+            string quality,
+            string qualityLabel,
+            string audioQuality,
+            int sampleRate,
+            int channelCount,
+            double loudnessDb,
+            int approxDurationMs,
+            string fileUrl,
+            string cipherSignatureEncrypted,
+            string cipherEncryptedFileUrl,
+            string mimeType,
+            string mimeExt,
+            string mimeCodecs,
+            string fileExtension,
+            bool isCiphered)
+            : base(formatId, bitrate, averageBitrate, lastModified, contentLength,
+                  quality, qualityLabel, approxDurationMs, null, fileUrl,
+                  cipherSignatureEncrypted, cipherEncryptedFileUrl,
+                  mimeType, mimeExt, mimeCodecs, fileExtension,
+                  false, false, isCiphered, null, null, null, null)
+        {
+            AudioQuality = audioQuality;
+            SampleRate = sampleRate;
+            ChannelCount = channelCount;
+            LoudnessDb = loudnessDb;
+        }
     }
 }

@@ -16,13 +16,10 @@ namespace YouTubeApiLib
 
             LinkedList<YouTubeMediaTrack> resList = new LinkedList<YouTubeMediaTrack>();
 
-            bool isHls = false;
-            string hlsManifestUrl = null;
             JToken jtHls = streamingData.RawData.Value<JToken>("hlsManifestUrl");
             if (jtHls != null)
             {
-                isHls = true;
-                hlsManifestUrl = jtHls.Value<string>();
+                string hlsManifestUrl = jtHls.Value<string>();
                 if (Utils.DownloadString(hlsManifestUrl, out string hlsManifest) == 200)
                 {
                     YouTubeHlsManifestParser parser = new YouTubeHlsManifestParser(hlsManifest);
@@ -38,12 +35,10 @@ namespace YouTubeApiLib
                 }
             }
 
-            bool isDash = false;
-            string dashManifestUrl = null;
             JToken jtDash = streamingData.RawData.Value<JToken>("dashManifestUrl");
             if (jtDash != null)
             {
-                dashManifestUrl = jtDash.Value<string>();
+                string dashManifestUrl = jtDash.Value<string>();
                 if (Utils.DownloadString(dashManifestUrl, out string dashManifest) == 200)
                 {
                     LinkedList<YouTubeMediaTrack> dashList = ParseDashManifest(dashManifest, dashManifestUrl);
@@ -119,8 +114,7 @@ namespace YouTubeApiLib
                                 formatId, videoWidth, videoHeight, videoFrameRate, bitrate, averageBitrate,
                                 lastModified, contentLength, quality, qualityLabel, approxDurationMs,
                                 projectionType, url, cipherSignatureEncrypted, cipherEncryptedUrl,
-                                mimeType, mimeExt, mimeCodecs, fileExtension,
-                                isDash, isHls, isCiphered, dashManifestUrl, null, hlsManifestUrl, null);
+                                mimeType, mimeExt, mimeCodecs, fileExtension, isCiphered);
                             resList.AddLast(video);
                         }
                         else if (mimeType.Contains("audio"))
@@ -173,8 +167,7 @@ namespace YouTubeApiLib
                                 quality, qualityLabel, audioQuality, audioSampleRate,
                                 audioChannelCount, loudnessDb, approxDurationMs, url,
                                 cipherSignatureEncrypted, cipherEncryptedUrl,
-                                mimeType, mimeExt, mimeCodecs, fileExtension,
-                                isDash, isHls, isCiphered, dashManifestUrl, null, hlsManifestUrl, null);
+                                mimeType, mimeExt, mimeCodecs, fileExtension, isCiphered);
                             resList.AddLast(audio);
                         }
                     }
@@ -240,7 +233,7 @@ namespace YouTubeApiLib
                             audioQuality, audioSampleRate, audioChannelCount, approxDurationMs,
                             projectionType, url, cipherSignatureEncrypted, cipherEncryptedUrl,
                             mimeType, mimeExt, mimeCodecs, fileExtension,
-                            isDash, isHls, isCiphered, dashManifestUrl, null);
+                            false, false, isCiphered, null, null);
                         resList.AddLast(video);
                     }
                 }
