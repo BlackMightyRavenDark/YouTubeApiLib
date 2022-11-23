@@ -232,8 +232,7 @@ namespace YouTubeApiLib
                             lastModified, contentLength, quality, qualityLabel,
                             audioQuality, audioSampleRate, audioChannelCount, approxDurationMs,
                             projectionType, url, cipherSignatureEncrypted, cipherEncryptedUrl,
-                            mimeType, mimeExt, mimeCodecs, fileExtension,
-                            false, false, isCiphered, null, null);
+                            mimeType, mimeExt, mimeCodecs, fileExtension, isCiphered);
                         resList.AddLast(video);
                     }
                 }
