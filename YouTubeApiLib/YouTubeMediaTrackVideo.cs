@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace YouTubeApiLib
 {
     public class YouTubeMediaTrackVideo : YouTubeMediaTrack
@@ -33,12 +32,12 @@ namespace YouTubeApiLib
             string dashManifestUrl,
             DashUrlList dashUrls,
             string hlsManifestUrl,
-            List<string> hlsUrls)
+            YouTubeBroadcast broadcast)
             : base(formatId, bitrate, averageBitrate, lastModified, contentLength,
                   quality, qualityLabel, approxDurationMs, projectionType, fileUrl,
                   cipherSignatureEncrypted, cipherEncryptedFileUrl,
                   mimeType, mimeExt, mimeCodecs, fileExtension,
-                  isDashManifest, isHlsManifest, isCiphered, dashManifestUrl, dashUrls, hlsManifestUrl, hlsUrls)
+                  isDashManifest, isHlsManifest, isCiphered, dashManifestUrl, dashUrls, hlsManifestUrl, broadcast)
         {
             VideoWidth = videoWidth;
             VideoHeight = videoHeight;
@@ -65,6 +64,18 @@ namespace YouTubeApiLib
             VideoWidth = videoWidth;
             VideoHeight = videoHeight;
             FrameRate = frameRate;
+        }
+
+        //Simplified constructor for HLS track (broadcast aka stream)
+        public YouTubeMediaTrackVideo(YouTubeBroadcast broadcast, string hlsManifestUrl)
+            : base(broadcast.FormatId, broadcast.Bandwidth, broadcast.Bandwidth, null, -1L,
+                  null, null, -1, null, broadcast.PlaylistUrl, null, null,
+                  "video/ts", "ts", broadcast.Codecs, "ts",
+                  false, true, false, null, null, hlsManifestUrl, broadcast)
+        {
+            VideoWidth = broadcast.VideoWidth;
+            VideoHeight = broadcast.VideoHeight;
+            FrameRate = broadcast.FrameRate;
         }
     }
 }

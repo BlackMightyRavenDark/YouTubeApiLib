@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace YouTubeApiLib
 {
     public class YouTubeMediaTrackAudio : YouTubeMediaTrack
@@ -35,12 +34,12 @@ namespace YouTubeApiLib
             string dashManifestUrl,
             DashUrlList dashUrls,
             string hlsManifestUrl,
-            List<string> hlsUrls)
+            YouTubeBroadcast broadcast)
             : base(formatId, bitrate, averageBitrate, lastModified, contentLength,
                   quality, qualityLabel, approxDurationMs, null, fileUrl,
                   cipherSignatureEncrypted, cipherEncryptedFileUrl,
                   mimeType, mimeExt, mimeCodecs, fileExtension,
-                  isDash, isHls, isCiphered, dashManifestUrl, dashUrls, hlsManifestUrl, hlsUrls)
+                  isDash, isHls, isCiphered, dashManifestUrl, dashUrls, hlsManifestUrl, broadcast)
         {
             AudioQuality = audioQuality;
             SampleRate = sampleRate;

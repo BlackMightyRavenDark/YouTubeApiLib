@@ -80,18 +80,31 @@ namespace YouTubeApiLib
             SimplifiedInfo = simplifiedInfo;
             Status = status;
 
-            YouTubeMediaTrack track = MediaTracks != null && MediaTracks.Count > 0 ? MediaTracks.First.Value : null;
-            if (track != null)
+            if (MediaTracks != null)
             {
-                IsDashed = track.IsDashManifest;
-                DashManifestUrl = track.DashManifestUrl;
-                HlsManifestUrl = track.HlsManifestUrl;
-                IsLiveNow = !string.IsNullOrEmpty(HlsManifestUrl) && !string.IsNullOrWhiteSpace(HlsManifestUrl);
+                foreach (YouTubeMediaTrack track in MediaTracks)
+                {
+                    if (!IsDashed)
+                    {
+                        IsDashed = track.IsDashManifest;
+                        DashManifestUrl = track.DashManifestUrl;
+                    }
+                    if (!IsLiveNow && track.Broadcast != null)
+                    {
+                        HlsManifestUrl = track.HlsManifestUrl;
+                        IsLiveNow = true;
+                    }
+                    if (IsDashed && IsLiveNow)
+                    {
+                        break;
+                    }
+                }
             }
             else
             {
                 IsDashed = false;
                 DashManifestUrl = null;
+                IsLiveNow = false;
                 HlsManifestUrl = null;
             }
         }

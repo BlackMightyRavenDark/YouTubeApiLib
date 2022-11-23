@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace YouTubeApiLib
 {
     public abstract class YouTubeMediaTrack
@@ -26,7 +25,7 @@ namespace YouTubeApiLib
         public string DashManifestUrl { get; private set; }
         public DashUrlList DashUrls { get; private set; }
         public string HlsManifestUrl { get; private set; }
-        public List<string> HlsUrls { get; private set; }
+        public YouTubeBroadcast Broadcast { get; private set; }
 
         public YouTubeMediaTrack(
             int formatId,
@@ -51,7 +50,7 @@ namespace YouTubeApiLib
             string dashManifestUrl,
             DashUrlList dashUrls,
             string hlsManifestUrl,
-            List<string> hlsUrls)
+            YouTubeBroadcast broadcast)
         {
             FormatId = formatId;
             Bitrate = bitrate;
@@ -75,12 +74,7 @@ namespace YouTubeApiLib
             DashManifestUrl = dashManifestUrl;
             DashUrls = dashUrls;
             HlsManifestUrl = hlsManifestUrl;
-            HlsUrls = hlsUrls;
-        }
-
-        internal void SetHlsUrl(string url)
-        {
-            HlsManifestUrl = url;
+            Broadcast = broadcast;
         }
 
         public virtual string GetShortInfo()

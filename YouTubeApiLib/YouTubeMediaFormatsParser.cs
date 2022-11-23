@@ -14,8 +14,6 @@ namespace YouTubeApiLib
                 return null;
             }
 
-            //TODO: Complete parsing
-
             LinkedList<YouTubeMediaTrack> resList = new LinkedList<YouTubeMediaTrack>();
 
             bool isHls = false;
@@ -25,7 +23,19 @@ namespace YouTubeApiLib
             {
                 isHls = true;
                 hlsManifestUrl = jtHls.Value<string>();
-                //TODO: Download and parse HLS manifest
+                if (Utils.DownloadString(hlsManifestUrl, out string hlsManifest) == 200)
+                {
+                    YouTubeHlsManifestParser parser = new YouTubeHlsManifestParser(hlsManifest);
+                    LinkedList<YouTubeBroadcast> broadcasts = parser.Parse();
+                    if (broadcasts != null)
+                    {
+                        foreach (YouTubeBroadcast broadcast in broadcasts)
+                        {
+                            YouTubeMediaTrack hlsStream = new YouTubeMediaTrackVideo(broadcast, hlsManifestUrl);
+                            resList.AddLast(hlsStream);
+                        }
+                    }
+                }
             }
 
             bool isDash = false;
@@ -41,7 +51,6 @@ namespace YouTubeApiLib
                     {
                         foreach (YouTubeMediaTrack track in dashList)
                         {
-                            track.SetHlsUrl(hlsManifestUrl);
                             resList.AddLast(track);
                         }
                     }
@@ -231,7 +240,7 @@ namespace YouTubeApiLib
                             audioQuality, audioSampleRate, audioChannelCount, approxDurationMs,
                             projectionType, url, cipherSignatureEncrypted, cipherEncryptedUrl,
                             mimeType, mimeExt, mimeCodecs, fileExtension,
-                            isDash, isHls, isCiphered, dashManifestUrl, null, null);
+                            isDash, isHls, isCiphered, dashManifestUrl, null);
                         resList.AddLast(video);
                     }
                 }

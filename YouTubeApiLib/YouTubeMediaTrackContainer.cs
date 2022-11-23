@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace YouTubeApiLib
 {
     public class YouTubeMediaTrackContainer : YouTubeMediaTrack
@@ -37,13 +36,12 @@ namespace YouTubeApiLib
             bool isHlsManifest,
             bool isCiphered,
             string dashManifestUrl,
-            DashUrlList dashUrls,
-            List<string> hlsUrls)
+            DashUrlList dashUrls)
             : base(formatId, bitrate, averageBitrate, lastModified, contentLength,
                   quality, qualityLabel, approxDurationMs, projectionType, fileUrl,
                   cipherSignatureEncrypted, cipherEncryptedFileUrl,
                   mimeType, mimeExt, mimeCodecs, fileExtension,
-                  isDashManifest, isHlsManifest, isCiphered, dashManifestUrl, dashUrls, null, hlsUrls)
+                  isDashManifest, isHlsManifest, isCiphered, dashManifestUrl, dashUrls, null, null)
         {
             VideoWidth = videoWidth;
             VideoHeight = videoHeight;
