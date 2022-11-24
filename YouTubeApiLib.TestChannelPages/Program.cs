@@ -12,7 +12,7 @@ namespace YouTubeApiLib.TestChannelPages
             VideoIdPageResult videoIdPageResult = api.GetVideoIdPage(channel, null);
             if (videoIdPageResult.ErrorCode == 200)
             {
-                Console.WriteLine($"{channel.DisplayName} [{channel.Id}]: Videos tab page:");
+                Console.WriteLine($"{channel} Videos tab page:");
                 foreach (string id in videoIdPageResult.VideoIdPage.VideoIds)
                 {
                     Console.WriteLine(id);
@@ -21,7 +21,7 @@ namespace YouTubeApiLib.TestChannelPages
             }
             else
             {
-                Console.WriteLine($"{channel.DisplayName} [{channel.Id}]: Error code = {videoIdPageResult.ErrorCode}");
+                Console.WriteLine($"{channel}: Error code = {videoIdPageResult.ErrorCode}");
             }
 
             Console.ReadLine();

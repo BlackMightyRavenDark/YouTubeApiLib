@@ -11,5 +11,10 @@ namespace YouTubeApiLib
             Id = id;
             DisplayName = displayName;
         }
+
+        public override string ToString()
+        {
+            return $"{DisplayName} ({Id})";
+        }
     }
 }
