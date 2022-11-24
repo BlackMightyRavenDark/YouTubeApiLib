@@ -356,10 +356,14 @@ namespace YouTubeApiLib
                     j = j.Value<JObject>("content");
                     if (j != null)
                     {
-                        j = j.Value<JObject>("videoRenderer");
-                        if (j != null)
+                        JObject jRenderer = j.Value<JObject>("videoRenderer");
+                        if (jRenderer == null)
                         {
-                            return j.Value<string>("videoId");
+                            jRenderer = j.Value<JObject>("reelItemRenderer");
+                        }
+                        if (jRenderer != null)
+                        {
+                            return jRenderer.Value<string>("videoId");
                         }
                     }
                 }
@@ -501,15 +505,15 @@ namespace YouTubeApiLib
                 }
                 else
                 {
-                    YouTubeChannelTab tabVideos = FindChannelTab(YouTubeChannelTabPages.Videos, json);
-                    if (tabVideos != null)
+                    YouTubeChannelTab selectedTab = FindSelectedChannelTab(json);
+                    if (selectedTab != null)
                     {
                         List<ITabPageParser> parsers = new List<ITabPageParser>() {
                             new TabPageParserVideo1(), new TabPageParserVideo2()
                         };
                         foreach (ITabPageParser parser in parsers)
                         {
-                            JArray items = parser.FindGridItems(tabVideos.Json);
+                            JArray items = parser.FindGridItems(selectedTab.Json);
                             if (items != null && items.Count > 0)
                             {
                                 return items;

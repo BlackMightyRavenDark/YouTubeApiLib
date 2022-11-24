@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace YouTubeApiLib.TestChannelPages
 {
@@ -9,21 +10,32 @@ namespace YouTubeApiLib.TestChannelPages
             YouTubeChannel channel = new YouTubeChannel("UCSCHk4GbzMlKtxwpXPyYeMA", "Frozzen Fro");
             YouTubeApi api = new YouTubeApi();
             YouTubeApi.getMediaTracksInfoImmediately = false;
-            VideoIdPageResult videoIdPageResult = api.GetVideoIdPage(channel, YouTubeChannelTabPages.Videos, null);
-            if (videoIdPageResult.ErrorCode == 200)
+            List<YouTubeChannelTabPage> pages = new List<YouTubeChannelTabPage>()
             {
-                Console.WriteLine($"{channel} Videos tab page:");
-                foreach (string id in videoIdPageResult.VideoIdPage.VideoIds)
+                YouTubeChannelTabPages.Videos,
+                YouTubeChannelTabPages.Shorts,
+                YouTubeChannelTabPages.Live
+            };
+            foreach (YouTubeChannelTabPage page in pages)
+            {
+                VideoIdPageResult videoIdPageResult = api.GetVideoIdPage(channel, page, null);
+                if (videoIdPageResult.ErrorCode == 200)
                 {
-                    Console.WriteLine(id);
+                    Console.WriteLine($"{channel} {page.Title} tab page:");
+                    foreach (string id in videoIdPageResult.VideoIdPage.VideoIds)
+                    {
+                        Console.WriteLine(id);
+                    }
+                    string token = !string.IsNullOrEmpty(videoIdPageResult.VideoIdPage.ContinuationToken) &&
+                        !string.IsNullOrWhiteSpace(videoIdPageResult.VideoIdPage.ContinuationToken) ?
+                    videoIdPageResult.VideoIdPage.ContinuationToken : "null";
+                    Console.WriteLine($"Continuation token: {token}");
                 }
-                Console.WriteLine($"Continuation token: {videoIdPageResult.VideoIdPage.ContinuationToken}");
+                else
+                {
+                    Console.WriteLine($"{channel} {page.Title} tab page: null");
+                }
             }
-            else
-            {
-                Console.WriteLine($"{channel}: Error code = {videoIdPageResult.ErrorCode}");
-            }
-
             Console.ReadLine();
         }
     }
