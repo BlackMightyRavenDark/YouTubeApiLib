@@ -33,12 +33,24 @@ namespace YouTubeApiLib
 
         public VideoIdPageResult GetVideoIdPage(YouTubeChannel youTubeChannel, string continuationToken)
         {
-            return Utils.GetVideoIdPage(youTubeChannel?.Id, continuationToken);
+            return GetVideoIdPage(youTubeChannel, null, continuationToken);
+        }
+
+        public VideoIdPageResult GetVideoIdPage(
+            YouTubeChannel youTubeChannel, YouTubeChannelTabPage channelTabPage, string continuationToken)
+        {
+            return Utils.GetVideoIdPage(youTubeChannel?.Id, channelTabPage, continuationToken);
         }
 
         public VideoPageResult GetVideoPage(YouTubeChannel youTubeChannel, string continuationToken)
         {
-            return Utils.GetVideoPage(youTubeChannel?.Id, continuationToken);
+            return GetVideoPage(youTubeChannel, null, continuationToken);
+        }
+
+        public VideoPageResult GetVideoPage(
+            YouTubeChannel youTubeChannel, YouTubeChannelTabPage channelTabPage, string continuationToken)
+        {
+            return Utils.GetVideoPage(youTubeChannel?.Id, channelTabPage, continuationToken);
         }
 
         public YouTubeChannelTabResult GetChannelTab(

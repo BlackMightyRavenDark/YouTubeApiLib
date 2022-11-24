@@ -90,7 +90,7 @@ namespace YouTubeApiLib.GuiTest
             YouTubeApi api = new YouTubeApi();
             YouTubeApi.getMediaTracksInfoImmediately = false;
             VideoPageResult videoPageResult =
-                await Task.Run(() => api.GetVideoPage(youTubeChannel, null));
+                await Task.Run(() => api.GetVideoPage(youTubeChannel, YouTubeChannelTabPages.Videos, null));
             if (videoPageResult.ErrorCode != 200 || videoPageResult.VideoPage.Videos.Count == 0)
             {
                 MessageBox.Show("Ничего не найдено!", "Ошибка!",

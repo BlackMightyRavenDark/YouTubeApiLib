@@ -9,7 +9,7 @@ namespace YouTubeApiLib.TestChannelPages
             YouTubeChannel channel = new YouTubeChannel("UCSCHk4GbzMlKtxwpXPyYeMA", "Frozzen Fro");
             YouTubeApi api = new YouTubeApi();
             YouTubeApi.getMediaTracksInfoImmediately = false;
-            VideoIdPageResult videoIdPageResult = api.GetVideoIdPage(channel, null);
+            VideoIdPageResult videoIdPageResult = api.GetVideoIdPage(channel, YouTubeChannelTabPages.Videos, null);
             if (videoIdPageResult.ErrorCode == 200)
             {
                 Console.WriteLine($"{channel} Videos tab page:");

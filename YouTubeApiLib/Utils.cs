@@ -38,7 +38,10 @@ namespace YouTubeApiLib
             json["browseId"] = channelId;
             if (string.IsNullOrEmpty(continuationToken) || string.IsNullOrWhiteSpace(continuationToken))
             {
-                json["params"] = youTubeChannelTabPage.ParamsId;
+                if (youTubeChannelTabPage != null)
+                {
+                    json["params"] = youTubeChannelTabPage.ParamsId;
+                }
             }
             else
             {
@@ -256,9 +259,9 @@ namespace YouTubeApiLib
             return youTubeVideo;
         }
 
-        internal static VideoPageResult GetVideoPage(string channelId, string continuationToken)
+        internal static VideoPageResult GetVideoPage(string channelId, YouTubeChannelTabPage tabPage, string continuationToken)
         {
-            VideoIdPageResult videoIdPageResult = GetVideoIdPage(channelId, continuationToken);
+            VideoIdPageResult videoIdPageResult = GetVideoIdPage(channelId, tabPage, continuationToken);
             if (videoIdPageResult.ErrorCode == 200)
             {
                 List<YouTubeVideo> videos = new List<YouTubeVideo>();
@@ -279,16 +282,22 @@ namespace YouTubeApiLib
             return new VideoPageResult(null, videoIdPageResult.ErrorCode);
         }
 
-        internal static VideoIdPageResult GetVideoIdPage(string channelId, string continuationToken)
+        internal static VideoIdPageResult GetVideoIdPage(string channelId, YouTubeChannelTabPage tabPage, string continuationToken)
         {
-            JObject body = GenerateChannelTabRequestBody(channelId, YouTubeChannelTabPages.Videos, continuationToken);
+            JObject body = GenerateChannelTabRequestBody(channelId, tabPage, continuationToken);
+            bool tokenExists = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);
+            return GetVideoIdPage(body, tokenExists);
+        }
+
+        internal static VideoIdPageResult GetVideoIdPage(JObject requestBody, bool continuationTokenExists)
+        {
             string url = $"{API_V1_BROWSE_URL}?key={API_V1_KEY}";
-            int errorCode = HttpsPost(url, body.ToString(), out string response);
+            string body = requestBody != null ? requestBody.ToString() : string.Empty;
+            int errorCode = HttpsPost(url, body, out string response);
             if (errorCode == 200)
             {
                 JObject json = JObject.Parse(response);
-                bool tokenExists = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);
-                VideoIdPage videoIdPage = new VideoIdPage(json, tokenExists);
+                VideoIdPage videoIdPage = new VideoIdPage(json, continuationTokenExists);
                 int count = videoIdPage.Parse();
                 return new VideoIdPageResult(videoIdPage, count > 0 ? 200 : 400);
             }
@@ -302,7 +311,7 @@ namespace YouTubeApiLib
             int errorCode;
             while (true)
             {
-                VideoIdPageResult videoIdPageResult = GetVideoIdPage(channelId, continuationToken);
+                VideoIdPageResult videoIdPageResult = GetVideoIdPage(channelId, YouTubeChannelTabPages.Videos, continuationToken);
 
                 errorCode = videoIdPageResult.ErrorCode;
                 if (errorCode != 200)
