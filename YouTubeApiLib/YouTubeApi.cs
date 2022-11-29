@@ -5,6 +5,7 @@ namespace YouTubeApiLib
     public sealed class YouTubeApi
     {
         public static bool getMediaTracksInfoImmediately = false;
+        public static VideoInfoGettingMethod defaultVideoInfoGettingMethod = VideoInfoGettingMethod.HiddenApi;
 
         public YouTubeVideo GetVideo(VideoId videoId)
         {
@@ -18,7 +19,7 @@ namespace YouTubeApiLib
 
         public RawVideoInfoResult GetRawVideoInfo(VideoId videoId)
         {
-            return Utils.GetRawVideoInfo(videoId.Id);
+            return Utils.GetRawVideoInfo(videoId.Id, defaultVideoInfoGettingMethod);
         }
 
         public SimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId)

@@ -16,6 +16,19 @@ namespace YouTubeApiLib
         public const string API_V1_PLAYER_URL = "https://www.youtube.com/youtubei/v1/player";
         public const string YOUTUBE_CLIENT_VERSION = "2.20211221.00.00";
 
+        public enum VideoInfoGettingMethod
+        {
+            HiddenApi,
+
+            /// <summary>
+            /// This way will download and parse the video web page.
+            /// Warning!!! YouTube may ban your IP address if you make requests too often!
+            /// You will get the "HTTP error 429" for some days or weeks (maybe forever!).
+            /// You should not abuse this method!
+            /// </summary>
+            WebPage
+        }
+
         public static JObject GenerateChannelVideoListRequestBody(string channelId, string continuationToken)
         {
             return GenerateChannelTabRequestBody(channelId, YouTubeChannelTabPages.Videos, continuationToken);
@@ -73,7 +86,43 @@ namespace YouTubeApiLib
             return json;
         }
 
-        internal static RawVideoInfoResult GetRawVideoInfo(string videoId)
+        public static RawVideoInfoResult GetRawVideoInfo(
+            string videoId, VideoInfoGettingMethod method)
+        {
+            switch (method)
+            {
+                case VideoInfoGettingMethod.HiddenApi:
+                    return GetRawVideoInfoViaApi(videoId);
+
+                case VideoInfoGettingMethod.WebPage:
+                    return GetRawVideoInfoViaWebPage(videoId);
+            }
+            return new RawVideoInfoResult(null, 400);
+        }
+
+        internal static RawVideoInfoResult GetRawVideoInfoViaWebPage(string videoId)
+        {
+            int errorCode = DownloadVideoWebPage(videoId, out string webPageCode);
+            if (errorCode == 200)
+            {
+                string videoInfo = ExtractVideoInfoFromWebPage(webPageCode);
+                if (!string.IsNullOrEmpty(videoInfo) && !string.IsNullOrWhiteSpace(videoInfo))
+                {
+                    JObject j = JObject.Parse(videoInfo);
+                    if (j != null)
+                    {
+                        return new RawVideoInfoResult(new RawVideoInfo(j), 200);
+                    }
+                    else
+                    {
+                        return new RawVideoInfoResult(null, 400);
+                    }
+                }
+            }
+            return new RawVideoInfoResult(null, errorCode);
+        }
+
+        internal static RawVideoInfoResult GetRawVideoInfoViaApi(string videoId)
         {
             JObject body = GenerateVideoInfoRequestBody(videoId);
             string url = $"{API_V1_PLAYER_URL}?key={API_V1_KEY}";
@@ -91,7 +140,7 @@ namespace YouTubeApiLib
 
         internal static SimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId)
         {
-            RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId);
+            RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId, YouTubeApi.defaultVideoInfoGettingMethod);
             if (rawVideoInfoResult.ErrorCode == 200)
             {
                 return ParseRawVideoInfo(rawVideoInfoResult.RawVideoInfo);
@@ -267,7 +316,7 @@ namespace YouTubeApiLib
                 List<YouTubeVideo> videos = new List<YouTubeVideo>();
                 foreach (string videoId in videoIdPageResult.VideoIdPage.VideoIds)
                 {
-                    RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId);
+                    RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId, YouTubeApi.defaultVideoInfoGettingMethod);
                     if (rawVideoInfoResult.ErrorCode == 200)
                     {
                         YouTubeVideo video = MakeYouTubeVideo(rawVideoInfoResult.RawVideoInfo);
@@ -701,6 +750,53 @@ namespace YouTubeApiLib
             return res;
         }
 
+        internal static string ExtractVideoInfoFromWebPage(string webPage)
+        {
+            //TODO: Replace this shit with a cool web page parser!
+            try
+            {
+                int n = webPage.IndexOf("var ytInitialPlayerResponse");
+                if (n > 0)
+                {
+                    int n2 = webPage.IndexOf("}};var meta =");
+                    if (n2 > 0)
+                    {
+                        return webPage.Substring(n + 30, n2 - n - 28);
+                    }
+
+                    n2 = webPage.IndexOf("};\nvar meta =");
+                    if (n2 > 0)
+                    {
+                        return webPage.Substring(n + 29, n2 - n - 28);
+                    }
+
+                    n2 = webPage.IndexOf("}};var head =");
+                    if (n2 > 0)
+                    {
+                        return webPage.Substring(n + 30, n2 - n - 28);
+                    }
+
+                    n2 = webPage.IndexOf("};\nvar head =");
+                    if (n2 > 0)
+                    {
+                        return webPage.Substring(n + 29, n2 - n - 28);
+                    }
+
+                    n2 = webPage.IndexOf(";</script><div");
+                    if (n2 > 0)
+                    {
+                        return webPage.Substring(n + 30, n2 - n - 30);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
+
+            return null;
+        }
+
         public static VideoId ExtractVideoIdFromUrl(string url)
         {
             if (string.IsNullOrEmpty(url) || string.IsNullOrWhiteSpace(url))
@@ -769,6 +865,12 @@ namespace YouTubeApiLib
             FileDownloader d = new FileDownloader();
             d.Url = url;
             return d.DownloadString(out response);
+        }
+
+        public static int DownloadVideoWebPage(string videoId, out string responseWebPage)
+        {
+            string url = GetVideoUrl(videoId);
+            return DownloadString(url, out responseWebPage);
         }
 
         public static Dictionary<string, string> SplitUrlQueryToDictionary(string urlQuery)
