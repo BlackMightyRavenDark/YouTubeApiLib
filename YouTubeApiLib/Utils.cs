@@ -18,7 +18,8 @@ namespace YouTubeApiLib
 
         public enum VideoInfoGettingMethod
         {
-            HiddenApi,
+            HiddenApiEncryptedUrls,
+            HiddenApiDecryptedUrls,
 
             /// <summary>
             /// This way will download and parse the video web page.
@@ -68,19 +69,62 @@ namespace YouTubeApiLib
             return $"{YOUTUBE_URL}/watch?v={videoId}";
         }
 
-        public static JObject GenerateVideoInfoRequestBody(string videoId)
+        /// <summary>
+        /// Генерирует тело POST-запроса для получения информации о видео.
+        /// Ответ будет содержать всё необходимое, кроме ссылок для скачивания.
+        /// Ссылки будут зашифрованы (Cipher, ограничение скорости и т.д.).
+        /// </summary>
+        /// <param name="videoId">ID видео</param>
+        /// <returns>Тело запроса</returns>
+        public static JObject GenerateVideoInfoEncryptedRequestBody(string videoId)
         {
+            const string CLIENT_NAME = "WEB";
+            const string CLIENT_VERSION = "2.20201021.03.00";
+
             JObject jClient = new JObject();
             jClient["hl"] = "en";
             jClient["gl"] = "US";
-            jClient["clientName"] = "WEB";
-            jClient["clientVersion"] = YOUTUBE_CLIENT_VERSION;
+            jClient["clientName"] = CLIENT_NAME;
+            jClient["clientVersion"] = CLIENT_VERSION;
 
             JObject jContext = new JObject();
-            jContext["client"] = jClient;
+            jContext.Add(new JProperty("client", jClient));
 
             JObject json = new JObject();
-            json["context"] = jContext;
+            json.Add(new JProperty("context", jContext));
+            json["videoId"] = videoId;
+
+            return json;
+        }
+
+        /// <summary>
+        /// Генерирует тело POST-запроса для получения информации о видео.
+        /// Ответ будет содержать уже расшифрованные ссылки для скачивания
+        /// без ограничения скорости, но остальная информация будет не полной.
+        /// Используйте этот запрос только для получения ссылок.
+        /// </summary>
+        /// <param name="videoId">ID видео</param>
+        /// <returns>Тело запроса</returns>
+        public static JObject GenerateVideoInfoDecryptedRequestBody(string videoId)
+        {
+            const string CLIENT_NAME = "ANDROID";
+            const string CLIENT_VERSION = "16.46.37";
+
+            JObject jClient = new JObject();
+            jClient["hl"] = "en";
+            jClient["gl"] = "US";
+            jClient["clientName"] = CLIENT_NAME;
+            jClient["clientVersion"] = CLIENT_VERSION;
+            jClient["clientScreen"] = null;
+            jClient["utcOffsetMinutes"] = 0;
+
+            JObject jContext = new JObject();
+            jContext.Add(new JProperty("client", jClient));
+
+            JObject json = new JObject();
+            json.Add(new JProperty("context", jContext));
+            json["contentCheckOk"] = true;
+            json["racyCheckOk"] = true;
             json["videoId"] = videoId;
 
             return json;
@@ -91,8 +135,9 @@ namespace YouTubeApiLib
         {
             switch (method)
             {
-                case VideoInfoGettingMethod.HiddenApi:
-                    return GetRawVideoInfoViaApi(videoId);
+                case VideoInfoGettingMethod.HiddenApiEncryptedUrls:
+                case VideoInfoGettingMethod.HiddenApiDecryptedUrls:
+                    return GetRawVideoInfoViaApi(videoId, method);
 
                 case VideoInfoGettingMethod.WebPage:
                     return GetRawVideoInfoViaWebPage(videoId);
@@ -122,9 +167,17 @@ namespace YouTubeApiLib
             return new RawVideoInfoResult(null, errorCode);
         }
 
-        internal static RawVideoInfoResult GetRawVideoInfoViaApi(string videoId)
+        internal static RawVideoInfoResult GetRawVideoInfoViaApi(
+            string videoId, VideoInfoGettingMethod method)
         {
-            JObject body = GenerateVideoInfoRequestBody(videoId);
+            if (method == VideoInfoGettingMethod.WebPage)
+            {
+                return GetRawVideoInfoViaWebPage(videoId);
+            }
+
+            JObject body = method == VideoInfoGettingMethod.HiddenApiEncryptedUrls ?
+                GenerateVideoInfoEncryptedRequestBody(videoId) :
+                GenerateVideoInfoDecryptedRequestBody(videoId);
             string url = $"{API_V1_PLAYER_URL}?key={API_V1_KEY}";
             int errorCode = HttpsPost(url, body.ToString(), out string rawInfoJsonString);
             if (errorCode == 200)
@@ -187,10 +240,21 @@ namespace YouTubeApiLib
             {
                 return new SimplifiedVideoInfoResult(null, 404);
             }
+
+            string videoId = jVideoDetails.Value<string>("videoId");
             JObject jMicroformat = rawVideoInfo.RawData.Value<JObject>("microformat");
             if (jMicroformat == null)
             {
-                return new SimplifiedVideoInfoResult(null, 404);
+                //TODO: Refactor this shit!
+                RawVideoInfoResult raw = GetRawVideoInfo(videoId, VideoInfoGettingMethod.HiddenApiEncryptedUrls);
+                if (raw.ErrorCode == 200)
+                {
+                    jMicroformat = raw.RawVideoInfo.RawData.Value<JObject>("microformat");
+                }
+                if (jMicroformat == null)
+                {
+                    return new SimplifiedVideoInfoResult(null, 404);
+                }
             }
             JObject jMicroformatRenderer = jMicroformat.Value<JObject>("playerMicroformatRenderer");
             if (jMicroformatRenderer == null)
@@ -199,7 +263,6 @@ namespace YouTubeApiLib
             }
 
             string videoTitle = jVideoDetails.Value<string>("title");
-            string videoId = jVideoDetails.Value<string>("videoId");
             string shortDescription = jVideoDetails.Value<string>("shortDescription");
             int lengthSeconds = int.Parse(jVideoDetails.Value<string>("lengthSeconds"));
             string ownerChannelTitle = jVideoDetails.Value<string>("author");
