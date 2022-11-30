@@ -129,10 +129,10 @@ namespace YouTubeApiLib
         /// Warming!!! You will lost the current media track list!
         /// </summary>
         /// <returns>HTTP error code.</returns>
-        public int UpdateMediaFormats()
+        public int UpdateMediaFormats(Utils.VideoInfoGettingMethod method)
         {
             MediaTracks = null;
-            RawVideoInfoResult rawVideoInfoResult = Utils.GetRawVideoInfo(Id, YouTubeApi.defaultVideoInfoGettingMethod);
+            RawVideoInfoResult rawVideoInfoResult = Utils.GetRawVideoInfo(Id, method);
             if (rawVideoInfoResult != null)
             {
                 RawInfo = rawVideoInfoResult.RawVideoInfo;
@@ -144,6 +144,16 @@ namespace YouTubeApiLib
                 return rawVideoInfoResult.ErrorCode;
             }
             return 404;
+        }
+
+        /// <summary>
+        /// Redownload and reparse the downloadable formats info.
+        /// Warming!!! You will lost the current media track list!
+        /// </summary>
+        /// <returns>HTTP error code.</returns>
+        public int UpdateMediaFormats()
+        {
+            return UpdateMediaFormats(YouTubeApi.defaultVideoInfoGettingMethod);
         }
     }
 }
