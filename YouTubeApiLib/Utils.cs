@@ -157,7 +157,7 @@ namespace YouTubeApiLib
                     JObject j = JObject.Parse(videoInfo);
                     if (j != null)
                     {
-                        return new RawVideoInfoResult(new RawVideoInfo(j), 200);
+                        return new RawVideoInfoResult(new RawVideoInfo(j, VideoInfoGettingMethod.WebPage), 200);
                     }
                     else
                     {
@@ -186,7 +186,7 @@ namespace YouTubeApiLib
                 JObject j = JObject.Parse(rawInfoJsonString);
                 if (j != null)
                 {
-                    return new RawVideoInfoResult(new RawVideoInfo(j), 200);
+                    return new RawVideoInfoResult(new RawVideoInfo(j, method), 200);
                 }
             }
             return new RawVideoInfoResult(null, errorCode);
@@ -756,7 +756,7 @@ namespace YouTubeApiLib
                 return null;
             }
             JObject jStreamingData = rawVideoInfo.RawData.Value<JObject>("streamingData");
-            StreamingData streamingData = new StreamingData(jStreamingData);
+            StreamingData streamingData = new StreamingData(jStreamingData, rawVideoInfo.DataGettingMethod);
             return streamingData.Parse();
         }
 
