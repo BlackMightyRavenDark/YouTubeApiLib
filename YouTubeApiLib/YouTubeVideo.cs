@@ -153,7 +153,9 @@ namespace YouTubeApiLib
         /// <returns>HTTP error code.</returns>
         public int UpdateMediaFormats()
         {
-            return UpdateMediaFormats(YouTubeApi.defaultVideoInfoGettingMethod);
+            Utils.VideoInfoGettingMethod method =
+                RawInfo != null ? RawInfo.DataGettingMethod : Utils.VideoInfoGettingMethod.HiddenApiEncryptedUrls;
+            return UpdateMediaFormats(method);
         }
     }
 }

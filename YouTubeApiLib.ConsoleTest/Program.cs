@@ -8,7 +8,7 @@ namespace YouTubeApiLib.ConsoleTest
         static void Main(string[] args)
         {
             //Magical Underwater World 4K | 2160p | 7304448660 bytes
-            //string videoUrl = "https://www.youtube.com/watch?v=7szcXCT-Oqw";
+            string videoUrl = "https://www.youtube.com/watch?v=7szcXCT-Oqw";
 
             //Trick or treat, kingdom hearts, and beat saber. | 18+ | 1080p | 197233776 bytes
             //string videoUrl = "https://www.youtube.com/watch?v=pQNRrnk63MQ";
@@ -17,7 +17,7 @@ namespace YouTubeApiLib.ConsoleTest
             //string videoUrl = "https://www.youtube.com/watch?v=Z9c9SbfGvec";
 
             //NASA Live: Official Stream of NASA TV | HLS
-            string videoUrl = "https://www.youtube.com/watch?v=21X5lGlDOfg";
+            //string videoUrl = "https://www.youtube.com/watch?v=21X5lGlDOfg";
 
             Console.WriteLine($"Video URL: {videoUrl}");
 
@@ -27,6 +27,7 @@ namespace YouTubeApiLib.ConsoleTest
             {
                 YouTubeApi api = new YouTubeApi();
                 YouTubeApi.getMediaTracksInfoImmediately = true;
+                YouTubeApi.decryptMediaTrackUrlsAutomaticallyIfPossible = true;
                 YouTubeVideo video = api.GetVideo(videoId);
                 if (video != null)
                 {

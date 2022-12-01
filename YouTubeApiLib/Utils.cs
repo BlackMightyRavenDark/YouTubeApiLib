@@ -192,12 +192,16 @@ namespace YouTubeApiLib
             return new RawVideoInfoResult(null, errorCode);
         }
 
-        internal static SimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId)
+        internal static SimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId, out StreamingData streamingData)
         {
             RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId, YouTubeApi.defaultVideoInfoGettingMethod);
             if (rawVideoInfoResult.ErrorCode == 200)
             {
-                return ParseRawVideoInfo(rawVideoInfoResult.RawVideoInfo);
+                return ParseRawVideoInfo(rawVideoInfoResult.RawVideoInfo, out streamingData);
+            }
+            else
+            {
+                streamingData = null;
             }
             return new SimplifiedVideoInfoResult(null, rawVideoInfoResult.ErrorCode);
         }
@@ -234,49 +238,38 @@ namespace YouTubeApiLib
             return new YouTubeChannelTabResult(null, errorCode);
         }
 
-        public static SimplifiedVideoInfoResult ParseRawVideoInfo(RawVideoInfo rawVideoInfo)
+        public static SimplifiedVideoInfoResult ParseRawVideoInfo(RawVideoInfo rawVideoInfo, out StreamingData streamingData)
         {
+            streamingData = null;
             JObject jVideoDetails = rawVideoInfo.RawData.Value<JObject>("videoDetails");
             if (jVideoDetails == null)
             {
                 return new SimplifiedVideoInfoResult(null, 404);
             }
 
-            string videoId = jVideoDetails.Value<string>("videoId");
             JObject jMicroformat = rawVideoInfo.RawData.Value<JObject>("microformat");
             if (jMicroformat == null)
             {
-                //TODO: Refactor this shit!
-                RawVideoInfoResult raw = GetRawVideoInfo(videoId, VideoInfoGettingMethod.HiddenApiEncryptedUrls);
-                if (raw.ErrorCode == 200)
-                {
-                    jMicroformat = raw.RawVideoInfo.RawData.Value<JObject>("microformat");
-                }
-                if (jMicroformat == null)
-                {
-                    return new SimplifiedVideoInfoResult(null, 404);
-                }
+                return new SimplifiedVideoInfoResult(null, 404);
             }
+
             JObject jMicroformatRenderer = jMicroformat.Value<JObject>("playerMicroformatRenderer");
             if (jMicroformatRenderer == null)
             {
                 return new SimplifiedVideoInfoResult(null, 404);
             }
 
+            string videoId = jVideoDetails.Value<string>("videoId");
             string videoTitle = jVideoDetails.Value<string>("title");
-            string shortDescription = jVideoDetails.Value<string>("shortDescription");
             int lengthSeconds = int.Parse(jVideoDetails.Value<string>("lengthSeconds"));
             string ownerChannelTitle = jVideoDetails.Value<string>("author");
             string ownerChannelId = jVideoDetails.Value<string>("channelId");
             int viewCount = int.Parse(jVideoDetails.Value<string>("viewCount"));
             bool isPrivate = jVideoDetails.Value<bool>("isPrivate");
             bool isLiveContent = jVideoDetails.Value<bool>("isLiveContent");
-            string description = null;
             JObject jDescription = jMicroformatRenderer.Value<JObject>("description");
-            if (jDescription != null)
-            {
-                description = jDescription.Value<string>("simpleText");
-            }
+            string description = jDescription?.Value<string>("simpleText");
+            string shortDescription = jVideoDetails.Value<string>("shortDescription");
             bool isFamilySafe = jMicroformatRenderer.Value<bool>("isFamilySafe");
             bool isUnlisted = jMicroformatRenderer.Value<bool>("isUnlisted");
             string category = jMicroformatRenderer.Value<string>("category");
@@ -304,7 +297,17 @@ namespace YouTubeApiLib
             List<YouTubeVideoThumbnail> videoThumbnails = GetThumbnailUrls(jMicroformat, videoId);
             simplifiedVideoInfo["thumbnails"] = ThumbnailsToJson(videoThumbnails);
 
-            JObject jStreamingData = rawVideoInfo.RawData.Value<JObject>("streamingData");
+            JObject jStreamingData;
+            if (rawVideoInfo.DataGettingMethod != VideoInfoGettingMethod.HiddenApiDecryptedUrls &&
+                YouTubeApi.decryptMediaTrackUrlsAutomaticallyIfPossible)
+            {
+                streamingData = GetStreamingData(videoId, VideoInfoGettingMethod.HiddenApiDecryptedUrls);
+                jStreamingData = streamingData?.RawData;
+            }
+            else
+            {
+                jStreamingData = rawVideoInfo.RawData.Value<JObject>("streamingData");
+            }
             simplifiedVideoInfo["streamingData"] = jStreamingData;
 
             return new SimplifiedVideoInfoResult(new SimplifiedVideoInfo(simplifiedVideoInfo), 200);
@@ -312,16 +315,17 @@ namespace YouTubeApiLib
 
         public static YouTubeVideo MakeYouTubeVideo(RawVideoInfo rawVideoInfo)
         {
-            SimplifiedVideoInfoResult simplifiedVideoInfoResult = ParseRawVideoInfo(rawVideoInfo);
+            SimplifiedVideoInfoResult simplifiedVideoInfoResult = ParseRawVideoInfo(rawVideoInfo, out StreamingData streamingData);
             if (simplifiedVideoInfoResult.ErrorCode != 200)
             {
                 return YouTubeVideo.CreateEmpty(new YouTubeVideoPlayabilityStatus(null, "Not parsed", 400, null));
             }
 
-            return MakeYouTubeVideo(rawVideoInfo, simplifiedVideoInfoResult.SimplifiedVideoInfo);
+            return MakeYouTubeVideo(rawVideoInfo, streamingData, simplifiedVideoInfoResult.SimplifiedVideoInfo);
         }
 
-        public static YouTubeVideo MakeYouTubeVideo(RawVideoInfo rawVideoInfo, SimplifiedVideoInfo simplifiedVideoInfo)
+        public static YouTubeVideo MakeYouTubeVideo(RawVideoInfo rawVideoInfo,
+            StreamingData streamingData, SimplifiedVideoInfo simplifiedVideoInfo)
         {
             string videoTitle = simplifiedVideoInfo.Info.Value<string>("title");
             string videoId = simplifiedVideoInfo.Info.Value<string>("id");
@@ -358,8 +362,11 @@ namespace YouTubeApiLib
                 }
             }
 
-            LinkedList<YouTubeMediaTrack> mediaTracks =
-                YouTubeApi.getMediaTracksInfoImmediately ? ParseMediaTracks(rawVideoInfo) : null;
+            LinkedList<YouTubeMediaTrack> mediaTracks = null;
+            if (YouTubeApi.getMediaTracksInfoImmediately)
+            {
+                mediaTracks = streamingData != null ? ParseMediaTracks(streamingData) : ParseMediaTracks(rawVideoInfo);
+            }
 
             JObject jPlayabilityStatus = rawVideoInfo.RawData.Value<JObject>("playabilityStatus");
             YouTubeVideoPlayabilityStatus videoStatus = YouTubeVideoPlayabilityStatus.Parse(jPlayabilityStatus);
@@ -434,7 +441,7 @@ namespace YouTubeApiLib
 
                 foreach (string videoId in videoIdPageResult.VideoIdPage.VideoIds)
                 {
-                    SimplifiedVideoInfoResult simplifiedVideoInfoResult = GetSimplifiedVideoInfo(videoId);
+                    SimplifiedVideoInfoResult simplifiedVideoInfoResult = GetSimplifiedVideoInfo(videoId, out _);
                     if (simplifiedVideoInfoResult.ErrorCode == 200)
                     {
                         resList.Add(simplifiedVideoInfoResult.SimplifiedVideoInfo.Info);
@@ -452,6 +459,20 @@ namespace YouTubeApiLib
             }
 
             return new VideoListResult(resList, resList.Count > 0 ? 200 : errorCode);
+        }
+
+        public static StreamingData GetStreamingData(string videoId, VideoInfoGettingMethod method)
+        {
+            RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId, method);
+            if (rawVideoInfoResult.ErrorCode == 200)
+            {
+                JObject jStreamingData = rawVideoInfoResult.RawVideoInfo.RawData.Value<JObject>("streamingData");
+                if (jStreamingData != null)
+                {
+                    return new StreamingData(jStreamingData, method);
+                }
+            }
+            return null;
         }
 
         internal static string ExtractVideoIDsFromGridRendererItem(JObject gridVideoRendererItem)
@@ -749,6 +770,11 @@ namespace YouTubeApiLib
             return jsonArr;
         }
 
+        internal static LinkedList<YouTubeMediaTrack> ParseMediaTracks(StreamingData streamingData)
+        {
+            return streamingData != null ? streamingData.Parse() : null;
+        }
+
         internal static LinkedList<YouTubeMediaTrack> ParseMediaTracks(RawVideoInfo rawVideoInfo)
         {
             if (rawVideoInfo == null || rawVideoInfo.RawData == null)
@@ -757,7 +783,7 @@ namespace YouTubeApiLib
             }
             JObject jStreamingData = rawVideoInfo.RawData.Value<JObject>("streamingData");
             StreamingData streamingData = new StreamingData(jStreamingData, rawVideoInfo.DataGettingMethod);
-            return streamingData.Parse();
+            return ParseMediaTracks(streamingData);
         }
 
         public static int HttpsPost(string url, string body, out string responseString)
