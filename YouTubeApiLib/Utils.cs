@@ -153,10 +153,10 @@ namespace YouTubeApiLib
 
         internal static RawVideoInfoResult GetRawVideoInfoViaWebPage(string videoId)
         {
-            int errorCode = DownloadVideoWebPage(videoId, out string webPageCode);
-            if (errorCode == 200)
+            YouTubeVideoWebPageResult videoWebPageResult = DownloadVideoWebPage(videoId);
+            if (videoWebPageResult.ErrorCode == 200)
             {
-                string videoInfo = ExtractVideoInfoFromWebPage(webPageCode);
+                string videoInfo = ExtractVideoInfoFromWebPage(videoWebPageResult.VideoWebPage);
                 if (!string.IsNullOrEmpty(videoInfo) && !string.IsNullOrWhiteSpace(videoInfo))
                 {
                     JObject j = JObject.Parse(videoInfo);
@@ -170,7 +170,7 @@ namespace YouTubeApiLib
                     }
                 }
             }
-            return new RawVideoInfoResult(null, errorCode);
+            return new RawVideoInfoResult(null, videoWebPageResult.ErrorCode);
         }
 
         internal static RawVideoInfoResult GetRawVideoInfoViaApi(
@@ -844,42 +844,47 @@ namespace YouTubeApiLib
             return res;
         }
 
-        internal static string ExtractVideoInfoFromWebPage(string webPage)
+        public static string ExtractVideoInfoFromWebPage(YouTubeVideoWebPage webPage)
+        {
+            return webPage != null ? ExtractVideoInfoFromWebPageCode(webPage.WebPageCode) : null;
+        }
+
+        internal static string ExtractVideoInfoFromWebPageCode(string webPageCode)
         {
             //TODO: Replace this shit with a cool web page parser!
             try
             {
-                int n = webPage.IndexOf("var ytInitialPlayerResponse");
+                int n = webPageCode.IndexOf("var ytInitialPlayerResponse");
                 if (n > 0)
                 {
-                    int n2 = webPage.IndexOf("}};var meta =");
+                    int n2 = webPageCode.IndexOf("}};var meta =");
                     if (n2 > 0)
                     {
-                        return webPage.Substring(n + 30, n2 - n - 28);
+                        return webPageCode.Substring(n + 30, n2 - n - 28);
                     }
 
-                    n2 = webPage.IndexOf("};\nvar meta =");
+                    n2 = webPageCode.IndexOf("};\nvar meta =");
                     if (n2 > 0)
                     {
-                        return webPage.Substring(n + 29, n2 - n - 28);
+                        return webPageCode.Substring(n + 29, n2 - n - 28);
                     }
 
-                    n2 = webPage.IndexOf("}};var head =");
+                    n2 = webPageCode.IndexOf("}};var head =");
                     if (n2 > 0)
                     {
-                        return webPage.Substring(n + 30, n2 - n - 28);
+                        return webPageCode.Substring(n + 30, n2 - n - 28);
                     }
 
-                    n2 = webPage.IndexOf("};\nvar head =");
+                    n2 = webPageCode.IndexOf("};\nvar head =");
                     if (n2 > 0)
                     {
-                        return webPage.Substring(n + 29, n2 - n - 28);
+                        return webPageCode.Substring(n + 29, n2 - n - 28);
                     }
 
-                    n2 = webPage.IndexOf(";</script><div");
+                    n2 = webPageCode.IndexOf(";</script><div");
                     if (n2 > 0)
                     {
-                        return webPage.Substring(n + 30, n2 - n - 30);
+                        return webPageCode.Substring(n + 30, n2 - n - 30);
                     }
                 }
             }
@@ -961,10 +966,17 @@ namespace YouTubeApiLib
             return d.DownloadString(out response);
         }
 
-        public static int DownloadVideoWebPage(string videoId, out string responseWebPage)
+        public static YouTubeVideoWebPageResult DownloadVideoWebPage(VideoId videoId)
+        {
+            return videoId != null ? DownloadVideoWebPage(videoId.Id) : null;
+        }
+
+        internal static YouTubeVideoWebPageResult DownloadVideoWebPage(string videoId)
         {
             string url = GetVideoUrl(videoId);
-            return DownloadString(url, out responseWebPage);
+            int errorCode = DownloadString(url, out string responseWebPageCode);
+            YouTubeVideoWebPage webPage = errorCode == 200 ? new YouTubeVideoWebPage(responseWebPageCode) : null;
+            return new YouTubeVideoWebPageResult(webPage, errorCode);
         }
 
         public static Dictionary<string, string> SplitUrlQueryToDictionary(string urlQuery)

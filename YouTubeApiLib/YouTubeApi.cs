@@ -19,9 +19,14 @@ namespace YouTubeApiLib
             return YouTubeVideo.CreateEmpty(new YouTubeVideoPlayabilityStatus(null, null, rawVideoInfoResult.ErrorCode, null));
         }
 
-        public YouTubeVideo GetVideo(string webPageCode)
+        public YouTubeVideo GetVideo(YouTubeVideoWebPage videoWebPage)
         {
-            string videoInfo = ExtractVideoInfoFromWebPage(webPageCode);
+            return videoWebPage != null ? GetVideo(videoWebPage.WebPageCode) : null;
+        }
+
+        private YouTubeVideo GetVideo(string webPageCode)
+        {
+            string videoInfo = ExtractVideoInfoFromWebPageCode(webPageCode);
             if (!string.IsNullOrEmpty(videoInfo) && !string.IsNullOrWhiteSpace(videoInfo))
             {
                 JObject j = JObject.Parse(videoInfo);
