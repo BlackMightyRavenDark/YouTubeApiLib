@@ -27,7 +27,12 @@ namespace YouTubeApiLib
             /// You will get the "HTTP error 429" for some days or weeks (maybe forever!).
             /// You should not abuse this method!
             /// </summary>
-            WebPage
+            WebPage,
+
+            /// <summary>
+            /// Used when user provide the web page code or video info data manually.
+            /// </summary>
+            Manual
         }
 
         public static JObject GenerateChannelVideoListRequestBody(string channelId, string continuationToken)
@@ -363,7 +368,8 @@ namespace YouTubeApiLib
             if (YouTubeApi.getMediaTracksInfoImmediately)
             {
                 mediaTracks = simplifiedVideoInfo.StreamingData != null ?
-                    ParseMediaTracks(simplifiedVideoInfo.StreamingData) : ParseMediaTracks(rawVideoInfo);
+                    ParseMediaTracks(simplifiedVideoInfo.StreamingData) :
+                    ParseMediaTracks(rawVideoInfo);
             }
 
             JObject jPlayabilityStatus = rawVideoInfo.RawData.Value<JObject>("playabilityStatus");
