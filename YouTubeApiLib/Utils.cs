@@ -842,7 +842,8 @@ namespace YouTubeApiLib
                     JObject j = JObject.Parse(videoInfo);
                     if (j != null)
                     {
-                        return new RawVideoInfoResult(new RawVideoInfo(j, VideoInfoGettingMethod.WebPage), 200);
+                        VideoInfoGettingMethod method = webPage.IsProvidedManually ? VideoInfoGettingMethod.Manual : VideoInfoGettingMethod.WebPage;
+                        return new RawVideoInfoResult(new RawVideoInfo(j, method), 200);
                     }
                     else
                     {
@@ -979,7 +980,7 @@ namespace YouTubeApiLib
         {
             string url = GetVideoUrl(videoId);
             int errorCode = DownloadString(url, out string responseWebPageCode);
-            YouTubeVideoWebPage webPage = errorCode == 200 ? new YouTubeVideoWebPage(responseWebPageCode) : null;
+            YouTubeVideoWebPage webPage = errorCode == 200 ? new YouTubeVideoWebPage(responseWebPageCode, false) : null;
             return new YouTubeVideoWebPageResult(webPage, errorCode);
         }
 
