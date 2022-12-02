@@ -156,19 +156,7 @@ namespace YouTubeApiLib
             YouTubeVideoWebPageResult videoWebPageResult = DownloadVideoWebPage(videoId);
             if (videoWebPageResult.ErrorCode == 200)
             {
-                string videoInfo = ExtractVideoInfoFromWebPage(videoWebPageResult.VideoWebPage);
-                if (!string.IsNullOrEmpty(videoInfo) && !string.IsNullOrWhiteSpace(videoInfo))
-                {
-                    JObject j = JObject.Parse(videoInfo);
-                    if (j != null)
-                    {
-                        return new RawVideoInfoResult(new RawVideoInfo(j, VideoInfoGettingMethod.WebPage), 200);
-                    }
-                    else
-                    {
-                        return new RawVideoInfoResult(null, 400);
-                    }
-                }
+                return ExtractRawVideoInfoFromWebPage(videoWebPageResult.VideoWebPage);
             }
             return new RawVideoInfoResult(null, videoWebPageResult.ErrorCode);
         }
@@ -844,12 +832,28 @@ namespace YouTubeApiLib
             return res;
         }
 
-        public static string ExtractVideoInfoFromWebPage(YouTubeVideoWebPage webPage)
+        public static RawVideoInfoResult ExtractRawVideoInfoFromWebPage(YouTubeVideoWebPage webPage)
         {
-            return webPage != null ? ExtractVideoInfoFromWebPageCode(webPage.WebPageCode) : null;
+            if (webPage != null)
+            {
+                string videoInfo = ExtractRawVideoInfoFromWebPageCode(webPage.WebPageCode);
+                if (!string.IsNullOrEmpty(videoInfo) && !string.IsNullOrWhiteSpace(videoInfo))
+                {
+                    JObject j = JObject.Parse(videoInfo);
+                    if (j != null)
+                    {
+                        return new RawVideoInfoResult(new RawVideoInfo(j, VideoInfoGettingMethod.WebPage), 200);
+                    }
+                    else
+                    {
+                        return new RawVideoInfoResult(null, 400);
+                    }
+                }
+            }
+            return new RawVideoInfoResult(null, 404);
         }
 
-        internal static string ExtractVideoInfoFromWebPageCode(string webPageCode)
+        internal static string ExtractRawVideoInfoFromWebPageCode(string webPageCode)
         {
             //TODO: Replace this shit with a cool web page parser!
             try

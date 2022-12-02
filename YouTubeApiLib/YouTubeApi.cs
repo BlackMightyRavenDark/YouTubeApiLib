@@ -26,7 +26,7 @@ namespace YouTubeApiLib
 
         private YouTubeVideo GetVideo(string webPageCode)
         {
-            string videoInfo = ExtractVideoInfoFromWebPageCode(webPageCode);
+            string videoInfo = ExtractRawVideoInfoFromWebPageCode(webPageCode);
             if (!string.IsNullOrEmpty(videoInfo) && !string.IsNullOrWhiteSpace(videoInfo))
             {
                 JObject j = JObject.Parse(videoInfo);
