@@ -312,8 +312,8 @@ namespace YouTubeApiLib
                     VideoInfoGettingMethod.HiddenApiEncryptedUrls;
                 streamingData = GetStreamingData(videoId, method);
             }
-            simplifiedVideoInfo["streamingData"] = streamingData != null ? streamingData.RawData :
-                rawVideoInfo.RawData.Value<JObject>("streamingData");
+            simplifiedVideoInfo["streamingData"] =
+                streamingData != null ? streamingData.RawData : rawVideoInfo.StreamingData.RawData;
 
             return new SimplifiedVideoInfoResult(new SimplifiedVideoInfo(simplifiedVideoInfo, streamingData), 200);
         }
@@ -778,18 +778,12 @@ namespace YouTubeApiLib
 
         internal static LinkedList<YouTubeMediaTrack> ParseMediaTracks(StreamingData streamingData)
         {
-            return streamingData != null ? streamingData.Parse() : null;
+            return streamingData?.Parse();
         }
 
         internal static LinkedList<YouTubeMediaTrack> ParseMediaTracks(RawVideoInfo rawVideoInfo)
         {
-            if (rawVideoInfo == null || rawVideoInfo.RawData == null)
-            {
-                return null;
-            }
-            JObject jStreamingData = rawVideoInfo.RawData.Value<JObject>("streamingData");
-            StreamingData streamingData = new StreamingData(jStreamingData, rawVideoInfo.DataGettingMethod);
-            return ParseMediaTracks(streamingData);
+            return rawVideoInfo != null ? ParseMediaTracks(rawVideoInfo.StreamingData) : null;
         }
 
         public static int HttpsPost(string url, string body, out string responseString)
