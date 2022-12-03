@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using static YouTubeApiLib.Utils;
+﻿using static YouTubeApiLib.Utils;
 
 namespace YouTubeApiLib
 {
@@ -21,24 +20,15 @@ namespace YouTubeApiLib
 
         public YouTubeVideo GetVideo(YouTubeVideoWebPage videoWebPage)
         {
-            return videoWebPage != null ? GetVideo(videoWebPage.WebPageCode) : null;
+            return GetVideoFromWebPage(videoWebPage);
         }
 
-        private YouTubeVideo GetVideo(string webPageCode)
+        public YouTubeVideo GetVideo(string webPageCode)
         {
-            string videoInfo = ExtractRawVideoInfoFromWebPageCode(webPageCode);
-            if (!string.IsNullOrEmpty(videoInfo) && !string.IsNullOrWhiteSpace(videoInfo))
+            YouTubeVideoWebPageResult webPageResult = YouTubeVideoWebPage.FromCode(webPageCode);
+            if (webPageResult.ErrorCode == 200)
             {
-                JObject j = JObject.Parse(videoInfo);
-                if (j != null)
-                {
-                    RawVideoInfo rawVideoInfo = new RawVideoInfo(j, VideoInfoGettingMethod.Manual);
-                    SimplifiedVideoInfoResult simplifiedVideoInfoResult = ParseRawVideoInfo(rawVideoInfo);
-                    if (simplifiedVideoInfoResult.ErrorCode == 200)
-                    {
-                        return MakeYouTubeVideo(rawVideoInfo, simplifiedVideoInfoResult.SimplifiedVideoInfo);
-                    }
-                }
+                return GetVideo(webPageResult.VideoWebPage);
             }
             return null;
         }

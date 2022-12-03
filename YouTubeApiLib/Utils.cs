@@ -136,6 +136,23 @@ namespace YouTubeApiLib
             return json;
         }
 
+        internal static YouTubeVideo GetVideoFromWebPage(YouTubeVideoWebPage webPage)
+        {
+            if (webPage != null)
+            {
+                RawVideoInfoResult rawVideoInfoResult = ExtractRawVideoInfoFromWebPage(webPage);
+                if (rawVideoInfoResult.ErrorCode == 200)
+                {
+                    SimplifiedVideoInfoResult simplifiedVideoInfoResult = ParseRawVideoInfo(rawVideoInfoResult.RawVideoInfo);
+                    if (simplifiedVideoInfoResult.ErrorCode == 200)
+                    {
+                        return MakeYouTubeVideo(rawVideoInfoResult.RawVideoInfo, simplifiedVideoInfoResult.SimplifiedVideoInfo);
+                    }
+                }
+            }
+            return null;
+        }
+
         public static RawVideoInfoResult GetRawVideoInfo(
             string videoId, VideoInfoGettingMethod method)
         {
@@ -153,7 +170,7 @@ namespace YouTubeApiLib
 
         internal static RawVideoInfoResult GetRawVideoInfoViaWebPage(string videoId)
         {
-            YouTubeVideoWebPageResult videoWebPageResult = DownloadVideoWebPage(videoId);
+            YouTubeVideoWebPageResult videoWebPageResult = YouTubeVideoWebPage.Get(videoId);
             if (videoWebPageResult.ErrorCode == 200)
             {
                 return ExtractRawVideoInfoFromWebPage(videoWebPageResult.VideoWebPage);
@@ -287,17 +304,9 @@ namespace YouTubeApiLib
 
             StreamingData streamingData = null;
             if (rawVideoInfo.DataGettingMethod != VideoInfoGettingMethod.HiddenApiDecryptedUrls &&
-                YouTubeApi.decryptMediaTrackUrlsAutomaticallyIfPossible)
+                YouTubeApi.decryptMediaTrackUrlsAutomaticallyIfPossible && isFamilySafe)
             {
                 streamingData = GetStreamingData(videoId, VideoInfoGettingMethod.HiddenApiDecryptedUrls);
-            }
-            else
-            {
-                JObject jStreamingData = rawVideoInfo.RawData.Value<JObject>("streamingData");
-                if (jStreamingData != null)
-                {
-                    streamingData = new StreamingData(jStreamingData, rawVideoInfo.DataGettingMethod);
-                }
             }
             simplifiedVideoInfo["streamingData"] = streamingData?.RawData;
 
@@ -969,19 +978,6 @@ namespace YouTubeApiLib
             FileDownloader d = new FileDownloader();
             d.Url = url;
             return d.DownloadString(out response);
-        }
-
-        public static YouTubeVideoWebPageResult DownloadVideoWebPage(VideoId videoId)
-        {
-            return videoId != null ? DownloadVideoWebPage(videoId.Id) : null;
-        }
-
-        internal static YouTubeVideoWebPageResult DownloadVideoWebPage(string videoId)
-        {
-            string url = GetVideoUrl(videoId);
-            int errorCode = DownloadString(url, out string responseWebPageCode);
-            YouTubeVideoWebPage webPage = errorCode == 200 ? new YouTubeVideoWebPage(responseWebPageCode, false) : null;
-            return new YouTubeVideoWebPageResult(webPage, errorCode);
         }
 
         public static Dictionary<string, string> SplitUrlQueryToDictionary(string urlQuery)
