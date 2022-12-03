@@ -10,7 +10,6 @@ namespace YouTubeApiLib.TestChannelPages
             YouTubeChannel channel = new YouTubeChannel("UCSCHk4GbzMlKtxwpXPyYeMA", "Frozzen Fro");
             YouTubeApi api = new YouTubeApi();
             YouTubeApi.getMediaTracksInfoImmediately = false;
-            YouTubeApi.decryptMediaTrackUrlsAutomaticallyIfPossible = false;
             List<YouTubeChannelTabPage> pages = new List<YouTubeChannelTabPage>()
             {
                 YouTubeChannelTabPages.Videos,

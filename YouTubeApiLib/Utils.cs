@@ -303,12 +303,17 @@ namespace YouTubeApiLib
             simplifiedVideoInfo["thumbnails"] = ThumbnailsToJson(videoThumbnails);
 
             StreamingData streamingData = null;
-            if (rawVideoInfo.DataGettingMethod != VideoInfoGettingMethod.HiddenApiDecryptedUrls &&
-                YouTubeApi.decryptMediaTrackUrlsAutomaticallyIfPossible && isFamilySafe)
+            if (YouTubeApi.getMediaTracksInfoImmediately && isFamilySafe &&
+                rawVideoInfo.DataGettingMethod != VideoInfoGettingMethod.HiddenApiDecryptedUrls)
             {
-                streamingData = GetStreamingData(videoId, VideoInfoGettingMethod.HiddenApiDecryptedUrls);
+                VideoInfoGettingMethod method =
+                    YouTubeApi.decryptMediaTrackUrlsAutomaticallyIfPossible ?
+                    VideoInfoGettingMethod.HiddenApiDecryptedUrls :
+                    VideoInfoGettingMethod.HiddenApiEncryptedUrls;
+                streamingData = GetStreamingData(videoId, method);
             }
-            simplifiedVideoInfo["streamingData"] = streamingData?.RawData;
+            simplifiedVideoInfo["streamingData"] = streamingData != null ? streamingData.RawData :
+                rawVideoInfo.RawData.Value<JObject>("streamingData");
 
             return new SimplifiedVideoInfoResult(new SimplifiedVideoInfo(simplifiedVideoInfo, streamingData), 200);
         }
