@@ -75,5 +75,11 @@ namespace YouTubeApiLib
         {
             return YouTubeApiV1.GetChannelTab(youTubeChannel.Id, youTubeChannelTabPage);
         }
+
+        public YouTubeApiV1SearchResults Search(string searchQuery, string continuationToken,
+            YouTubeApiV1SearchResultFilter searchResultFilter)
+        {
+            return YouTubeApiV1.SearchYouTube(searchQuery, continuationToken, searchResultFilter);
+        }
     }
 }

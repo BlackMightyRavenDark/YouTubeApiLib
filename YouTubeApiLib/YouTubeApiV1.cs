@@ -9,6 +9,7 @@ namespace YouTubeApiLib
         internal const string API_V1_KEY = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8";
         internal const string API_V1_BROWSE_URL = "https://www.youtube.com/youtubei/v1/browse";
         internal const string API_V1_PLAYER_URL = "https://www.youtube.com/youtubei/v1/player";
+        internal const string API_V1_SEARCH_URL = "https://www.youtube.com/youtubei/v1/search";
 
         /// <summary>
         /// Генерирует тело POST-запроса для получения информации о видео.
@@ -72,6 +73,39 @@ namespace YouTubeApiLib
             return json;
         }
 
+        public static JObject GenerateSearchQueryRequestBody(
+            string searchQuery, string continuationToken, YouTubeApiV1SearchResultFilter filter)
+        {
+            const string CLIENT_NAME = "WEB";
+            const string CLIENT_VERSION = "2.20210408.08.00";
+
+            JObject jClient = new JObject();
+            jClient["clientName"] = CLIENT_NAME;
+            jClient["clientVersion"] = CLIENT_VERSION;
+            jClient["hl"] = "en";
+            jClient["gl"] = "US";
+            jClient["utcOffsetMinutes"] = 0;
+
+            JObject jContext = new JObject();
+            jContext.Add(new JProperty("client", jClient));
+
+            JObject json = new JObject();
+            json.Add(new JProperty("context", jContext));
+            if (!string.IsNullOrEmpty(searchQuery) && !string.IsNullOrWhiteSpace(searchQuery))
+            {
+                json["query"] = searchQuery;
+                if (filter != YouTubeApiV1SearchResultFilters.None)
+                {
+                    json["params"] = filter.ParamsId;
+                }
+            }
+            else if (!string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken))
+            {
+                json["continuation"] = continuationToken;
+            }
+            return json;
+        }
+
         public static JObject GenerateChannelTabRequestBody(string channelId,
             YouTubeChannelTabPage youTubeChannelTabPage, string continuationToken)
         {
@@ -107,6 +141,11 @@ namespace YouTubeApiLib
         public static JObject GenerateChannelVideoListRequestBody(string channelId, string continuationToken)
         {
             return GenerateChannelTabRequestBody(channelId, YouTubeChannelTabPages.Videos, continuationToken);
+        }
+
+        public static string GetSearchRequestUrl()
+        {
+            return $"{API_V1_SEARCH_URL}?key={API_V1_KEY}";
         }
 
         internal static RawVideoInfoResult GetRawVideoInfo(
@@ -245,6 +284,26 @@ namespace YouTubeApiLib
             }
 
             return new YouTubeChannelTabResult(null, errorCode);
+        }
+
+        internal static YouTubeApiV1SearchResults SearchYouTube(
+            string searchQuery, string continuationToken,
+            YouTubeApiV1SearchResultFilter searchResultFilter)
+        {
+            string url = GetSearchRequestUrl();
+            JObject body = GenerateSearchQueryRequestBody(
+                searchQuery, continuationToken, searchResultFilter);
+            int errorCode = HttpsPost(url, body.ToString(), out string response);
+            if (errorCode == 200)
+            {
+                JObject j = JObject.Parse(response);
+                if (j != null)
+                {
+                    bool isContinationToken = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);
+                    return new YouTubeApiV1SearchResults(j, searchResultFilter, isContinationToken, errorCode);
+                }
+            }
+            return new YouTubeApiV1SearchResults(null, searchResultFilter, false, errorCode);
         }
     }
 }
