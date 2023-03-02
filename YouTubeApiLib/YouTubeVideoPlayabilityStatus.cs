@@ -6,45 +6,69 @@ namespace YouTubeApiLib
     {
         public string Status { get; private set; }
         public string Reason { get; private set; }
+        public string ThumbnailUrl { get; private set; }
         public bool IsPlayable { get; private set; }
+        public bool IsPrivate => GetIsPrivate();
+        public bool IsAdult => GetIsAdult();
         public int ErrorCode { get; private set; }
         public JObject RawInfo { get; private set; }
 
-        public YouTubeVideoPlayabilityStatus(string status, string reason, int errorCode, JObject rawInfo)
+        public YouTubeVideoPlayabilityStatus(string status, string reason, string thumbnailUrl,
+            int errorCode, JObject rawInfo)
         {
             Status = status;
             Reason = reason;
-            IsPlayable = status == "OK";
+            ThumbnailUrl = thumbnailUrl;
             ErrorCode = errorCode;
             RawInfo = rawInfo;
+            IsPlayable = status == "OK";
         }
 
         public static YouTubeVideoPlayabilityStatus Parse(JObject jPlayabilityStatus)
         {
             string status = jPlayabilityStatus.Value<string>("status");
-            int errorCode = status == "OK" ? 200 : 403;
-            string reason = errorCode != 200 ? GetReason(jPlayabilityStatus) : null;
-            return new YouTubeVideoPlayabilityStatus(status, reason, errorCode, jPlayabilityStatus);
-        }
-
-        private static string GetReason(JObject jPlayabilityStatus)
-        {
-            JToken jt = jPlayabilityStatus.Value<JToken>("reason");
-            if (jt != null)
+            string reason = jPlayabilityStatus.Value<string>("reason");
+            string thumbnailUrl = null;
+            JObject jErrorScreen = jPlayabilityStatus.Value<JObject>("errorScreen");
+            if (jErrorScreen != null)
             {
-                return jt.Value<string>();
-            }
-            jt = jPlayabilityStatus.Value<JToken>("errorScreen");
-            if (jt != null)
-            {
-                jt = jt.Value<JObject>().Value<JToken>("playerErrorMessageRenderer");
-                if (jt != null)
+                JObject jPlayerErrorMessageRenderer = jErrorScreen.Value<JObject>("playerErrorMessageRenderer");
+                if (string.IsNullOrEmpty(reason) || string.IsNullOrWhiteSpace(reason))
                 {
-                    JObject jReason = jt.Value<JObject>().Value<JObject>("reason");
-                    return jReason != null ? jReason.Value<string>("simpleText") : string.Empty;
+                    JObject jReason = jPlayerErrorMessageRenderer.Value<JObject>("reason");
+                    if (jReason != null)
+                    {
+                        reason = jReason.Value<string>("simpleText");
+                        if (string.IsNullOrEmpty(reason) || string.IsNullOrWhiteSpace(reason))
+                        {
+                            reason = "<UNKNOWN>";
+                        }
+                    }
+                }
+                JObject jThumbnail = jPlayerErrorMessageRenderer.Value<JObject>("thumbnail");
+                if (jThumbnail != null)
+                {
+                    JArray jaThumbnails = jThumbnail.Value<JArray>("thumbnails");
+                    if (jaThumbnails != null && jaThumbnails.Count > 0)
+                    {
+                        thumbnailUrl = $"https:{(jaThumbnails[0] as JObject).Value<string>("url")}";
+                    }
                 }
             }
-            return string.Empty;
+            int errorCode = status == "OK" ? 200 : 403;
+            return new YouTubeVideoPlayabilityStatus(status, reason, thumbnailUrl, errorCode, jPlayabilityStatus);
+        }
+
+        private bool GetIsPrivate()
+        {
+            return !string.IsNullOrEmpty(Reason) && !string.IsNullOrWhiteSpace(Reason) &&
+                Reason.ToLower().Contains("private");
+        }
+
+        private bool GetIsAdult()
+        {
+            return !string.IsNullOrEmpty(Reason) && !string.IsNullOrWhiteSpace(Reason) &&
+                Reason.ToLower().Contains("age");
         }
     }
 }

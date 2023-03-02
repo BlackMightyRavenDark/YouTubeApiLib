@@ -15,7 +15,8 @@ namespace YouTubeApiLib
             {
                 return MakeYouTubeVideo(rawVideoInfoResult.RawVideoInfo);
             }
-            return YouTubeVideo.CreateEmpty(new YouTubeVideoPlayabilityStatus(null, null, rawVideoInfoResult.ErrorCode, null));
+            return YouTubeVideo.CreateEmpty(new YouTubeVideoPlayabilityStatus(
+                null, null, null, rawVideoInfoResult.ErrorCode, null));
         }
 
         public YouTubeVideo GetVideo(YouTubeVideoWebPage videoWebPage)
