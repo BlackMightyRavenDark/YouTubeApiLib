@@ -561,50 +561,35 @@ namespace YouTubeApiLib
         {
             responseString = "Client error";
             int res = 400;
-            HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
-            httpWebRequest.ContentLength = body.Length;
-            httpWebRequest.Host = "www.youtube.com";
-            httpWebRequest.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3591.2 Safari/537.36";
-            httpWebRequest.Method = "POST";
-            StreamWriter streamWriter = new StreamWriter(httpWebRequest.GetRequestStream());
             try
             {
-                streamWriter.Write(body);
-                streamWriter.Dispose();
-            }
-            catch
-            {
-                if (streamWriter != null)
+                const string userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3591.2 Safari/537.36";
+                HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
+                httpWebRequest.ContentLength = body.Length;
+                httpWebRequest.Host = "www.youtube.com";
+                httpWebRequest.UserAgent = userAgent;
+                httpWebRequest.Method = "POST";
+                using (StreamWriter streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
                 {
+                    streamWriter.Write(body);
                     streamWriter.Dispose();
                 }
-                return res;
-            }
-            try
-            {
                 HttpWebResponse httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-                StreamReader streamReader = new StreamReader(httpResponse.GetResponseStream());
-                try
+                using (StreamReader streamReader = new StreamReader(httpResponse.GetResponseStream()))
                 {
                     responseString = streamReader.ReadToEnd();
                     streamReader.Dispose();
                     res = (int)httpResponse.StatusCode;
                 }
-                catch
-                {
-                    if (streamReader != null)
-                    {
-                        streamReader.Dispose();
-                    }
-                    return 400;
-                }
             }
             catch (WebException ex)
             {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+                responseString = ex.Message;
+                res = ex.HResult;
                 if (ex.Status == WebExceptionStatus.ProtocolError)
                 {
                     HttpWebResponse httpWebResponse = (HttpWebResponse)ex.Response;
-                    responseString = ex.Message;
                     res = (int)httpWebResponse.StatusCode;
                 }
             }
