@@ -31,8 +31,7 @@ namespace YouTubeApiLib.ConsoleTest
                 YouTubeVideo video = api.GetVideo(videoId);
                 if (video != null)
                 {
-                    bool infoAvailable = video.Status == null || (video.Status != null && !video.Status.IsPrivate);
-                    if (infoAvailable)
+                    if (video.IsInfoAvailable)
                     {
                         if (!YouTubeApi.getMediaTracksInfoImmediately)
                         {
