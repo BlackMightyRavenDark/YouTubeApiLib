@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace YouTubeApiLib
 {
@@ -36,7 +37,7 @@ namespace YouTubeApiLib
         public RawVideoInfo RawInfo { get; private set; }
         public SimplifiedVideoInfo SimplifiedInfo { get; private set; }
         public YouTubeVideoPlayabilityStatus Status { get; private set; }
-        public bool IsInfoAvailable => Status == null || (Status != null && !Status.IsPrivate);
+        public bool IsInfoAvailable => GetIsInfoAvailable();
 
         public YouTubeVideo(
             string title,
@@ -157,6 +158,12 @@ namespace YouTubeApiLib
             Utils.VideoInfoGettingMethod method =
                 RawInfo != null ? RawInfo.DataGettingMethod : Utils.VideoInfoGettingMethod.HiddenApiEncryptedUrls;
             return UpdateMediaFormats(method);
+        }
+
+        private bool GetIsInfoAvailable()
+        {
+            bool status = Status == null || (Status != null && !Status.IsPrivate);
+            return status || RawInfo?.RawData?.Value<JObject>("videoDetails") != null;
         }
     }
 }
