@@ -7,7 +7,10 @@ namespace YouTubeApiLib
     {
         public JObject RawData { get; private set; }
         public VideoInfoGettingMethod DataGettingMethod { get; private set; }
-        public StreamingData StreamingData => GetStreamingData();
+        public YouTubeVideoPlayabilityStatus PlayabilityStatus => ExtractPlayabilityStatus();
+        public StreamingData StreamingData => ExtractStreamingData();
+        public JObject VideoDetails => ExtractVideoDetails();
+        public JObject Microformat => ExtractMicroformat();
 
         public RawVideoInfo(JObject rawData, VideoInfoGettingMethod dataGettingMethod)
         {
@@ -15,14 +18,30 @@ namespace YouTubeApiLib
             DataGettingMethod = dataGettingMethod;
         }
 
-        private StreamingData GetStreamingData()
+        private YouTubeVideoPlayabilityStatus ExtractPlayabilityStatus()
+        {
+            JObject jPlayabilityStatus = RawData?.Value<JObject>("playabilityStatus");
+            return jPlayabilityStatus != null ? YouTubeVideoPlayabilityStatus.Parse(jPlayabilityStatus) : null;
+        }
+
+        private StreamingData ExtractStreamingData()
         {
             JObject jStreamingData = RawData?.Value<JObject>("streamingData");
             if (jStreamingData != null)
             {
-                return new StreamingData(RawData, DataGettingMethod);
+                return new StreamingData(jStreamingData, DataGettingMethod);
             }
             return null;
+        }
+
+        private JObject ExtractVideoDetails()
+        {
+            return RawData?.Value<JObject>("videoDetails");
+        }
+
+        private JObject ExtractMicroformat()
+        {
+            return RawData?.Value<JObject>("microformat");
         }
 
         public override string ToString()

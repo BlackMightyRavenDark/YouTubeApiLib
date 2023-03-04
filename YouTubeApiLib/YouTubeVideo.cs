@@ -163,7 +163,7 @@ namespace YouTubeApiLib
         private bool GetIsInfoAvailable()
         {
             bool status = Status == null || (Status != null && !Status.IsPrivate);
-            return status || RawInfo?.RawData?.Value<JObject>("videoDetails") != null;
+            return status || RawInfo?.VideoDetails != null;
         }
     }
 }

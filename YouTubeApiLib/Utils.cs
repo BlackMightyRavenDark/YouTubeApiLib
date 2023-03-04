@@ -90,13 +90,13 @@ namespace YouTubeApiLib
 
         public static SimplifiedVideoInfoResult ParseRawVideoInfo(RawVideoInfo rawVideoInfo)
         {
-            JObject jVideoDetails = rawVideoInfo.RawData.Value<JObject>("videoDetails");
+            JObject jVideoDetails = rawVideoInfo.VideoDetails;
             if (jVideoDetails == null)
             {
                 return new SimplifiedVideoInfoResult(null, 404);
             }
 
-            JObject jMicroformat = rawVideoInfo.RawData.Value<JObject>("microformat");
+            JObject jMicroformat = rawVideoInfo.Microformat;
             if (jMicroformat == null)
             {
                 return new SimplifiedVideoInfoResult(null, 404);
@@ -157,7 +157,7 @@ namespace YouTubeApiLib
                 streamingData = GetStreamingData(videoId, method);
             }
             simplifiedVideoInfo["streamingData"] =
-                streamingData != null ? streamingData.RawData : GetStreamingData(rawVideoInfo)?.RawData;
+                streamingData != null ? streamingData.RawData : rawVideoInfo.StreamingData?.RawData;
 
             return new SimplifiedVideoInfoResult(new SimplifiedVideoInfo(simplifiedVideoInfo, streamingData), 200);
         }
@@ -165,10 +165,9 @@ namespace YouTubeApiLib
         public static YouTubeVideo MakeYouTubeVideo(RawVideoInfo rawVideoInfo)
         {
             SimplifiedVideoInfoResult simplifiedVideoInfoResult = ParseRawVideoInfo(rawVideoInfo);
-            YouTubeVideoPlayabilityStatus videoStatus = GetPlayabilityStatus(rawVideoInfo);
             if (simplifiedVideoInfoResult.ErrorCode != 200)
             {
-                return YouTubeVideo.CreateEmpty(videoStatus);
+                return YouTubeVideo.CreateEmpty(rawVideoInfo.PlayabilityStatus);
             }
 
             return MakeYouTubeVideo(rawVideoInfo, simplifiedVideoInfoResult.SimplifiedVideoInfo);
@@ -219,8 +218,7 @@ namespace YouTubeApiLib
                     ParseMediaTracks(rawVideoInfo);
             }
 
-            JObject jPlayabilityStatus = rawVideoInfo.RawData.Value<JObject>("playabilityStatus");
-            YouTubeVideoPlayabilityStatus videoStatus = YouTubeVideoPlayabilityStatus.Parse(jPlayabilityStatus);
+            YouTubeVideoPlayabilityStatus videoStatus = rawVideoInfo.PlayabilityStatus;
 
             YouTubeVideo youTubeVideo = new YouTubeVideo(
                 videoTitle, videoId, length, dateUploaded, datePublished, ownerChannelTitle,
@@ -235,21 +233,9 @@ namespace YouTubeApiLib
             RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId, method);
             if (rawVideoInfoResult.ErrorCode == 200)
             {
-                return GetStreamingData(rawVideoInfoResult.RawVideoInfo);
+                return rawVideoInfoResult.RawVideoInfo.StreamingData;
             }
             return null;
-        }
-
-        public static StreamingData GetStreamingData(RawVideoInfo rawVideoInfo)
-        {
-            JObject jStreamingData = rawVideoInfo.RawData.Value<JObject>("streamingData");
-            return jStreamingData != null ? new StreamingData(jStreamingData, rawVideoInfo.DataGettingMethod) : null;
-        }
-
-        public static YouTubeVideoPlayabilityStatus GetPlayabilityStatus(RawVideoInfo rawVideoInfo)
-        {
-            JObject jPlayabilityStatus = rawVideoInfo.RawData.Value<JObject>("playabilityStatus");
-            return jPlayabilityStatus != null ? YouTubeVideoPlayabilityStatus.Parse(jPlayabilityStatus) : null;
         }
 
         internal static string ExtractVideoIDsFromGridRendererItem(JObject gridVideoRendererItem)
@@ -730,8 +716,7 @@ namespace YouTubeApiLib
 
         public static int DownloadString(string url, out string response)
         {
-            FileDownloader d = new FileDownloader();
-            d.Url = url;
+            FileDownloader d = new FileDownloader() { Url = url };
             return d.DownloadString(out response);
         }
 
