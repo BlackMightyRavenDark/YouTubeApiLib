@@ -40,8 +40,11 @@ namespace YouTubeApiLib.ConsoleTest
                         Console.WriteLine($"Title: {video.Title}");
                         Console.WriteLine($"ID: {video.Id}");
                         Console.WriteLine($"URL: {video.Url}");
-                        Console.WriteLine($"Uploaded: {video.DateUploaded:yyyy.MM.dd}");
-                        Console.WriteLine($"Published: {video.DatePublished:yyyy.MM.dd}");
+                        if (video.SimplifiedInfo.IsMicroformatInfoAvailable)
+                        {
+                            Console.WriteLine($"Uploaded: {video.DateUploaded:yyyy.MM.dd}");
+                            Console.WriteLine($"Published: {video.DatePublished:yyyy.MM.dd}");
+                        }
                         if (video.Length > TimeSpan.Zero)
                         {
                             Console.WriteLine($"Length: {video.Length}");

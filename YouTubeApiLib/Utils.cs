@@ -91,60 +91,50 @@ namespace YouTubeApiLib
         public static SimplifiedVideoInfoResult ParseRawVideoInfo(RawVideoInfo rawVideoInfo)
         {
             JObject jVideoDetails = rawVideoInfo.VideoDetails;
-            if (jVideoDetails == null)
-            {
-                return new SimplifiedVideoInfoResult(null, 404);
-            }
-
             JObject jMicroformat = rawVideoInfo.Microformat;
-            if (jMicroformat == null)
+            JObject jMicroformatRenderer = jMicroformat?.Value<JObject>("playerMicroformatRenderer");
+
+            JObject jSimplifiedVideoInfo = new JObject();
+            string videoId = null;
+            bool isFamilySafe = true;
+            if (jVideoDetails != null)
             {
-                return new SimplifiedVideoInfoResult(null, 404);
+                jSimplifiedVideoInfo["title"] = jVideoDetails.Value<string>("title");
+                videoId = jVideoDetails.Value<string>("videoId");
+                jSimplifiedVideoInfo["id"] = videoId;
+                jSimplifiedVideoInfo["url"] = GetVideoUrl(videoId);
+                if (int.TryParse(jVideoDetails.Value<string>("lengthSeconds"), out int lengthSeconds))
+                {
+                    jSimplifiedVideoInfo["lengthSeconds"] = lengthSeconds;
+                }
+                jSimplifiedVideoInfo["ownerChannelTitle"] = jVideoDetails.Value<string>("author");
+                jSimplifiedVideoInfo["ownerChannelId"] = jVideoDetails.Value<string>("channelId");
+                jSimplifiedVideoInfo["viewCount"] = int.Parse(jVideoDetails.Value<string>("viewCount"));
+                jSimplifiedVideoInfo["isPrivate"] = jVideoDetails.Value<bool>("isPrivate");
+                jSimplifiedVideoInfo["isLiveContent"] = jVideoDetails.Value<bool>("isLiveContent");
+                jSimplifiedVideoInfo["shortDescription"] = jVideoDetails.Value<string>("shortDescription");
+            }
+            if (jMicroformatRenderer != null)
+            {
+                JObject jDescription = jMicroformatRenderer.Value<JObject>("description");
+                jSimplifiedVideoInfo["description"] = jDescription?.Value<string>("simpleText");
+                isFamilySafe = jMicroformatRenderer.Value<bool>("isFamilySafe");
+                jSimplifiedVideoInfo["isFamilySafe"] = isFamilySafe;
+                jSimplifiedVideoInfo["isUnlisted"] = jMicroformatRenderer.Value<bool>("isUnlisted");
+                jSimplifiedVideoInfo["category"] = jMicroformatRenderer.Value<string>("category");
+                jSimplifiedVideoInfo["datePublished"] = jMicroformatRenderer.Value<string>("publishDate");
+                jSimplifiedVideoInfo["dateUploaded"] = jMicroformatRenderer.Value<string>("uploadDate");
             }
 
-            JObject jMicroformatRenderer = jMicroformat.Value<JObject>("playerMicroformatRenderer");
-            if (jMicroformatRenderer == null)
+            if (jMicroformat != null)
             {
-                return new SimplifiedVideoInfoResult(null, 404);
+                List<YouTubeVideoThumbnail> videoThumbnails = GetThumbnailUrls(jMicroformat, videoId);
+                jSimplifiedVideoInfo["thumbnails"] = ThumbnailsToJson(videoThumbnails);
             }
-
-            string videoId = jVideoDetails.Value<string>("videoId");
-            string videoTitle = jVideoDetails.Value<string>("title");
-            int lengthSeconds = int.Parse(jVideoDetails.Value<string>("lengthSeconds"));
-            string ownerChannelTitle = jVideoDetails.Value<string>("author");
-            string ownerChannelId = jVideoDetails.Value<string>("channelId");
-            int viewCount = int.Parse(jVideoDetails.Value<string>("viewCount"));
-            bool isPrivate = jVideoDetails.Value<bool>("isPrivate");
-            bool isLiveContent = jVideoDetails.Value<bool>("isLiveContent");
-            JObject jDescription = jMicroformatRenderer.Value<JObject>("description");
-            string description = jDescription?.Value<string>("simpleText");
-            string shortDescription = jVideoDetails.Value<string>("shortDescription");
-            bool isFamilySafe = jMicroformatRenderer.Value<bool>("isFamilySafe");
-            bool isUnlisted = jMicroformatRenderer.Value<bool>("isUnlisted");
-            string category = jMicroformatRenderer.Value<string>("category");
-            string datePublished = jMicroformatRenderer.Value<string>("publishDate");
-            string dateUploaded = jMicroformatRenderer.Value<string>("uploadDate");
-
-            JObject simplifiedVideoInfo = new JObject();
-            simplifiedVideoInfo["title"] = videoTitle;
-            simplifiedVideoInfo["id"] = videoId;
-            simplifiedVideoInfo["url"] = GetVideoUrl(videoId);
-            simplifiedVideoInfo["lengthSeconds"] = lengthSeconds;
-            simplifiedVideoInfo["ownerChannelTitle"] = ownerChannelTitle;
-            simplifiedVideoInfo["ownerChannelId"] = ownerChannelId;
-            simplifiedVideoInfo["viewCount"] = viewCount;
-            simplifiedVideoInfo["category"] = category;
-            simplifiedVideoInfo["isPrivate"] = isPrivate;
-            simplifiedVideoInfo["isUnlisted"] = isUnlisted;
-            simplifiedVideoInfo["isFamilySafe"] = isFamilySafe;
-            simplifiedVideoInfo["isLiveContent"] = isLiveContent;
-            simplifiedVideoInfo["datePublished"] = datePublished;
-            simplifiedVideoInfo["dateUploaded"] = dateUploaded;
-            simplifiedVideoInfo["description"] = description;
-            simplifiedVideoInfo["shortDescription"] = shortDescription;
-
-            List<YouTubeVideoThumbnail> videoThumbnails = GetThumbnailUrls(jMicroformat, videoId);
-            simplifiedVideoInfo["thumbnails"] = ThumbnailsToJson(videoThumbnails);
+            else
+            {
+                jSimplifiedVideoInfo["thumbnails"] = null;
+            }
 
             StreamingData streamingData = null;
             if (YouTubeApi.getMediaTracksInfoImmediately && isFamilySafe &&
@@ -156,10 +146,12 @@ namespace YouTubeApiLib
                     VideoInfoGettingMethod.HiddenApiEncryptedUrls;
                 streamingData = GetStreamingData(videoId, method);
             }
-            simplifiedVideoInfo["streamingData"] =
+            jSimplifiedVideoInfo["streamingData"] =
                 streamingData != null ? streamingData.RawData : rawVideoInfo.StreamingData?.RawData;
 
-            return new SimplifiedVideoInfoResult(new SimplifiedVideoInfo(simplifiedVideoInfo, streamingData), 200);
+            SimplifiedVideoInfo simplifiedVideoInfo = new SimplifiedVideoInfo(
+                jSimplifiedVideoInfo, jVideoDetails != null, jMicroformatRenderer != null, streamingData);
+            return new SimplifiedVideoInfoResult(simplifiedVideoInfo, 200);
         }
 
         public static YouTubeVideo MakeYouTubeVideo(RawVideoInfo rawVideoInfo)
@@ -175,41 +167,66 @@ namespace YouTubeApiLib
 
         public static YouTubeVideo MakeYouTubeVideo(RawVideoInfo rawVideoInfo, SimplifiedVideoInfo simplifiedVideoInfo)
         {
-            string videoTitle = simplifiedVideoInfo.Info.Value<string>("title");
-            string videoId = simplifiedVideoInfo.Info.Value<string>("id");
-            int lengthSeconds = int.Parse(simplifiedVideoInfo.Info.Value<string>("lengthSeconds"));
-            TimeSpan length = TimeSpan.FromSeconds(lengthSeconds);
-            string ownerChannelTitle = simplifiedVideoInfo.Info.Value<string>("ownerChannelTitle");
-            string ownerChannelId = simplifiedVideoInfo.Info.Value<string>("ownerChannelId");
-            int viewCount = int.Parse(simplifiedVideoInfo.Info.Value<string>("viewCount"));
-            bool isPrivate = simplifiedVideoInfo.Info.Value<bool>("isPrivate");
-            bool isLiveContent = simplifiedVideoInfo.Info.Value<bool>("isLiveContent");
-            string description = simplifiedVideoInfo.Info.Value<string>("description");
-            if (string.IsNullOrEmpty(description))
-            {
-                description = simplifiedVideoInfo.Info.Value<string>("shortDescription");
-            }
-            bool isFamilySafe = simplifiedVideoInfo.Info.Value<bool>("isFamilySafe");
-            bool isUnlisted = simplifiedVideoInfo.Info.Value<bool>("isUnlisted");
-            string category = simplifiedVideoInfo.Info.Value<string>("category");
-            string published = simplifiedVideoInfo.Info.Value<string>("datePublished");
-            string uploaded = simplifiedVideoInfo.Info.Value<string>("dateUploaded");
-            StringToDateTime(published, out DateTime datePublished);
-            StringToDateTime(uploaded, out DateTime dateUploaded);
+            string videoTitle = null;
+            string videoId = null;
+            TimeSpan videoLength = TimeSpan.Zero;
+            string ownerChannelTitle = null;
+            string ownerChannelId = null;
+            int viewCount = 0;
+            bool isPrivate = false;
+            bool isLiveContent = false;
+            string shortDescription = null;
+
+            string description = null;
+            bool isFamilySafe = true;
+            bool isUnlisted = false;
+            string category = null;
+            DateTime datePublished = DateTime.MaxValue;
+            DateTime dateUploaded = DateTime.MaxValue;
 
             List<YouTubeVideoThumbnail> videoThumbnails = null;
-            JArray jaThumbnails = simplifiedVideoInfo.Info.Value<JArray>("thumbnails");
-            if (jaThumbnails != null && jaThumbnails.Count > 0)
+
+            if (simplifiedVideoInfo.IsVideoInfoAvailable)
             {
-                videoThumbnails = new List<YouTubeVideoThumbnail>();
-                foreach (JObject jThumbnail in jaThumbnails)
+                videoTitle = simplifiedVideoInfo.Info.Value<string>("title");
+                videoId = simplifiedVideoInfo.Info.Value<string>("id");
+                if (int.TryParse(simplifiedVideoInfo.Info.Value<string>("lengthSeconds"), out int lengthSeconds))
                 {
-                    string id = jThumbnail.Value<string>("id");
-                    string url = jThumbnail.Value<string>("url");
-                    videoThumbnails.Add(new YouTubeVideoThumbnail(id, url));
+                    videoLength = TimeSpan.FromSeconds(lengthSeconds);
+                }
+                ownerChannelTitle = simplifiedVideoInfo.Info.Value<string>("ownerChannelTitle");
+                ownerChannelId = simplifiedVideoInfo.Info.Value<string>("ownerChannelId");
+                if (!int.TryParse(simplifiedVideoInfo.Info.Value<string>("viewCount"), out viewCount))
+                {
+                    viewCount = 0;
+                }
+                isPrivate = simplifiedVideoInfo.Info.Value<bool>("isPrivate");
+                isLiveContent = simplifiedVideoInfo.Info.Value<bool>("isLiveContent");
+                shortDescription = simplifiedVideoInfo.Info.Value<string>("shortDescription");
+            }
+            if (simplifiedVideoInfo.IsMicroformatInfoAvailable)
+            {
+                description = simplifiedVideoInfo.Info.Value<string>("description");
+                isFamilySafe = simplifiedVideoInfo.Info.Value<bool>("isFamilySafe");
+                isUnlisted = simplifiedVideoInfo.Info.Value<bool>("isUnlisted");
+                category = simplifiedVideoInfo.Info.Value<string>("category");
+                string published = simplifiedVideoInfo.Info.Value<string>("datePublished");
+                string uploaded = simplifiedVideoInfo.Info.Value<string>("dateUploaded");
+                StringToDateTime(published, out datePublished);
+                StringToDateTime(uploaded, out dateUploaded);
+
+                JArray jaThumbnails = simplifiedVideoInfo.Info.Value<JArray>("thumbnails");
+                if (jaThumbnails != null && jaThumbnails.Count > 0)
+                {
+                    videoThumbnails = new List<YouTubeVideoThumbnail>();
+                    foreach (JObject jThumbnail in jaThumbnails)
+                    {
+                        string id = jThumbnail.Value<string>("id");
+                        string url = jThumbnail.Value<string>("url");
+                        videoThumbnails.Add(new YouTubeVideoThumbnail(id, url));
+                    }
                 }
             }
-
             LinkedList<YouTubeMediaTrack> mediaTracks = null;
             if (YouTubeApi.getMediaTracksInfoImmediately)
             {
@@ -220,9 +237,11 @@ namespace YouTubeApiLib
 
             YouTubeVideoPlayabilityStatus videoStatus = rawVideoInfo.PlayabilityStatus;
 
+            string descr = !string.IsNullOrEmpty(description) ? description : shortDescription;
+
             YouTubeVideo youTubeVideo = new YouTubeVideo(
-                videoTitle, videoId, length, dateUploaded, datePublished, ownerChannelTitle,
-                ownerChannelId, description, viewCount, category, isPrivate, isUnlisted,
+                videoTitle, videoId, videoLength, dateUploaded, datePublished, ownerChannelTitle,
+                ownerChannelId, descr, viewCount, category, isPrivate, isUnlisted,
                 isFamilySafe, isLiveContent, videoThumbnails, mediaTracks,
                 rawVideoInfo, simplifiedVideoInfo, videoStatus);
             return youTubeVideo;
