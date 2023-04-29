@@ -42,9 +42,7 @@ namespace YouTubeApiLib
 
         public RawVideoInfoResult GetRawVideoInfo(VideoId videoId)
         {
-            VideoInfoGettingMethod method = decryptMediaTrackUrlsAutomaticallyIfPossible ?
-                VideoInfoGettingMethod.HiddenApiDecryptedUrls : defaultVideoInfoGettingMethod;
-            return Utils.GetRawVideoInfo(videoId.Id, method);
+            return Utils.GetRawVideoInfo(videoId.Id, defaultVideoInfoGettingMethod);
         }
 
         public SimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId)
