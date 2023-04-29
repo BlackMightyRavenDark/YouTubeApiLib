@@ -51,13 +51,14 @@ namespace YouTubeApiLib
         public static JObject GenerateVideoInfoDecryptedRequestBody(string videoId)
         {
             const string CLIENT_NAME = "ANDROID";
-            const string CLIENT_VERSION = "16.46.37";
+            const string CLIENT_VERSION = "17.10.35";
 
             JObject jClient = new JObject();
             jClient["hl"] = "en";
             jClient["gl"] = "US";
             jClient["clientName"] = CLIENT_NAME;
             jClient["clientVersion"] = CLIENT_VERSION;
+            jClient["androidSdkVersion"] = 30;
             jClient["clientScreen"] = null;
             jClient["utcOffsetMinutes"] = 0;
 

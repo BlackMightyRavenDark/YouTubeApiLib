@@ -568,7 +568,7 @@ namespace YouTubeApiLib
             int res = 400;
             try
             {
-                const string userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3591.2 Safari/537.36";
+                const string userAgent = "com.google.android.youtube/17.10.35 (Linux; U; Android 12; GB) gzip";
                 HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
                 httpWebRequest.ContentLength = body.Length;
                 httpWebRequest.Host = "www.youtube.com";
