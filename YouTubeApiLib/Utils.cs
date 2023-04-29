@@ -126,15 +126,8 @@ namespace YouTubeApiLib
                 jSimplifiedVideoInfo["dateUploaded"] = jMicroformatRenderer.Value<string>("uploadDate");
             }
 
-            if (jMicroformat != null)
-            {
-                List<YouTubeVideoThumbnail> videoThumbnails = GetThumbnailUrls(jMicroformat, videoId);
-                jSimplifiedVideoInfo["thumbnails"] = ThumbnailsToJson(videoThumbnails);
-            }
-            else
-            {
-                jSimplifiedVideoInfo["thumbnails"] = null;
-            }
+            List<YouTubeVideoThumbnail> videoThumbnails = GetThumbnailUrls(jMicroformat, videoId);
+            jSimplifiedVideoInfo["thumbnails"] = ThumbnailsToJson(videoThumbnails);
 
             StreamingData streamingData = null;
             if (YouTubeApi.getMediaTracksInfoImmediately && isFamilySafe &&
@@ -214,19 +207,20 @@ namespace YouTubeApiLib
                 string uploaded = simplifiedVideoInfo.Info.Value<string>("dateUploaded");
                 StringToDateTime(published, out datePublished);
                 StringToDateTime(uploaded, out dateUploaded);
+            }
 
-                JArray jaThumbnails = simplifiedVideoInfo.Info.Value<JArray>("thumbnails");
-                if (jaThumbnails != null && jaThumbnails.Count > 0)
+            JArray jaThumbnails = simplifiedVideoInfo.Info.Value<JArray>("thumbnails");
+            if (jaThumbnails != null && jaThumbnails.Count > 0)
+            {
+                videoThumbnails = new List<YouTubeVideoThumbnail>();
+                foreach (JObject jThumbnail in jaThumbnails)
                 {
-                    videoThumbnails = new List<YouTubeVideoThumbnail>();
-                    foreach (JObject jThumbnail in jaThumbnails)
-                    {
-                        string id = jThumbnail.Value<string>("id");
-                        string url = jThumbnail.Value<string>("url");
-                        videoThumbnails.Add(new YouTubeVideoThumbnail(id, url));
-                    }
+                    string id = jThumbnail.Value<string>("id");
+                    string url = jThumbnail.Value<string>("url");
+                    videoThumbnails.Add(new YouTubeVideoThumbnail(id, url));
                 }
             }
+
             LinkedList<YouTubeMediaTrack> mediaTracks = null;
             if (YouTubeApi.getMediaTracksInfoImmediately)
             {
@@ -449,6 +443,11 @@ namespace YouTubeApiLib
 
         internal static List<YouTubeVideoThumbnail> GetThumbnailUrls(JObject jMicroformat, string videoId)
         {
+            if (string.IsNullOrEmpty(videoId) || string.IsNullOrWhiteSpace(videoId))
+            {
+                return null;
+            }
+
             List<YouTubeVideoThumbnail> possibleThumbnails = new List<YouTubeVideoThumbnail>()
             {
                 new YouTubeVideoThumbnail("maxresdefault", $"https://i.ytimg.com/vi/{videoId}/maxresdefault.jpg"),
@@ -457,21 +456,25 @@ namespace YouTubeApiLib
                 new YouTubeVideoThumbnail("sddefault", $"https://i.ytimg.com/vi/{videoId}/sddefault.jpg"),
                 new YouTubeVideoThumbnail("default", $"https://i.ytimg.com/vi/{videoId}/default.jpg")
             };
-            List<YouTubeVideoThumbnail> thumbnails = ExtractThumbnailsFromMicroformat(jMicroformat);
-            foreach (YouTubeVideoThumbnail thumbnail in thumbnails)
+
+            if (jMicroformat != null)
             {
-                bool found = false;
-                foreach (YouTubeVideoThumbnail thumbnail2 in possibleThumbnails)
+                List<YouTubeVideoThumbnail> thumbnails = ExtractThumbnailsFromMicroformat(jMicroformat);
+                foreach (YouTubeVideoThumbnail thumbnail in thumbnails)
                 {
-                    if (thumbnail.Url == thumbnail2.Url)
+                    bool found = false;
+                    foreach (YouTubeVideoThumbnail thumbnail2 in possibleThumbnails)
                     {
-                        found = true;
-                        break;
+                        if (thumbnail.Url == thumbnail2.Url)
+                        {
+                            found = true;
+                            break;
+                        }
                     }
-                }
-                if (!found)
-                {
-                    possibleThumbnails.Add(thumbnail);
+                    if (!found)
+                    {
+                        possibleThumbnails.Add(thumbnail);
+                    }
                 }
             }
 
@@ -544,6 +547,11 @@ namespace YouTubeApiLib
 
         private static JArray ThumbnailsToJson(IEnumerable<YouTubeVideoThumbnail> videoThumbnails)
         {
+            if (videoThumbnails == null)
+            {
+                return null;
+            }
+
             JArray jsonArr = new JArray();
             foreach (YouTubeVideoThumbnail thumbnail in videoThumbnails)
             {
