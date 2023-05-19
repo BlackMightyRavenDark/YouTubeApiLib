@@ -104,10 +104,21 @@ namespace YouTubeApiLib
             }
             else
             {
-                IsDashed = false;
-                DashManifestUrl = null;
-                IsLiveNow = false;
-                HlsManifestUrl = null;
+                StreamingData streamingData = rawInfo?.StreamingData;
+                if (streamingData != null)
+                {
+                    DashManifestUrl = streamingData.RawData.Value<string>("dashManifestUrl");
+                    IsDashed = !string.IsNullOrEmpty(DashManifestUrl) && !string.IsNullOrWhiteSpace(DashManifestUrl);
+                    HlsManifestUrl = streamingData.RawData.Value<string>("hlsManifestUrl");
+                    IsLiveNow = !string.IsNullOrEmpty(HlsManifestUrl) && !string.IsNullOrWhiteSpace(HlsManifestUrl);
+                }
+                else
+                {
+                    DashManifestUrl = null;
+                    IsDashed = false;
+                    HlsManifestUrl = null;
+                    IsLiveNow = false;
+                }
             }
         }
 
