@@ -7,14 +7,15 @@ namespace YouTubeApiLib.ConsoleTest
     {
         static void Main(string[] args)
         {
-            //Magical Underwater World 4K | 2160p | 7304448660 bytes
-            string videoUrl = "https://www.youtube.com/watch?v=7szcXCT-Oqw";
+            //11 HOURS of 4K Underwater Wonders + Relaxing Music - Coral Reefs & Colorful Sea Life in UHD
+            //| 2160p | 30 fps | 78583477005 bytes
+            string videoUrl = "https://www.youtube.com/watch?v=843Rpqza_6o";
 
-            //Trick or treat, kingdom hearts, and beat saber. | 18+ | 1080p | 197233776 bytes
+            //Magical Underwater World 4K | 2160p | 24 fps | 7304448660 bytes
+            //string videoUrl = "https://www.youtube.com/watch?v=7szcXCT-Oqw";
+
+            //Trick or treat, kingdom hearts, and beat saber. | 18+ | 1080p | 30 fps | 197233776 bytes
             //string videoUrl = "https://www.youtube.com/watch?v=pQNRrnk63MQ";
-
-            //коопим с Колясиком : Fighting Force | 1080p | DASH
-            //string videoUrl = "https://www.youtube.com/watch?v=Z9c9SbfGvec";
 
             //NASA Live: Official Stream of NASA TV | HLS
             //string videoUrl = "https://www.youtube.com/watch?v=21X5lGlDOfg";
