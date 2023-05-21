@@ -761,13 +761,13 @@ namespace YouTubeApiLib
         }
 
         public static Dictionary<string, string> SplitStringToKeyValues(
-            string inputString, char keySeparaor, char valueSeparator)
+            string inputString, char keySeparator, char valueSeparator)
         {
             if (string.IsNullOrEmpty(inputString) || string.IsNullOrWhiteSpace(inputString))
             {
                 return null;
             }
-            string[] keyValues = inputString.Split(keySeparaor);
+            string[] keyValues = inputString.Split(keySeparator);
             Dictionary<string, string> dict = new Dictionary<string, string>();
             for (int i = 0; i < keyValues.Length; i++)
             {
