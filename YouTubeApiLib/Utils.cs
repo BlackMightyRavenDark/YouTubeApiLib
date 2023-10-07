@@ -124,6 +124,13 @@ namespace YouTubeApiLib
                 jSimplifiedVideoInfo["category"] = jMicroformatRenderer.Value<string>("category");
                 jSimplifiedVideoInfo["datePublished"] = jMicroformatRenderer.Value<string>("publishDate");
                 jSimplifiedVideoInfo["dateUploaded"] = jMicroformatRenderer.Value<string>("uploadDate");
+
+                JObject jLiveBroadcastDetails = jMicroformatRenderer.Value<JObject>("liveBroadcastDetails");
+                if (jLiveBroadcastDetails != null)
+                {
+                    jSimplifiedVideoInfo["startTimestamp"] = jLiveBroadcastDetails.Value<string>("startTimestamp");
+                    jSimplifiedVideoInfo["endTimestamp"] = jLiveBroadcastDetails.Value<string>("endTimestamp");
+                }
             }
 
             List<YouTubeVideoThumbnail> videoThumbnails = GetThumbnailUrls(jMicroformat, videoId);
@@ -203,10 +210,7 @@ namespace YouTubeApiLib
                 isFamilySafe = simplifiedVideoInfo.Info.Value<bool>("isFamilySafe");
                 isUnlisted = simplifiedVideoInfo.Info.Value<bool>("isUnlisted");
                 category = simplifiedVideoInfo.Info.Value<string>("category");
-                string published = simplifiedVideoInfo.Info.Value<string>("datePublished");
-                string uploaded = simplifiedVideoInfo.Info.Value<string>("dateUploaded");
-                StringToDateTime(published, out datePublished);
-                StringToDateTime(uploaded, out dateUploaded);
+                ExtractDatesFromMicroformat(simplifiedVideoInfo.Info, out dateUploaded, out datePublished);
             }
 
             JArray jaThumbnails = simplifiedVideoInfo.Info.Value<JArray>("thumbnails");
@@ -780,15 +784,45 @@ namespace YouTubeApiLib
             return dict;
         }
 
-        public static bool StringToDateTime(string inputString, out DateTime resDateTime, string format = "yyyy-MM-dd")
+        public static bool ParseMicroformatDate(string dateString, out DateTime dateTime)
         {
-            bool res = DateTime.TryParseExact(inputString, format,
-                CultureInfo.InvariantCulture, DateTimeStyles.None, out resDateTime);
-            if (!res)
+            if (DateTime.TryParseExact(dateString, "MM/dd/yyyy HH:mm:ss",
+                null, DateTimeStyles.None, out dateTime))
             {
-                resDateTime = DateTime.MaxValue;
+                return true;
             }
-            return res;
+
+            if (DateTime.TryParseExact(dateString, "yyyy-MM-dd",
+                null, DateTimeStyles.None, out dateTime))
+            {
+                return true;
+            }
+
+            dateTime = DateTime.MaxValue;
+            return false;
+        }
+
+        public static void ExtractDatesFromMicroformat(
+            JObject jSimplifiedVideoInfo, out DateTime uploadDate, out DateTime publishDate)
+        {
+            string published = jSimplifiedVideoInfo.Value<string>("datePublished");
+            if (!DateTime.TryParseExact(published, "MM/dd/yyyy HH:mm:ss",
+                null, DateTimeStyles.None, out publishDate))
+            {
+                string startTimestamp = jSimplifiedVideoInfo.Value<string>("startTimestamp");
+                if (!DateTime.TryParseExact(startTimestamp, "MM/dd/yyyy HH:mm:ss",
+                    null, DateTimeStyles.None, out publishDate))
+                {
+                    if (!DateTime.TryParseExact(published, "yyyy-MM-dd",
+                        null, DateTimeStyles.None, out publishDate))
+                    {
+                        publishDate = DateTime.MaxValue;
+                    }
+                }
+            }
+
+            string uploaded = jSimplifiedVideoInfo.Value<string>("dateUploaded");
+            ParseMicroformatDate(uploaded, out uploadDate);
         }
     }
 }
