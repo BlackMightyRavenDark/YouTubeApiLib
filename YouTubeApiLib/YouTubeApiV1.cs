@@ -44,32 +44,31 @@ namespace YouTubeApiLib
         /// Ответ будет содержать уже расшифрованные ссылки для скачивания
         /// без ограничения скорости, но остальная информация будет не полной.
         /// Используйте этот запрос только для получения ссылок.
-        /// Внимание! Этот запрос не работает для видео с пометкой "18+"!
+        /// Внимание! Этот запрос не работает для видео с доступом только по ссылке (unlisted)
+        /// и видео с ограничением по возрасту (18+)!
         /// </summary>
         /// <param name="videoId">ID видео</param>
         /// <returns>Тело запроса</returns>
         public static JObject GenerateVideoInfoDecryptedRequestBody(string videoId)
         {
-            const string CLIENT_NAME = "ANDROID";
-            const string CLIENT_VERSION = "17.10.35";
+            const string CLIENT_NAME = "ANDROID_TESTSUITE";
+            const string CLIENT_VERSION = "1.9";
+            const int SDK_VERSION = 30;
 
             JObject jClient = new JObject();
-            jClient["hl"] = "en";
-            jClient["gl"] = "US";
             jClient["clientName"] = CLIENT_NAME;
             jClient["clientVersion"] = CLIENT_VERSION;
-            jClient["androidSdkVersion"] = 30;
-            jClient["clientScreen"] = null;
+            jClient["androidSdkVersion"] = SDK_VERSION;
+            jClient["hl"] = "en";
+            jClient["gl"] = "US";
             jClient["utcOffsetMinutes"] = 0;
 
             JObject jContext = new JObject();
             jContext.Add(new JProperty("client", jClient));
 
             JObject json = new JObject();
-            json.Add(new JProperty("context", jContext));
-            json["contentCheckOk"] = true;
-            json["racyCheckOk"] = true;
             json["videoId"] = videoId;
+            json.Add(new JProperty("context", jContext));
 
             return json;
         }

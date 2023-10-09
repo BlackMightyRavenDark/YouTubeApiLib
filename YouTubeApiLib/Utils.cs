@@ -96,6 +96,7 @@ namespace YouTubeApiLib
 
             JObject jSimplifiedVideoInfo = new JObject();
             string videoId = null;
+            bool isUnlisted = false;
             bool isFamilySafe = true;
             if (jVideoDetails != null)
             {
@@ -120,7 +121,8 @@ namespace YouTubeApiLib
                 jSimplifiedVideoInfo["description"] = jDescription?.Value<string>("simpleText");
                 isFamilySafe = jMicroformatRenderer.Value<bool>("isFamilySafe");
                 jSimplifiedVideoInfo["isFamilySafe"] = isFamilySafe;
-                jSimplifiedVideoInfo["isUnlisted"] = jMicroformatRenderer.Value<bool>("isUnlisted");
+                isUnlisted = jMicroformatRenderer.Value<bool>("isUnlisted");
+                jSimplifiedVideoInfo["isUnlisted"] = isUnlisted;
                 jSimplifiedVideoInfo["category"] = jMicroformatRenderer.Value<string>("category");
                 jSimplifiedVideoInfo["datePublished"] = jMicroformatRenderer.Value<string>("publishDate");
                 jSimplifiedVideoInfo["dateUploaded"] = jMicroformatRenderer.Value<string>("uploadDate");
@@ -141,7 +143,7 @@ namespace YouTubeApiLib
                 rawVideoInfo.DataGettingMethod != VideoInfoGettingMethod.HiddenApiDecryptedUrls)
             {
                 VideoInfoGettingMethod method =
-                    YouTubeApi.decryptMediaTrackUrlsAutomaticallyIfPossible ?
+                    YouTubeApi.decryptMediaTrackUrlsAutomaticallyIfPossible && !isUnlisted ?
                     VideoInfoGettingMethod.HiddenApiDecryptedUrls :
                     VideoInfoGettingMethod.HiddenApiEncryptedUrls;
                 streamingData = GetStreamingData(videoId, method);
@@ -364,33 +366,6 @@ namespace YouTubeApiLib
                     {
                         string tabTitle = j.Value<string>("title");
                         return new YouTubeChannelTab(tabTitle, jObject);
-                    }
-                }
-            }
-            return null;
-        }
-
-        private static YouTubeChannelTab FindChannelTab(
-            YouTubeChannelTabPage channelTabPage, JObject megaRoot)
-        {
-            JArray jaTabs = FindTabItems(megaRoot);
-            if (jaTabs == null || jaTabs.Count == 0)
-            {
-                return null;
-            }
-            foreach (JObject jTab in jaTabs)
-            {
-                JObject j = jTab.Value<JObject>("tabRenderer");
-                if (j == null)
-                {
-                    j = jTab.Value<JObject>("expandableTabRenderer");
-                }
-                if (j != null)
-                {
-                    string tabTitle = j.Value<string>("title");
-                    if (tabTitle == channelTabPage.Title)
-                    {
-                        return new YouTubeChannelTab(tabTitle, jTab);
                     }
                 }
             }
