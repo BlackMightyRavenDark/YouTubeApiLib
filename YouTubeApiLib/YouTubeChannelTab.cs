@@ -12,5 +12,11 @@ namespace YouTubeApiLib
             Title = title;
             Json = json;
         }
+
+        public bool IsChannelTabPage(YouTubeChannelTabPage channelTabPage)
+        {
+            return !string.IsNullOrEmpty(Title) &&
+                Title.Equals(channelTabPage.Title, System.StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

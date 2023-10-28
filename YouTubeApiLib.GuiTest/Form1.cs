@@ -58,7 +58,7 @@ namespace YouTubeApiLib.GuiTest
             btnSaveList.Enabled = true;
         }
 
-        private async void btnOpenChannel_Click(object sender, EventArgs e)
+        private void btnOpenChannel_Click(object sender, EventArgs e)
         {
             btnOpenChannel.Enabled = false;
             btnNextPage.Enabled = false;
@@ -86,42 +86,55 @@ namespace YouTubeApiLib.GuiTest
                 return;
             }
 
-            YouTubeChannel youTubeChannel = new YouTubeChannel(channelId, channelName);
-            YouTubeApi api = new YouTubeApi();
             YouTubeApi.getMediaTracksInfoImmediately = false;
-            VideoPageResult videoPageResult =
-                await Task.Run(() => api.GetVideoPage(youTubeChannel, YouTubeChannelTabPages.Videos, null));
-            if (videoPageResult.ErrorCode != 200 || videoPageResult.VideoPage.Videos.Count == 0)
+            YouTubeChannelTabPageContentResult pageContentResult =
+                YouTubeChannelTabPageContent.Get(channelId, YouTubeChannelTabPages.Videos, null);
+            if (pageContentResult.ErrorCode == 200)
+            {
+                YouTubeVideosTabPage videosTabPage = pageContentResult.Content.ParseAsVideosTabPage();
+                if (videosTabPage != null)
+                {
+                    if (videosTabPage.UpdateVideosMultiThreaded())
+                    {
+                        videosTabPage.VideoList.Sort((x, y) =>
+                        {
+                            return x.DatePublished > y.DatePublished ? -1 : 1;
+                        });
+
+                        foreach (YouTubeVideo video in videosTabPage.VideoList)
+                        {
+                            foundVideos.Add(video);
+
+                            ListViewItem item = new ListViewItem(video.Id);
+                            item.SubItems.Add(video.Title);
+                            item.Tag = video;
+                            listView1.Items.Add(item);
+                        }
+                    }
+
+                    nextPageToken = videosTabPage.NextPageToken;
+                    if (!string.IsNullOrEmpty(nextPageToken) && !string.IsNullOrWhiteSpace(nextPageToken))
+                    {
+                        btnNextPage.Enabled = true;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Ничего не найдено!", "Ошибка!",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            else
             {
                 MessageBox.Show("Ничего не найдено!", "Ошибка!",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
-                btnOpenChannel.Enabled = true;
-                btnSaveList.Enabled = true;
-                return;
-            }
-
-            foreach (YouTubeVideo video in videoPageResult.VideoPage.Videos)
-            {
-                foundVideos.Add(video);
-
-                ListViewItem item = new ListViewItem(video.Id);
-                item.SubItems.Add(video.Title);
-                item.Tag = video;
-                
-                listView1.Items.Add(item);
-            }
-
-            nextPageToken = videoPageResult.VideoPage.ContinuationToken;
-            if (!string.IsNullOrEmpty(nextPageToken) && !string.IsNullOrWhiteSpace(nextPageToken))
-            {
-                btnNextPage.Enabled = true;
             }
 
             btnOpenChannel.Enabled = true;
             btnSaveList.Enabled = true;
         }
 
-        private async void btnNextPage_Click(object sender, EventArgs e)
+        private void btnNextPage_Click(object sender, EventArgs e)
         {
             btnNextPage.Enabled = false;
             btnOpenChannel.Enabled = false;
@@ -133,33 +146,47 @@ namespace YouTubeApiLib.GuiTest
                 return;
             }
 
-            YouTubeApi api = new YouTubeApi();
             YouTubeApi.getMediaTracksInfoImmediately = false;
-            VideoPageResult videoPageResult = await Task.Run(() => api.GetVideoPage(null, nextPageToken));
-            if (videoPageResult.ErrorCode != 200 || videoPageResult.VideoPage.Videos.Count == 0)
+            YouTubeChannelTabPageContentResult pageContentResult = YouTubeChannelTabPageContent.Get(nextPageToken);
+            if (pageContentResult != null)
+            {
+                YouTubeVideosTabPage videosTabPage = pageContentResult.Content.ParseAsVideosTabPage();
+                if (videosTabPage != null)
+                {
+                    if (videosTabPage.UpdateVideosMultiThreaded())
+                    {
+                        videosTabPage.VideoList.Sort((x, y) =>
+                        {
+                            return x.DatePublished > y.DatePublished ? -1 : 1;
+                        });
+
+                        foreach (YouTubeVideo video in videosTabPage.VideoList)
+                        {
+                            foundVideos.Add(video);
+
+                            ListViewItem item = new ListViewItem(video.Id);
+                            item.SubItems.Add(video.Title);
+                            item.Tag = video;
+                            listView1.Items.Add(item);
+                        }
+                    }
+
+                    nextPageToken = videosTabPage.NextPageToken;
+                    if (!string.IsNullOrEmpty(nextPageToken) && !string.IsNullOrWhiteSpace(nextPageToken))
+                    {
+                        btnNextPage.Enabled = true;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Ничего не найдено!", "Ошибка!",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            else
             {
                 MessageBox.Show("Ничего не найдено!", "Ошибка!",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
-                btnOpenChannel.Enabled = true;
-                btnSaveList.Enabled = true;
-                return;
-            }
-
-            foreach (YouTubeVideo video in videoPageResult.VideoPage.Videos)
-            {
-                foundVideos.Add(video);
-
-                ListViewItem item = new ListViewItem(video.Id);
-                item.SubItems.Add(video.Title);
-                item.Tag = video;
-
-                listView1.Items.Add(item);
-            }
-
-            nextPageToken = videoPageResult.VideoPage.ContinuationToken;
-            if (!string.IsNullOrEmpty(nextPageToken) && !string.IsNullOrWhiteSpace(nextPageToken))
-            {
-                btnNextPage.Enabled = true;
             }
 
             btnOpenChannel.Enabled = true;

@@ -124,17 +124,17 @@ namespace YouTubeApiLib
             JObject json = new JObject();
             json["context"] = jContext;
             json["browseId"] = channelId;
-            if (string.IsNullOrEmpty(continuationToken) || string.IsNullOrWhiteSpace(continuationToken))
-            {
-                if (youTubeChannelTabPage != null)
-                {
-                    json["params"] = youTubeChannelTabPage.ParamsId;
-                }
-            }
-            else
+
+            bool tokenExists = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);
+            if (tokenExists)
             {
                 json["continuation"] = continuationToken;
             }
+            else if (youTubeChannelTabPage != null)
+            {
+                json["params"] = youTubeChannelTabPage.ParamsId;
+            }
+
             return json;
         }
 
@@ -284,6 +284,16 @@ namespace YouTubeApiLib
             }
 
             return new YouTubeChannelTabResult(null, errorCode);
+        }
+
+        public static YouTubeChannelTabPageContentResult GetChannelTabContentRawData(
+            string channelId, YouTubeChannelTabPage channelTabPage, string pageToken)
+        {
+            string url = $"{API_V1_BROWSE_URL}?key={API_V1_KEY}";
+            JObject body = GenerateChannelTabRequestBody(channelId, channelTabPage, pageToken);
+            int errorCode = HttpsPost(url, body.ToString(), out string response);
+            return new YouTubeChannelTabPageContentResult(
+                new YouTubeChannelTabPageContent(channelTabPage, response), errorCode);
         }
 
         internal static YouTubeApiV1SearchResults SearchYouTube(
