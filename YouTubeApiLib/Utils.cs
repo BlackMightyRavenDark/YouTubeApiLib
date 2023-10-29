@@ -124,14 +124,26 @@ namespace YouTubeApiLib
                 isUnlisted = jMicroformatRenderer.Value<bool>("isUnlisted");
                 jSimplifiedVideoInfo["isUnlisted"] = isUnlisted;
                 jSimplifiedVideoInfo["category"] = jMicroformatRenderer.Value<string>("category");
-                jSimplifiedVideoInfo["datePublished"] = jMicroformatRenderer.Value<string>("publishDate");
-                jSimplifiedVideoInfo["dateUploaded"] = jMicroformatRenderer.Value<string>("uploadDate");
+                {
+                    string date = jMicroformatRenderer.Value<string>("publishDate");
+                    jSimplifiedVideoInfo["datePublished"] = DateTimeStringToUtcString(date);
+                }
+                {
+                    string date = jMicroformatRenderer.Value<string>("uploadDate");
+                    jSimplifiedVideoInfo["dateUploaded"] = DateTimeStringToUtcString(date);
+                }
 
                 JObject jLiveBroadcastDetails = jMicroformatRenderer.Value<JObject>("liveBroadcastDetails");
                 if (jLiveBroadcastDetails != null)
                 {
-                    jSimplifiedVideoInfo["startTimestamp"] = jLiveBroadcastDetails.Value<string>("startTimestamp");
-                    jSimplifiedVideoInfo["endTimestamp"] = jLiveBroadcastDetails.Value<string>("endTimestamp");
+                    {
+                        string date = jLiveBroadcastDetails.Value<string>("startTimestamp");
+                        jSimplifiedVideoInfo["startTimestamp"] = DateTimeStringToUtcString(date);
+                    }
+                    {
+                        string date = jLiveBroadcastDetails.Value<string>("endTimestamp");
+                        jSimplifiedVideoInfo["endTimestamp"] = DateTimeStringToUtcString(date);
+                    }
                 }
             }
 
@@ -798,6 +810,22 @@ namespace YouTubeApiLib
 
             string uploaded = jSimplifiedVideoInfo.Value<string>("dateUploaded");
             ParseMicroformatDate(uploaded, out uploadDate);
+        }
+
+        public static string ToUtcString(this DateTime dateTime)
+        {
+            return $"{dateTime:yyyy-MM-dd\"T\"HH:mm:ss}Z";
+        }
+
+        internal static string DateTimeStringToUtcString(string s)
+        {
+            if (!DateTime.TryParseExact(s, "MM/dd/yyyy HH:mm:ss",
+                null, DateTimeStyles.None, out DateTime dateTime))
+            {
+                return s;
+            }
+
+            return dateTime.ToUtcString();
         }
     }
 }
