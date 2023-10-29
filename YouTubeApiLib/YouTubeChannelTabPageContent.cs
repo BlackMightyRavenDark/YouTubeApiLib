@@ -45,7 +45,7 @@ namespace YouTubeApiLib
                 .Value<JArray>("continuationItems");
         }
 
-        public YouTubeVideosTabPage ParseAsVideosTabPage()
+        public YouTubeVideosTabPage ParseAsVideosOrShortsOrLiveTabPage()
         {
             try
             {
@@ -54,10 +54,12 @@ namespace YouTubeApiLib
                 {
                     if (!string.IsNullOrEmpty(tabs.RawData))
                     {
-                        YouTubeChannelTab tabVideos = tabs.GetSelectedTab();
-                        if (tabVideos != null && tabVideos.IsChannelTabPage(YouTubeChannelTabPages.Videos))
+                        YouTubeChannelTab channelTab = tabs.GetSelectedTab();
+                        if (channelTab != null && (channelTab.IsChannelTabPage(YouTubeChannelTabPages.Videos) ||
+                            channelTab.IsChannelTabPage(YouTubeChannelTabPages.Live) ||
+                            channelTab.IsChannelTabPage(YouTubeChannelTabPages.Shorts)))
                         {
-                            JObject jContent = tabVideos.Json.Value<JObject>("tabRenderer").Value<JObject>("content");
+                            JObject jContent = channelTab.Json.Value<JObject>("tabRenderer").Value<JObject>("content");
                             JArray jaItems = jContent.Value<JObject>("richGridRenderer").Value<JArray>("contents");
                             List<string> ids = Utils.ExtractVideoIDsFromGridRendererItems(jaItems, out string token);
 
@@ -77,7 +79,6 @@ namespace YouTubeApiLib
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
             }
-
             return null;
         }
     }

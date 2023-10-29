@@ -91,7 +91,7 @@ namespace YouTubeApiLib.GuiTest
                 YouTubeChannelTabPageContent.Get(channelId, YouTubeChannelTabPages.Videos, null);
             if (pageContentResult.ErrorCode == 200)
             {
-                YouTubeVideosTabPage videosTabPage = pageContentResult.Content.ParseAsVideosTabPage();
+                YouTubeVideosTabPage videosTabPage = pageContentResult.Content.ParseAsVideosOrShortsOrLiveTabPage();
                 if (videosTabPage != null)
                 {
                     if (videosTabPage.UpdateVideosMultiThreaded())
@@ -150,7 +150,7 @@ namespace YouTubeApiLib.GuiTest
             YouTubeChannelTabPageContentResult pageContentResult = YouTubeChannelTabPageContent.Get(nextPageToken);
             if (pageContentResult != null)
             {
-                YouTubeVideosTabPage videosTabPage = pageContentResult.Content.ParseAsVideosTabPage();
+                YouTubeVideosTabPage videosTabPage = pageContentResult.Content.ParseAsVideosOrShortsOrLiveTabPage();
                 if (videosTabPage != null)
                 {
                     if (videosTabPage.UpdateVideosMultiThreaded())
