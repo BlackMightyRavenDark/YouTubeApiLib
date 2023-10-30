@@ -43,8 +43,8 @@ namespace YouTubeApiLib.ConsoleTest
                         Console.WriteLine($"URL: {video.Url}");
                         if (video.SimplifiedInfo.IsMicroformatInfoAvailable)
                         {
-                            Console.WriteLine($"Uploaded: {video.DateUploaded:yyyy.MM.dd HH:mm:ss}");
-                            Console.WriteLine($"Published: {video.DatePublished:yyyy.MM.dd HH:mm:ss}");
+                            Console.WriteLine($"Uploaded: {DateTimeToString(video.DateUploaded)}");
+                            Console.WriteLine($"Published: {DateTimeToString(video.DatePublished)}");
                         }
                         if (video.Length > TimeSpan.Zero)
                         {
@@ -171,6 +171,12 @@ namespace YouTubeApiLib.ConsoleTest
                 Console.WriteLine("Video ID: <ERROR>");
             }
             Console.ReadLine();
+        }
+
+        private static string DateTimeToString(DateTime dateTime)
+        {
+            string s = dateTime.ToString("yyyy.MM.dd HH:mm:ss");
+            return dateTime.Kind != DateTimeKind.Utc ? s : $"{s} GMT";
         }
     }
 }
