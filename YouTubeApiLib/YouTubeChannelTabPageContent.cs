@@ -32,17 +32,25 @@ namespace YouTubeApiLib
                 return null;
             }
 
-            JObject json = JObject.Parse(RawData);
-            JArray jaTabs = json.Value<JObject>("contents")?.Value<JObject>("twoColumnBrowseResultsRenderer")?.Value<JArray>("tabs");
+            JObject json = Utils.TryParseJson(RawData);
+            JArray jaTabs = json?.Value<JObject>("contents")?.Value<JObject>("twoColumnBrowseResultsRenderer")?.Value<JArray>("tabs");
             return jaTabs != null ? new YouTubeChannelTabPageContentTabs(jaTabs.ToString()) : null;
         }
 
         private JArray GetContinuationItems()
         {
-            JObject json = JObject.Parse(RawData);
-            return json.Value<JArray>("onResponseReceivedActions")[0]
-                .Value<JObject>("appendContinuationItemsAction")
-                .Value<JArray>("continuationItems");
+            try
+            {
+                JObject json = JObject.Parse(RawData);
+                return json.Value<JArray>("onResponseReceivedActions")[0]
+                    .Value<JObject>("appendContinuationItemsAction")
+                    .Value<JArray>("continuationItems");
+            }
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+                return null;
+            }
         }
 
         public YouTubeVideosTabPage ParseAsVideosOrShortsOrLiveTabPage()

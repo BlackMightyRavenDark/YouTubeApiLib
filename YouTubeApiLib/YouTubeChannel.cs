@@ -3,8 +3,8 @@ namespace YouTubeApiLib
 {
     public class YouTubeChannel
     {
-        public string DisplayName { get; private set; }
-        public string Id { get; private set; }
+        public string DisplayName { get; }
+        public string Id { get; }
 
         public YouTubeChannel(string id, string displayName)
         {

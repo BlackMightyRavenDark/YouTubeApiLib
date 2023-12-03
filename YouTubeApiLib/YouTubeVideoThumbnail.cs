@@ -4,8 +4,8 @@ namespace YouTubeApiLib
 {
     public class YouTubeVideoThumbnail
     {
-        public string Id { get; private set; }
-        public string Url { get; private set; }
+        public string Id { get; }
+        public string Url { get; }
 
         public YouTubeVideoThumbnail(string id, string url)
         {

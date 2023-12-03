@@ -5,12 +5,12 @@ namespace YouTubeApiLib
 {
     public class VideoIdPage : IVideoPageParser
     {
-        public JObject RawData { get; private set; }
+        public string RawData { get; }
         public List<string> VideoIds { get; private set; }
         public string ContinuationToken { get; private set; }
         private bool _isContinuationToken;
 
-        public VideoIdPage(JObject rawData, bool isContinuationToken)
+        public VideoIdPage(string rawData, bool isContinuationToken)
         {
             RawData = rawData;
             _isContinuationToken = isContinuationToken;
@@ -22,7 +22,9 @@ namespace YouTubeApiLib
         /// <returns>Video ID count</returns>
         public int Parse()
         {
-            JArray jaItems = Utils.FindItemsArray(RawData, _isContinuationToken);
+            JObject json = Utils.TryParseJson(RawData);
+            if (json == null) { return 0; }
+            JArray jaItems = Utils.FindItemsArray(json, _isContinuationToken);
             if (jaItems == null)
             {
                 return 0;

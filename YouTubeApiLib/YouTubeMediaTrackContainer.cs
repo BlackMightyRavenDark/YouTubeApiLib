@@ -3,12 +3,12 @@ namespace YouTubeApiLib
 {
     public class YouTubeMediaTrackContainer : YouTubeMediaTrack
     {
-        public int VideoWidth { get; private set; }
-        public int VideoHeight { get; private set; }
-        public int VideoFrameRate { get; private set; }
-        public string AudioQuality { get; private set; }
-        public int AudioSampleRate { get; private set; }
-        public int AudioChannelCount { get; private set; }
+        public int VideoWidth { get; }
+        public int VideoHeight { get; }
+        public int VideoFrameRate { get; }
+        public string AudioQuality { get; }
+        public int AudioSampleRate { get; }
+        public int AudioChannelCount { get; }
 
         public YouTubeMediaTrackContainer(
             int formatId,

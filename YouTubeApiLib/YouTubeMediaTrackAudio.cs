@@ -3,10 +3,10 @@ namespace YouTubeApiLib
 {
     public class YouTubeMediaTrackAudio : YouTubeMediaTrack
     {
-        public string AudioQuality { get; private set; }
-        public int SampleRate { get; private set; }
-        public int ChannelCount { get; private set; }
-        public double LoudnessDb { get; private set; }
+        public string AudioQuality { get; }
+        public int SampleRate { get; }
+        public int ChannelCount { get; }
+        public double LoudnessDb { get; }
 
         public YouTubeMediaTrackAudio(
             int formatId,

@@ -3,8 +3,8 @@ namespace YouTubeApiLib
 {
     public class SimplifiedVideoInfoResult
     {
-        public SimplifiedVideoInfo SimplifiedVideoInfo { get; private set; }
-        public int ErrorCode { get; private set; }
+        public SimplifiedVideoInfo SimplifiedVideoInfo { get; }
+        public int ErrorCode { get; }
 
         public SimplifiedVideoInfoResult(SimplifiedVideoInfo simplifiedVideoInfo, int errorCode)
         {

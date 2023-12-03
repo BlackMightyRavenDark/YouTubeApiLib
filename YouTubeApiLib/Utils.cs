@@ -607,16 +607,12 @@ namespace YouTubeApiLib
                 string videoInfo = ExtractRawVideoInfoFromWebPageCode(webPage.WebPageCode);
                 if (!string.IsNullOrEmpty(videoInfo) && !string.IsNullOrWhiteSpace(videoInfo))
                 {
-                    JObject j = JObject.Parse(videoInfo);
-                    if (j != null)
-                    {
-                        VideoInfoGettingMethod method = webPage.IsProvidedManually ? VideoInfoGettingMethod.Manual : VideoInfoGettingMethod.WebPage;
-                        return new RawVideoInfoResult(new RawVideoInfo(j, method), 200);
-                    }
-                    else
-                    {
-                        return new RawVideoInfoResult(null, 400);
-                    }
+                    VideoInfoGettingMethod method = webPage.IsProvidedManually ? VideoInfoGettingMethod.Manual : VideoInfoGettingMethod.WebPage;
+                    return new RawVideoInfoResult(new RawVideoInfo(videoInfo, method), 200);
+                }
+                else
+                {
+                    return new RawVideoInfoResult(null, 400);
                 }
             }
             return new RawVideoInfoResult(null, 404);
@@ -830,6 +826,25 @@ namespace YouTubeApiLib
             }
 
             return dateTime.ToUtcString();
+        }
+
+        internal static JObject TryParseJson(string jsonString, out string errorText)
+        {
+            try
+            {
+                errorText = null;
+                return JObject.Parse(jsonString);
+            }
+            catch (Exception ex)
+            {
+                errorText = ex.Message;
+                return null;
+            }
+        }
+
+        internal static JObject TryParseJson(string jsonString)
+        {
+            return TryParseJson(jsonString, out _);
         }
     }
 }

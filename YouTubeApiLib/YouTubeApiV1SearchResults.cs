@@ -1,16 +1,15 @@
-﻿using Newtonsoft.Json.Linq;
-
+﻿
 namespace YouTubeApiLib
 {
     public class YouTubeApiV1SearchResults
     {
-        public JObject RawData { get; private set; }
-        public YouTubeApiV1SearchResultFilter UsedFilter { get; private set; }
-        public bool IsContinuationItem { get; private set; }
-        public int ErrorCode { get; private set; }
+        public string RawData { get; }
+        public YouTubeApiV1SearchResultFilter UsedFilter { get; }
+        public bool IsContinuationItem { get; }
+        public int ErrorCode { get; }
 
         public YouTubeApiV1SearchResults(
-            JObject rawData,
+            string rawData,
             YouTubeApiV1SearchResultFilter usedFilter,
             bool isContinuationItem,
             int errorCode)

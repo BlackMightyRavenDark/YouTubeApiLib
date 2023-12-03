@@ -3,29 +3,29 @@ namespace YouTubeApiLib
 {
     public abstract class YouTubeMediaTrack
     {
-        public int FormatId { get; private set; }
-        public string MimeType { get; private set; }
-        public string MimeExt { get; private set; }
-        public string MimeCodecs { get; private set; }
-        public int Bitrate { get; private set; }
-        public int AverageBitrate { get; private set; }
-        public string LastModified { get; private set; }
-        public long ContentLength { get; private set; }
-        public string Quality { get; private set; }
-        public string QualityLabel { get; private set; }
-        public int ApproxDurationMs { get; private set; }
-        public string ProjectionType { get; private set; }
-        public string FileUrl { get; private set; }
-        public string CipherSignatureEncrypted { get; private set; }
-        public string CipherEncryptedFileUrl { get; private set; }
-        public string FileExtension { get; private set; }
-        public bool IsDashManifest { get; private set; }
-        public bool IsHlsManifest { get; private set; }
-        public bool IsCiphered { get; private set; }
-        public string DashManifestUrl { get; private set; }
-        public DashUrlList DashUrls { get; private set; }
-        public string HlsManifestUrl { get; private set; }
-        public YouTubeBroadcast Broadcast { get; private set; }
+        public int FormatId { get; }
+        public string MimeType { get; }
+        public string MimeExt { get; }
+        public string MimeCodecs { get; }
+        public int Bitrate { get; }
+        public int AverageBitrate { get; }
+        public string LastModified { get; }
+        public long ContentLength { get; }
+        public string Quality { get; }
+        public string QualityLabel { get; }
+        public int ApproxDurationMs { get; }
+        public string ProjectionType { get; }
+        public string FileUrl { get; }
+        public string CipherSignatureEncrypted { get; }
+        public string CipherEncryptedFileUrl { get; }
+        public string FileExtension { get; }
+        public bool IsDashManifest { get; }
+        public bool IsHlsManifest { get; }
+        public bool IsCiphered { get; }
+        public string DashManifestUrl { get; }
+        public DashUrlList DashUrls { get; }
+        public string HlsManifestUrl { get; }
+        public YouTubeBroadcast Broadcast { get; }
 
         public YouTubeMediaTrack(
             int formatId,

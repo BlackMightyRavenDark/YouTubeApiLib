@@ -11,8 +11,8 @@ namespace YouTubeApiLib
 
     public class YouTubeApiV1SearchResultFilter
     {
-        public string Name { get; private set; }
-        public string ParamsId { get; private set; }
+        public string Name { get; }
+        public string ParamsId { get; }
 
         public YouTubeApiV1SearchResultFilter(string name, string paramsId)
         {

@@ -3,7 +3,7 @@ namespace YouTubeApiLib
 {
     public class VideoId
     {
-        public string Id { get; private set; }
+        public string Id { get; }
 
         public VideoId(string id)
         {

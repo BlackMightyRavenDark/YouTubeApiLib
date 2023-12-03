@@ -15,46 +15,44 @@ namespace YouTubeApiLib
 
             LinkedList<YouTubeMediaTrack> resList = new LinkedList<YouTubeMediaTrack>();
 
-            JToken jtHls = streamingData.RawData.Value<JToken>("hlsManifestUrl");
-            if (jtHls != null)
+            bool isHls = false;
+            string hlsManifestUrl = streamingData.GetHlsManifestUrl();
+            if (!string.IsNullOrEmpty(hlsManifestUrl) && !string.IsNullOrWhiteSpace(hlsManifestUrl) &&
+                Utils.DownloadString(hlsManifestUrl, out string hlsManifest) == 200)
             {
-                string hlsManifestUrl = jtHls.Value<string>();
-                if (Utils.DownloadString(hlsManifestUrl, out string hlsManifest) == 200)
+                isHls = true;
+                YouTubeHlsManifestParser parser = new YouTubeHlsManifestParser(hlsManifest);
+                LinkedList<YouTubeBroadcast> broadcasts = parser.Parse();
+                if (broadcasts != null)
                 {
-                    YouTubeHlsManifestParser parser = new YouTubeHlsManifestParser(hlsManifest);
-                    LinkedList<YouTubeBroadcast> broadcasts = parser.Parse();
-                    if (broadcasts != null)
+                    foreach (YouTubeBroadcast broadcast in broadcasts)
                     {
-                        foreach (YouTubeBroadcast broadcast in broadcasts)
-                        {
-                            YouTubeMediaTrack hlsStream = new YouTubeMediaTrackVideo(broadcast, hlsManifestUrl);
-                            resList.AddLast(hlsStream);
-                        }
+                        YouTubeMediaTrack hlsStream = new YouTubeMediaTrackVideo(broadcast, hlsManifestUrl);
+                        resList.AddLast(hlsStream);
                     }
                 }
             }
 
-            JToken jtDash = streamingData.RawData.Value<JToken>("dashManifestUrl");
-            if (jtDash != null)
+            bool isDash = false;
+            string dashManifestUrl = streamingData.GetDashManifestUrl();
+            if (!string.IsNullOrEmpty(dashManifestUrl) && !string.IsNullOrWhiteSpace(dashManifestUrl) &&
+                Utils.DownloadString(dashManifestUrl, out string dashManifest) == 200)
             {
-                string dashManifestUrl = jtDash.Value<string>();
-                if (Utils.DownloadString(dashManifestUrl, out string dashManifest) == 200)
+                isDash = true;
+                YouTubeDashManifestParser parser = new YouTubeDashManifestParser(dashManifest, dashManifestUrl);
+                LinkedList<YouTubeMediaTrack> dashList = parser.Parse();
+                if (dashList != null)
                 {
-                    YouTubeDashManifestParser parser = new YouTubeDashManifestParser(dashManifest, dashManifestUrl);
-                    LinkedList<YouTubeMediaTrack> dashList = parser.Parse();
-                    if (dashList != null)
+                    foreach (YouTubeMediaTrack track in dashList)
                     {
-                        foreach (YouTubeMediaTrack track in dashList)
-                        {
-                            resList.AddLast(track);
-                        }
+                        resList.AddLast(track);
                     }
                 }
             }
 
-            if (jtDash == null && jtHls == null)
+            if (!isDash && !isHls)
             {
-                JArray jaAdaptiveFormats = streamingData.RawData.Value<JArray>("adaptiveFormats");
+                JArray jaAdaptiveFormats = streamingData.GetAdaptiveFormats();
                 if (jaAdaptiveFormats != null)
                 {
                     foreach (JObject jFormat in jaAdaptiveFormats)
@@ -158,7 +156,10 @@ namespace YouTubeApiLib
                             }
 
                             string audioQuality = jFormat.Value<string>("audioQuality");
-                            int audioSampleRate = int.Parse(jFormat.Value<string>("audioSampleRate"));
+                            if (!int.TryParse(jFormat.Value<string>("audioSampleRate"), out int audioSampleRate))
+                            {
+                                audioSampleRate = -1;
+                            }
                             int audioChannelCount = jFormat.Value<int>("audioChannels");
                             double loudnessDb = jFormat.Value<double>("loudnessDb");
 
@@ -173,7 +174,7 @@ namespace YouTubeApiLib
                     }
                 }
 
-                JArray jaFormats = streamingData.RawData.Value<JArray>("formats");
+                JArray jaFormats = streamingData.GetFormats();
                 if (jaFormats != null)
                 {
                     foreach (JObject jFormat in jaFormats)

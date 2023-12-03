@@ -5,8 +5,8 @@ namespace YouTubeApiLib
 {
     public class YouTubeDashManifestParser
     {
-        public string DashManifest { get; private set; }
-        public string DashManifestUrl { get; private set; }
+        public string DashManifest { get; }
+        public string DashManifestUrl { get; }
 
         public YouTubeDashManifestParser(string dashManifest, string dashManifestUrl)
         {

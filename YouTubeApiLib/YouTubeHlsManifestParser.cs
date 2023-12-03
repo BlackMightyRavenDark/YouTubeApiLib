@@ -5,7 +5,7 @@ namespace YouTubeApiLib
 {
     public class YouTubeHlsManifestParser
     {
-        public string HlsManifest { get; private set; }
+        public string HlsManifest { get; }
 
         public YouTubeHlsManifestParser(string hlsManifest)
         {
@@ -118,7 +118,8 @@ namespace YouTubeApiLib
                 string t = playlistUrl.Substring(n + 6);
                 n = t.IndexOf("/");
                 t = t.Substring(0, n);
-                return int.Parse(t);
+                if (!int.TryParse(t, out int res)) { res = 0; }
+                return res;
             }
             catch (Exception ex)
             {

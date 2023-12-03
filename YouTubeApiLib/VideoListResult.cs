@@ -4,8 +4,8 @@ namespace YouTubeApiLib
 {
     public class VideoListResult
     {
-        public JArray List { get; private set; }
-        public int ErrorCode { get; private set; }
+        public JArray List { get; }
+        public int ErrorCode { get; }
 
         public VideoListResult(JArray list, int errorCode)
         {

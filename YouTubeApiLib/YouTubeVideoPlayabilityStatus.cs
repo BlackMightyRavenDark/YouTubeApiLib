@@ -4,17 +4,17 @@ namespace YouTubeApiLib
 {
     public class YouTubeVideoPlayabilityStatus
     {
-        public string Status { get; private set; }
-        public string Reason { get; private set; }
-        public string ThumbnailUrl { get; private set; }
-        public bool IsPlayable { get; private set; }
+        public string Status { get; }
+        public string Reason { get; }
+        public string ThumbnailUrl { get; }
+        public bool IsPlayable { get; }
         public bool IsPrivate => GetIsPrivate();
         public bool IsAdult => GetIsAdult();
-        public int ErrorCode { get; private set; }
-        public JObject RawInfo { get; private set; }
+        public int ErrorCode { get; }
+        public string RawInfo { get; }
 
         public YouTubeVideoPlayabilityStatus(string status, string reason, string thumbnailUrl,
-            int errorCode, JObject rawInfo)
+            int errorCode, string rawInfo)
         {
             Status = status;
             Reason = reason;
@@ -56,7 +56,7 @@ namespace YouTubeApiLib
                 }
             }
             int errorCode = status == "OK" ? 200 : 403;
-            return new YouTubeVideoPlayabilityStatus(status, reason, thumbnailUrl, errorCode, jPlayabilityStatus);
+            return new YouTubeVideoPlayabilityStatus(status, reason, thumbnailUrl, errorCode, jPlayabilityStatus.ToString());
         }
 
         private bool GetIsPrivate()

@@ -163,11 +163,7 @@ namespace YouTubeApiLib
             int errorCode = HttpsPost(url, body.ToString(), out string rawVideoInfoJsonString);
             if (errorCode == 200)
             {
-                JObject j = JObject.Parse(rawVideoInfoJsonString);
-                if (j != null)
-                {
-                    return new RawVideoInfoResult(new RawVideoInfo(j, method), 200);
-                }
+                return new RawVideoInfoResult(new RawVideoInfo(rawVideoInfoJsonString, method), 200);
             }
             return new RawVideoInfoResult(null, errorCode);
         }
@@ -209,8 +205,7 @@ namespace YouTubeApiLib
             int errorCode = HttpsPost(url, body, out string response);
             if (errorCode == 200)
             {
-                JObject json = JObject.Parse(response);
-                VideoIdPage videoIdPage = new VideoIdPage(json, continuationTokenExists);
+                VideoIdPage videoIdPage = new VideoIdPage(response, continuationTokenExists);
                 int count = videoIdPage.Parse();
                 return new VideoIdPageResult(videoIdPage, count > 0 ? 200 : 400);
             }
@@ -261,7 +256,7 @@ namespace YouTubeApiLib
             int errorCode = HttpsPost(url, body.ToString(), out string response);
             if (errorCode == 200)
             {
-                JObject json = JObject.Parse(response);
+                JObject json = TryParseJson(response);
                 if (json == null)
                 {
                     return new YouTubeChannelTabResult(null, 404);
@@ -306,12 +301,8 @@ namespace YouTubeApiLib
             int errorCode = HttpsPost(url, body.ToString(), out string response);
             if (errorCode == 200)
             {
-                JObject j = JObject.Parse(response);
-                if (j != null)
-                {
-                    bool isContinationToken = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);
-                    return new YouTubeApiV1SearchResults(j, searchResultFilter, isContinationToken, errorCode);
-                }
+                bool isContinationToken = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);
+                return new YouTubeApiV1SearchResults(response, searchResultFilter, isContinationToken, errorCode);
             }
             return new YouTubeApiV1SearchResults(null, searchResultFilter, false, errorCode);
         }

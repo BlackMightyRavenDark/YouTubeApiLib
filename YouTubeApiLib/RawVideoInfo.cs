@@ -5,14 +5,16 @@ namespace YouTubeApiLib
 {
     public class RawVideoInfo
     {
-        public JObject RawData { get; private set; }
-        public VideoInfoGettingMethod DataGettingMethod { get; private set; }
+        public string RawData { get; }
+        public VideoInfoGettingMethod DataGettingMethod { get; }
         public YouTubeVideoPlayabilityStatus PlayabilityStatus => ExtractPlayabilityStatus();
         public StreamingData StreamingData => ExtractStreamingData();
         public JObject VideoDetails => ExtractVideoDetails();
         public JObject Microformat => ExtractMicroformat();
 
-        public RawVideoInfo(JObject rawData, VideoInfoGettingMethod dataGettingMethod)
+        private JObject _parsedData = null;
+
+        public RawVideoInfo(string rawData, VideoInfoGettingMethod dataGettingMethod)
         {
             RawData = rawData;
             DataGettingMethod = dataGettingMethod;
@@ -20,28 +22,35 @@ namespace YouTubeApiLib
 
         private YouTubeVideoPlayabilityStatus ExtractPlayabilityStatus()
         {
-            JObject jPlayabilityStatus = RawData?.Value<JObject>("playabilityStatus");
+            if (_parsedData == null) { _parsedData = TryParseJson(RawData); }
+            JObject jPlayabilityStatus = _parsedData?.Value<JObject>("playabilityStatus");
             return jPlayabilityStatus != null ? YouTubeVideoPlayabilityStatus.Parse(jPlayabilityStatus) : null;
         }
 
         private StreamingData ExtractStreamingData()
         {
-            JObject jStreamingData = RawData?.Value<JObject>("streamingData");
-            if (jStreamingData != null)
+            if (_parsedData == null) { _parsedData = TryParseJson(RawData); }
+            if (_parsedData != null)
             {
-                return new StreamingData(jStreamingData, DataGettingMethod);
+                JObject jStreamingData = _parsedData.Value<JObject>("streamingData");
+                if (jStreamingData != null)
+                {
+                    return new StreamingData(jStreamingData.ToString(), DataGettingMethod);
+                }
             }
             return null;
         }
 
         private JObject ExtractVideoDetails()
         {
-            return RawData?.Value<JObject>("videoDetails");
+            if (_parsedData == null) { _parsedData = TryParseJson(RawData); }
+            return _parsedData?.Value<JObject>("videoDetails");
         }
 
         private JObject ExtractMicroformat()
         {
-            return RawData?.Value<JObject>("microformat");
+            if (_parsedData == null) { _parsedData = TryParseJson(RawData); }
+            return _parsedData?.Value<JObject>("microformat");
         }
 
         public override string ToString()

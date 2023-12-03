@@ -3,13 +3,13 @@ namespace YouTubeApiLib
 {
     public class YouTubeBroadcast
     {
-        public int FormatId { get; private set; }
-        public int VideoWidth { get; private set; }
-        public int VideoHeight { get; private set; }
-        public int FrameRate { get; private set; }
-        public int Bandwidth { get; private set; }
-        public string Codecs { get; private set; }
-        public string PlaylistUrl { get; private set; }
+        public int FormatId { get; }
+        public int VideoWidth { get; }
+        public int VideoHeight { get; }
+        public int FrameRate { get; }
+        public int Bandwidth { get; }
+        public string Codecs { get; }
+        public string PlaylistUrl { get; }
 
         public YouTubeBroadcast(int formatId, int videoWidth, int videoHeight,
             int frameRate, int bandwidth, string codecs, string playlistUrl)

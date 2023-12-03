@@ -5,37 +5,37 @@ namespace YouTubeApiLib
 {
     public class YouTubeVideo
     {
-        public string Title { get; private set; }
-        public string Id { get; private set; }
-        public string Url { get; private set; }
-        public DateTime DateUploaded { get; private set; }
-        public DateTime DatePublished { get; private set; }
-        public TimeSpan Length { get; private set; }
-        public string OwnerChannelTitle { get; private set; }
-        public string OwnerChannelId { get; private set; }
-        public string Description { get; private set; }
-        public long ViewCount { get; private set; }
-        public string Category { get; private set; }
-        public bool IsPrivate { get; private set; }
-        public bool IsUnlisted { get; private set; }
-        public bool IsFamilySafe { get; private set; }
-        public bool IsLiveContent { get; private set; }
+        public string Title { get; }
+        public string Id { get; }
+        public string Url { get; }
+        public DateTime DateUploaded { get; }
+        public DateTime DatePublished { get; }
+        public TimeSpan Length { get; }
+        public string OwnerChannelTitle { get; }
+        public string OwnerChannelId { get; }
+        public string Description { get; }
+        public long ViewCount { get; }
+        public string Category { get; }
+        public bool IsPrivate { get; }
+        public bool IsUnlisted { get; }
+        public bool IsFamilySafe { get; }
+        public bool IsLiveContent { get; }
 
         /// <summary>
         /// Warning! This value can be always TRUE for some videos!
         /// E.G. when the broadcast is finished, but not yet fully processed by YouTube.
         /// This is a YouTube API bug.
         /// </summary>
-        public bool IsLiveNow { get; private set; }
+        public bool IsLiveNow { get; }
 
-        public bool IsDashed { get; private set; }
-        public string DashManifestUrl { get; private set; }
-        public string HlsManifestUrl { get; private set; }
-        public List<YouTubeVideoThumbnail> ThumbnailUrls { get; private set; }
+        public bool IsDashed { get; }
+        public string DashManifestUrl { get; }
+        public string HlsManifestUrl { get; }
+        public List<YouTubeVideoThumbnail> ThumbnailUrls { get; }
         public LinkedList<YouTubeMediaTrack> MediaTracks { get; private set; }
         public RawVideoInfo RawInfo { get; private set; }
-        public SimplifiedVideoInfo SimplifiedInfo { get; private set; }
-        public YouTubeVideoPlayabilityStatus Status { get; private set; }
+        public SimplifiedVideoInfo SimplifiedInfo { get; }
+        public YouTubeVideoPlayabilityStatus Status { get; }
         public bool IsInfoAvailable => GetIsInfoAvailable();
 
         public YouTubeVideo(
@@ -106,9 +106,9 @@ namespace YouTubeApiLib
                 StreamingData streamingData = rawInfo?.StreamingData;
                 if (streamingData != null)
                 {
-                    DashManifestUrl = streamingData.RawData.Value<string>("dashManifestUrl");
+                    DashManifestUrl = streamingData.GetDashManifestUrl();
                     IsDashed = !string.IsNullOrEmpty(DashManifestUrl) && !string.IsNullOrWhiteSpace(DashManifestUrl);
-                    HlsManifestUrl = streamingData.RawData.Value<string>("hlsManifestUrl");
+                    HlsManifestUrl = streamingData.GetHlsManifestUrl();
                     IsLiveNow = !string.IsNullOrEmpty(HlsManifestUrl) && !string.IsNullOrWhiteSpace(HlsManifestUrl);
                 }
                 else

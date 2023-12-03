@@ -3,8 +3,8 @@ namespace YouTubeApiLib
 {
     public class YouTubeVideoWebPage
     {
-        public string WebPageCode { get; private set; }
-        public bool IsProvidedManually { get; private set; }
+        public string WebPageCode { get; }
+        public bool IsProvidedManually { get; }
 
         private YouTubeVideoWebPage(string webPageCode, bool isProvidedManually)
         {

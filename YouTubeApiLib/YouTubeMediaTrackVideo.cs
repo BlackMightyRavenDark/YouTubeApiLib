@@ -3,9 +3,9 @@ namespace YouTubeApiLib
 {
     public class YouTubeMediaTrackVideo : YouTubeMediaTrack
     {
-        public int VideoWidth { get; private set; }
-        public int VideoHeight { get; private set; }
-        public int FrameRate { get; private set; }
+        public int VideoWidth { get; }
+        public int VideoHeight { get; }
+        public int FrameRate { get; }
 
         public YouTubeMediaTrackVideo(
             int formatId,
