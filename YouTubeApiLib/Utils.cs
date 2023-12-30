@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Globalization;
-using System.IO;
 using System.Net;
 using Newtonsoft.Json.Linq;
 using MultiThreadedDownloaderLib;
@@ -563,41 +563,68 @@ namespace YouTubeApiLib
 
         public static int HttpsPost(string url, string body, out string responseString)
         {
-            responseString = "Client error";
-            int res = 400;
             try
             {
                 const string userAgent = "com.google.android.youtube/17.10.35 (Linux; U; Android 12; GB) gzip";
-                HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
-                httpWebRequest.ContentLength = body.Length;
-                httpWebRequest.Host = "www.youtube.com";
-                httpWebRequest.UserAgent = userAgent;
-                httpWebRequest.Method = "POST";
-                using (StreamWriter streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+                NameValueCollection headers = new NameValueCollection()
                 {
-                    streamWriter.Write(body);
-                    streamWriter.Dispose();
-                }
-                HttpWebResponse httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-                using (StreamReader streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                    { "Host", "www.youtube.com" },
+                    { "User-Agent", userAgent },
+                    { "Accept", "*/*" },
+                    { "Accept-Encoding", "gzip" }
+                };
+
+                if (!string.IsNullOrEmpty(body))
                 {
-                    responseString = streamReader.ReadToEnd();
-                    streamReader.Dispose();
-                    res = (int)httpResponse.StatusCode;
+                    byte[] bodyBytes = System.Text.Encoding.UTF8.GetBytes(body);
+                    headers.Add("Content-Type", "application/json");
+                    headers.Add("Content-Length", bodyBytes.Length.ToString());
                 }
+                else
+                {
+                    headers.Add("Content-Length", "0");
+                }
+
+                HttpRequestResult requestResult = HttpRequestSender.Send("POST", url, body, headers);
+                int errorCode;
+                if (requestResult.ErrorCode == 200)
+                {
+                    bool isZipped = IsZippedContent(requestResult.HttpWebResponse);
+                    errorCode = requestResult.WebContent.ContentToString(out responseString, 4096, isZipped, null, default);
+                }
+                else
+                {
+                    responseString = requestResult.ErrorMessage;
+                    errorCode = requestResult.ErrorCode;
+                }
+
+                requestResult.Dispose();
+                return errorCode;
             }
-            catch (WebException ex)
+            catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(ex.Message);
                 responseString = ex.Message;
-                res = ex.HResult;
-                if (ex.Status == WebExceptionStatus.ProtocolError)
+                return ex.HResult;
+            }
+        }
+
+        private static bool IsZippedContent(HttpWebResponse webResponse)
+        {
+            int count = webResponse.Headers.Count;
+            for (int i = 0; i < count; ++i)
+            {
+                string headerName = webResponse.Headers.GetKey(i);
+                if (string.Compare(headerName, "Content-Encoding", true) == 0)
                 {
-                    HttpWebResponse httpWebResponse = (HttpWebResponse)ex.Response;
-                    res = (int)httpWebResponse.StatusCode;
+                    string headerValue = webResponse.Headers.Get(i);
+                    if (string.Compare(headerValue, "gzip", true) == 0)
+                    {
+                        return true;
+                    }
                 }
             }
-            return res;
+
+            return false;
         }
 
         public static RawVideoInfoResult ExtractRawVideoInfoFromWebPage(YouTubeVideoWebPage webPage)
