@@ -873,5 +873,24 @@ namespace YouTubeApiLib
 		{
 			return TryParseJson(jsonString, out _);
 		}
+
+		internal static JArray TryParseJsonArray(string jsonArrayString, out string errorText)
+		{
+			try
+			{
+				errorText = null;
+				return JArray.Parse(jsonArrayString);
+			}
+			catch (Exception ex)
+			{
+				errorText = ex.Message;
+				return null;
+			}
+		}
+
+		internal static JArray TryParseJsonArray(string jsonArrayString)
+		{
+			return TryParseJsonArray(jsonArrayString, out _);
+		}
 	}
 }
