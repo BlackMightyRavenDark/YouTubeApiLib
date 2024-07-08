@@ -1,12 +1,12 @@
 ﻿
 namespace YouTubeApiLib
 {
-	public class VideoIdPageResult
+	public class YouTubeVideoIdPageResult
 	{
 		public YouTubeVideoIdPage VideoIdPage { get; }
 		public int ErrorCode { get; }
 
-		public VideoIdPageResult(YouTubeVideoIdPage videoIdPage, int errorCode)
+		public YouTubeVideoIdPageResult(YouTubeVideoIdPage videoIdPage, int errorCode)
 		{
 			VideoIdPage = videoIdPage;
 			ErrorCode = errorCode;

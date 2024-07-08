@@ -18,7 +18,7 @@ namespace YouTubeApiLib.TestChannelPages
 			};
 			foreach (YouTubeChannelTabPage page in pages)
 			{
-				VideoIdPageResult videoIdPageResult = api.GetVideoIdPage(channel, page, null);
+				YouTubeVideoIdPageResult videoIdPageResult = api.GetVideoIdPage(channel, page, null);
 				if (videoIdPageResult.ErrorCode == 200)
 				{
 					Console.WriteLine($"{channel} {page.Title} tab page:");

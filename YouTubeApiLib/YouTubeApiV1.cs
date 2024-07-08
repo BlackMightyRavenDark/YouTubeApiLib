@@ -170,7 +170,7 @@ namespace YouTubeApiLib
 
 		internal static YouTubeVideoPageResult GetVideoPage(string channelId, YouTubeChannelTabPage tabPage, string continuationToken)
 		{
-			VideoIdPageResult videoIdPageResult = GetVideoIdPage(channelId, tabPage, continuationToken);
+			YouTubeVideoIdPageResult videoIdPageResult = GetVideoIdPage(channelId, tabPage, continuationToken);
 			if (videoIdPageResult.ErrorCode == 200)
 			{
 				List<YouTubeVideo> videos = new List<YouTubeVideo>();
@@ -191,14 +191,14 @@ namespace YouTubeApiLib
 			return new YouTubeVideoPageResult(null, videoIdPageResult.ErrorCode);
 		}
 
-		internal static VideoIdPageResult GetVideoIdPage(string channelId, YouTubeChannelTabPage tabPage, string continuationToken)
+		internal static YouTubeVideoIdPageResult GetVideoIdPage(string channelId, YouTubeChannelTabPage tabPage, string continuationToken)
 		{
 			JObject body = GenerateChannelTabRequestBody(channelId, tabPage, continuationToken);
 			bool tokenExists = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);
 			return GetVideoIdPage(body, tokenExists);
 		}
 
-		internal static VideoIdPageResult GetVideoIdPage(JObject requestBody, bool continuationTokenExists)
+		internal static YouTubeVideoIdPageResult GetVideoIdPage(JObject requestBody, bool continuationTokenExists)
 		{
 			string url = $"{API_V1_BROWSE_URL}?key={API_V1_KEY}";
 			string body = requestBody != null ? requestBody.ToString() : string.Empty;
@@ -207,9 +207,9 @@ namespace YouTubeApiLib
 			{
 				YouTubeVideoIdPage videoIdPage = new YouTubeVideoIdPage(response, continuationTokenExists);
 				int count = videoIdPage.Parse();
-				return new VideoIdPageResult(videoIdPage, count > 0 ? 200 : 400);
+				return new YouTubeVideoIdPageResult(videoIdPage, count > 0 ? 200 : 400);
 			}
-			return new VideoIdPageResult(null, errorCode);
+			return new YouTubeVideoIdPageResult(null, errorCode);
 		}
 
 		internal static VideoListResult GetChannelVideoList(string channelId)
@@ -219,7 +219,7 @@ namespace YouTubeApiLib
 			int errorCode;
 			while (true)
 			{
-				VideoIdPageResult videoIdPageResult = GetVideoIdPage(channelId, YouTubeChannelTabPages.Videos, continuationToken);
+				YouTubeVideoIdPageResult videoIdPageResult = GetVideoIdPage(channelId, YouTubeChannelTabPages.Videos, continuationToken);
 
 				errorCode = videoIdPageResult.ErrorCode;
 				if (errorCode != 200)
