@@ -103,7 +103,7 @@ namespace YouTubeApiLib
 			}
 			else
 			{
-				StreamingData streamingData = rawInfo?.StreamingData;
+				YouTubeStreamingData streamingData = rawInfo?.StreamingData;
 				if (streamingData != null)
 				{
 					DashManifestUrl = streamingData.GetDashManifestUrl();

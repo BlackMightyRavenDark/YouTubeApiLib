@@ -150,7 +150,7 @@ namespace YouTubeApiLib
 			List<YouTubeVideoThumbnail> videoThumbnails = GetThumbnailUrls(jMicroformat, videoId);
 			jSimplifiedVideoInfo["thumbnails"] = ThumbnailsToJson(videoThumbnails);
 
-			StreamingData streamingData = null;
+			YouTubeStreamingData streamingData = null;
 			if (YouTubeApi.getMediaTracksInfoImmediately && isFamilySafe &&
 				rawVideoInfo.DataGettingMethod != VideoInfoGettingMethod.HiddenApiDecryptedUrls)
 			{
@@ -259,7 +259,7 @@ namespace YouTubeApiLib
 			return youTubeVideo;
 		}
 
-		public static StreamingData GetStreamingData(string videoId, VideoInfoGettingMethod method)
+		public static YouTubeStreamingData GetStreamingData(string videoId, VideoInfoGettingMethod method)
 		{
 			RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId, method);
 			if (rawVideoInfoResult.ErrorCode == 200)
@@ -551,7 +551,7 @@ namespace YouTubeApiLib
 			return jsonArr;
 		}
 
-		internal static LinkedList<YouTubeMediaTrack> ParseMediaTracks(StreamingData streamingData)
+		internal static LinkedList<YouTubeMediaTrack> ParseMediaTracks(YouTubeStreamingData streamingData)
 		{
 			return streamingData?.Parse();
 		}

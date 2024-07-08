@@ -4,14 +4,14 @@ using static YouTubeApiLib.Utils;
 
 namespace YouTubeApiLib
 {
-	public class StreamingData
+	public class YouTubeStreamingData
 	{
 		public string RawData { get; }
 		public VideoInfoGettingMethod DataGettingMethod { get; }
 
 		private JObject _parsedData = null;
 
-		public StreamingData(string rawData, VideoInfoGettingMethod dataGettingMethod)
+		public YouTubeStreamingData(string rawData, VideoInfoGettingMethod dataGettingMethod)
 		{
 			RawData = rawData;
 			DataGettingMethod = dataGettingMethod;

@@ -8,7 +8,7 @@ namespace YouTubeApiLib
 		public string RawData { get; }
 		public VideoInfoGettingMethod DataGettingMethod { get; }
 		public YouTubeVideoPlayabilityStatus PlayabilityStatus => ExtractPlayabilityStatus();
-		public StreamingData StreamingData => ExtractStreamingData();
+		public YouTubeStreamingData StreamingData => ExtractStreamingData();
 		public JObject VideoDetails => ExtractVideoDetails();
 		public JObject Microformat => ExtractMicroformat();
 
@@ -27,7 +27,7 @@ namespace YouTubeApiLib
 			return jPlayabilityStatus != null ? YouTubeVideoPlayabilityStatus.Parse(jPlayabilityStatus) : null;
 		}
 
-		private StreamingData ExtractStreamingData()
+		private YouTubeStreamingData ExtractStreamingData()
 		{
 			if (_parsedData == null) { _parsedData = TryParseJson(RawData); }
 			if (_parsedData != null)
@@ -35,7 +35,7 @@ namespace YouTubeApiLib
 				JObject jStreamingData = _parsedData.Value<JObject>("streamingData");
 				if (jStreamingData != null)
 				{
-					return new StreamingData(jStreamingData.ToString(), DataGettingMethod);
+					return new YouTubeStreamingData(jStreamingData.ToString(), DataGettingMethod);
 				}
 			}
 			return null;

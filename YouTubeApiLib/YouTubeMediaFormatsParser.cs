@@ -6,7 +6,7 @@ namespace YouTubeApiLib
 {
 	public static class YouTubeMediaFormatsParser
 	{
-		public static LinkedList<YouTubeMediaTrack> Parse(StreamingData streamingData)
+		public static LinkedList<YouTubeMediaTrack> Parse(YouTubeStreamingData streamingData)
 		{
 			if (streamingData == null || streamingData.RawData == null)
 			{
