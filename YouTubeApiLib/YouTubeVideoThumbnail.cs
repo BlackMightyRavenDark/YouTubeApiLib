@@ -2,28 +2,28 @@
 
 namespace YouTubeApiLib
 {
-    public class YouTubeVideoThumbnail
-    {
-        public string Id { get; }
-        public string Url { get; }
+	public class YouTubeVideoThumbnail
+	{
+		public string Id { get; }
+		public string Url { get; }
 
-        public YouTubeVideoThumbnail(string id, string url)
-        {
-            Id = id;
-            Url = url;
-        }
+		public YouTubeVideoThumbnail(string id, string url)
+		{
+			Id = id;
+			Url = url;
+		}
 
-        public JObject ToJson()
-        {
-            JObject json = new JObject();
-            json["id"] = Id;
-            json["url"] = Url;
-            return json;
-        }
+		public JObject ToJson()
+		{
+			JObject json = new JObject();
+			json["id"] = Id;
+			json["url"] = Url;
+			return json;
+		}
 
-        public override string ToString()
-        {
-            return $"{Id}: {Url}";
-        }
-    }
+		public override string ToString()
+		{
+			return $"{Id}: {Url}";
+		}
+	}
 }
