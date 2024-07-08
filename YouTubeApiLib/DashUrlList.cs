@@ -15,5 +15,10 @@ namespace YouTubeApiLib
 			BaseUrl = baseUrl;
 			_partialUrlList = partialUrlList;
 		}
+
+		public string GetPartialUrl(int id)
+		{
+			return id >= 0 && id < Count ? _partialUrlList[id] : null;
+		}
 	}
 }
