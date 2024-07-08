@@ -186,7 +186,7 @@ namespace YouTubeApiLib
 						}
 					}
 				}
-				return new VideoPageResult(new VideoPage(videos, videoIdPageResult.VideoIdPage.ContinuationToken), 200);
+				return new VideoPageResult(new YouTubeVideoPage(videos, videoIdPageResult.VideoIdPage.ContinuationToken), 200);
 			}
 			return new VideoPageResult(null, videoIdPageResult.ErrorCode);
 		}

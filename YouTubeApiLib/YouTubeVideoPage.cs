@@ -2,12 +2,12 @@
 
 namespace YouTubeApiLib
 {
-	public class VideoPage
+	public class YouTubeVideoPage
 	{
 		public List<YouTubeVideo> Videos { get; }
 		public string ContinuationToken { get; }
 
-		public VideoPage(List<YouTubeVideo> videos, string continuationToken)
+		public YouTubeVideoPage(List<YouTubeVideo> videos, string continuationToken)
 		{
 			Videos = videos;
 			ContinuationToken = continuationToken;
