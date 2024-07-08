@@ -168,7 +168,7 @@ namespace YouTubeApiLib
 			return new RawVideoInfoResult(null, errorCode);
 		}
 
-		internal static VideoPageResult GetVideoPage(string channelId, YouTubeChannelTabPage tabPage, string continuationToken)
+		internal static YouTubeVideoPageResult GetVideoPage(string channelId, YouTubeChannelTabPage tabPage, string continuationToken)
 		{
 			VideoIdPageResult videoIdPageResult = GetVideoIdPage(channelId, tabPage, continuationToken);
 			if (videoIdPageResult.ErrorCode == 200)
@@ -186,9 +186,9 @@ namespace YouTubeApiLib
 						}
 					}
 				}
-				return new VideoPageResult(new YouTubeVideoPage(videos, videoIdPageResult.VideoIdPage.ContinuationToken), 200);
+				return new YouTubeVideoPageResult(new YouTubeVideoPage(videos, videoIdPageResult.VideoIdPage.ContinuationToken), 200);
 			}
-			return new VideoPageResult(null, videoIdPageResult.ErrorCode);
+			return new YouTubeVideoPageResult(null, videoIdPageResult.ErrorCode);
 		}
 
 		internal static VideoIdPageResult GetVideoIdPage(string channelId, YouTubeChannelTabPage tabPage, string continuationToken)
