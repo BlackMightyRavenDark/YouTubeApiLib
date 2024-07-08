@@ -205,7 +205,7 @@ namespace YouTubeApiLib
 			int errorCode = HttpsPost(url, body, out string response);
 			if (errorCode == 200)
 			{
-				VideoIdPage videoIdPage = new VideoIdPage(response, continuationTokenExists);
+				YouTubeVideoIdPage videoIdPage = new YouTubeVideoIdPage(response, continuationTokenExists);
 				int count = videoIdPage.Parse();
 				return new VideoIdPageResult(videoIdPage, count > 0 ? 200 : 400);
 			}

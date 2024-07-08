@@ -3,14 +3,14 @@ using Newtonsoft.Json.Linq;
 
 namespace YouTubeApiLib
 {
-	public class VideoIdPage : IVideoPageParser
+	public class YouTubeVideoIdPage : IVideoPageParser
 	{
 		public string RawData { get; }
 		public List<string> VideoIds { get; private set; }
 		public string ContinuationToken { get; private set; }
 		private bool _isContinuationToken;
 
-		public VideoIdPage(string rawData, bool isContinuationToken)
+		public YouTubeVideoIdPage(string rawData, bool isContinuationToken)
 		{
 			RawData = rawData;
 			_isContinuationToken = isContinuationToken;
