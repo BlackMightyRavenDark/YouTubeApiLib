@@ -692,7 +692,7 @@ namespace YouTubeApiLib
 			return null;
 		}
 
-		public static VideoId ExtractVideoIdFromUrl(string url)
+		public static YouTubeVideoId ExtractVideoIdFromUrl(string url)
 		{
 			if (string.IsNullOrEmpty(url) || string.IsNullOrWhiteSpace(url))
 			{
@@ -708,7 +708,7 @@ namespace YouTubeApiLib
 			{
 				//подразумевается, что юзер ввёл ID видео, а не ссылку.
 				System.Diagnostics.Debug.WriteLine(ex.Message);
-				return new VideoId(url);
+				return new YouTubeVideoId(url);
 			}
 
 			if (!uri.Host.EndsWith("youtube.com", StringComparison.OrdinalIgnoreCase) &&
@@ -741,7 +741,7 @@ namespace YouTubeApiLib
 						videoId = videoId.Substring(0, 11);
 					}
 
-					return new VideoId(videoId);
+					return new YouTubeVideoId(videoId);
 				}
 				return null;
 			}
@@ -752,7 +752,7 @@ namespace YouTubeApiLib
 				return null;
 			}
 
-			return new VideoId(dict["v"]);
+			return new YouTubeVideoId(dict["v"]);
 		}
 
 		public static int DownloadString(string url, out string response)

@@ -8,9 +8,9 @@ namespace YouTubeApiLib
 		internal static VideoInfoGettingMethod defaultVideoInfoGettingMethod = VideoInfoGettingMethod.HiddenApiEncryptedUrls;
 		public static bool decryptMediaTrackUrlsAutomaticallyIfPossible = true;
 
-		public YouTubeVideo GetVideo(VideoId videoId)
+		public YouTubeVideo GetVideo(YouTubeVideoId youTubeVideoId)
 		{
-			RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId);
+			RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(youTubeVideoId);
 			if (rawVideoInfoResult.ErrorCode == 200)
 			{
 				return MakeYouTubeVideo(rawVideoInfoResult.RawVideoInfo);
@@ -34,15 +34,15 @@ namespace YouTubeApiLib
 			return null;
 		}
 
-		public RawVideoInfoResult GetRawVideoInfo(VideoId videoId,
+		public RawVideoInfoResult GetRawVideoInfo(YouTubeVideoId youTubeVideoId,
 			VideoInfoGettingMethod method)
 		{
-			return Utils.GetRawVideoInfo(videoId.Id, method);
+			return Utils.GetRawVideoInfo(youTubeVideoId.Id, method);
 		}
 
-		public RawVideoInfoResult GetRawVideoInfo(VideoId videoId)
+		public RawVideoInfoResult GetRawVideoInfo(YouTubeVideoId youTubeVideoId)
 		{
-			return Utils.GetRawVideoInfo(videoId.Id, defaultVideoInfoGettingMethod);
+			return Utils.GetRawVideoInfo(youTubeVideoId.Id, defaultVideoInfoGettingMethod);
 		}
 
 		public SimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId)

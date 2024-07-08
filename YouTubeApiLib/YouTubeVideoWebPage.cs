@@ -20,9 +20,9 @@ namespace YouTubeApiLib
 			return new YouTubeVideoWebPageResult(webPage, errorCode);
 		}
 
-		public static YouTubeVideoWebPageResult Get(VideoId videoId)
+		public static YouTubeVideoWebPageResult Get(YouTubeVideoId youTubeVideoId)
 		{
-			return videoId != null ? Get(videoId.Id) : new YouTubeVideoWebPageResult(null, 400);
+			return youTubeVideoId != null ? Get(youTubeVideoId.Id) : new YouTubeVideoWebPageResult(null, 400);
 		}
 
 		public static YouTubeVideoWebPageResult FromCode(string webPageCode)

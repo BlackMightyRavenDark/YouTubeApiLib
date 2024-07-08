@@ -23,7 +23,7 @@ namespace YouTubeApiLib.ConsoleTest
 
 			Console.WriteLine($"Video URL: {videoUrl}");
 
-			VideoId videoId = ExtractVideoIdFromUrl(videoUrl);
+			YouTubeVideoId videoId = ExtractVideoIdFromUrl(videoUrl);
 
 			if (videoId != null)
 			{

@@ -1,11 +1,11 @@
 ﻿
 namespace YouTubeApiLib
 {
-	public class VideoId
+	public class YouTubeVideoId
 	{
 		public string Id { get; }
 
-		public VideoId(string id)
+		public YouTubeVideoId(string id)
 		{
 			Id = id;
 		}
