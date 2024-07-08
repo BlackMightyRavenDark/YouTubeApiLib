@@ -31,7 +31,7 @@ namespace YouTubeApiLib.TestChannelPages
 					}
 					string token = !string.IsNullOrEmpty(videoIdPageResult.VideoIdPage.ContinuationToken) &&
 						!string.IsNullOrWhiteSpace(videoIdPageResult.VideoIdPage.ContinuationToken) ?
-					videoIdPageResult.VideoIdPage.ContinuationToken : "null";
+						videoIdPageResult.VideoIdPage.ContinuationToken : "null";
 					Console.WriteLine($"Continuation token: {token}");
 				}
 				else
