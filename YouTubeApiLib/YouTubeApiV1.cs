@@ -302,8 +302,8 @@ namespace YouTubeApiLib
 			int errorCode = HttpPost(url, body.ToString(), out string response);
 			if (errorCode == 200)
 			{
-				bool isContinationToken = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);
-				return new YouTubeApiV1SearchResults(response, searchResultFilter, isContinationToken, errorCode);
+				bool isContinuationToken = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);
+				return new YouTubeApiV1SearchResults(response, searchResultFilter, isContinuationToken, errorCode);
 			}
 			return new YouTubeApiV1SearchResults(null, searchResultFilter, false, errorCode);
 		}
