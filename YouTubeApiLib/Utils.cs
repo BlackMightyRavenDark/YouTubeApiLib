@@ -40,7 +40,7 @@ namespace YouTubeApiLib
 		{
 			if (webPage != null)
 			{
-				RawVideoInfoResult rawVideoInfoResult = ExtractRawVideoInfoFromWebPage(webPage);
+				YouTubeRawVideoInfoResult rawVideoInfoResult = ExtractRawVideoInfoFromWebPage(webPage);
 				if (rawVideoInfoResult.ErrorCode == 200)
 				{
 					SimplifiedVideoInfoResult simplifiedVideoInfoResult = ParseRawVideoInfo(rawVideoInfoResult.RawVideoInfo);
@@ -53,7 +53,7 @@ namespace YouTubeApiLib
 			return null;
 		}
 
-		public static RawVideoInfoResult GetRawVideoInfo(
+		public static YouTubeRawVideoInfoResult GetRawVideoInfo(
 			string videoId, VideoInfoGettingMethod method)
 		{
 			switch (method)
@@ -65,22 +65,22 @@ namespace YouTubeApiLib
 				case VideoInfoGettingMethod.WebPage:
 					return GetRawVideoInfoViaWebPage(videoId);
 			}
-			return new RawVideoInfoResult(null, 400);
+			return new YouTubeRawVideoInfoResult(null, 400);
 		}
 
-		internal static RawVideoInfoResult GetRawVideoInfoViaWebPage(string videoId)
+		internal static YouTubeRawVideoInfoResult GetRawVideoInfoViaWebPage(string videoId)
 		{
 			YouTubeVideoWebPageResult videoWebPageResult = YouTubeVideoWebPage.Get(videoId);
 			if (videoWebPageResult.ErrorCode == 200)
 			{
 				return ExtractRawVideoInfoFromWebPage(videoWebPageResult.VideoWebPage);
 			}
-			return new RawVideoInfoResult(null, videoWebPageResult.ErrorCode);
+			return new YouTubeRawVideoInfoResult(null, videoWebPageResult.ErrorCode);
 		}
 
 		internal static SimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId)
 		{
-			RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId, YouTubeApi.defaultVideoInfoGettingMethod);
+			YouTubeRawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId, YouTubeApi.defaultVideoInfoGettingMethod);
 			if (rawVideoInfoResult.ErrorCode == 200)
 			{
 				return ParseRawVideoInfo(rawVideoInfoResult.RawVideoInfo);
@@ -261,7 +261,7 @@ namespace YouTubeApiLib
 
 		public static YouTubeStreamingData GetStreamingData(string videoId, VideoInfoGettingMethod method)
 		{
-			RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId, method);
+			YouTubeRawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId, method);
 			if (rawVideoInfoResult.ErrorCode == 200)
 			{
 				return rawVideoInfoResult.RawVideoInfo.StreamingData;
@@ -627,7 +627,7 @@ namespace YouTubeApiLib
 			return false;
 		}
 
-		public static RawVideoInfoResult ExtractRawVideoInfoFromWebPage(YouTubeVideoWebPage webPage)
+		public static YouTubeRawVideoInfoResult ExtractRawVideoInfoFromWebPage(YouTubeVideoWebPage webPage)
 		{
 			if (webPage != null)
 			{
@@ -636,14 +636,14 @@ namespace YouTubeApiLib
 				{
 					VideoInfoGettingMethod method = webPage.IsProvidedManually ? VideoInfoGettingMethod.Manual : VideoInfoGettingMethod.WebPage;
 					YouTubeRawVideoInfo youTubeRawVideoInfo = new YouTubeRawVideoInfo(rawVideoInfo, method);
-					return new RawVideoInfoResult(youTubeRawVideoInfo, 200);
+					return new YouTubeRawVideoInfoResult(youTubeRawVideoInfo, 200);
 				}
 				else
 				{
-					return new RawVideoInfoResult(null, 400);
+					return new YouTubeRawVideoInfoResult(null, 400);
 				}
 			}
-			return new RawVideoInfoResult(null, 404);
+			return new YouTubeRawVideoInfoResult(null, 404);
 		}
 
 		internal static string ExtractRawVideoInfoFromWebPageCode(string webPageCode)

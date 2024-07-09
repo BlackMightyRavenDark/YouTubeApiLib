@@ -148,7 +148,7 @@ namespace YouTubeApiLib
 			return $"{API_V1_SEARCH_URL}?key={API_V1_KEY}";
 		}
 
-		internal static RawVideoInfoResult GetRawVideoInfo(
+		internal static YouTubeRawVideoInfoResult GetRawVideoInfo(
 			string videoId, VideoInfoGettingMethod method)
 		{
 			if (method == VideoInfoGettingMethod.WebPage)
@@ -164,9 +164,9 @@ namespace YouTubeApiLib
 			if (errorCode == 200)
 			{
 				YouTubeRawVideoInfo youTubeRawVideoInfo = new YouTubeRawVideoInfo(rawVideoInfoJsonString, method);
-				return new RawVideoInfoResult(youTubeRawVideoInfo, 200);
+				return new YouTubeRawVideoInfoResult(youTubeRawVideoInfo, 200);
 			}
-			return new RawVideoInfoResult(null, errorCode);
+			return new YouTubeRawVideoInfoResult(null, errorCode);
 		}
 
 		internal static YouTubeVideoPageResult GetVideoPage(string channelId, YouTubeChannelTabPage tabPage, string continuationToken)
@@ -177,7 +177,7 @@ namespace YouTubeApiLib
 				List<YouTubeVideo> videos = new List<YouTubeVideo>();
 				foreach (string videoId in videoIdPageResult.VideoIdPage.VideoIds)
 				{
-					RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId, YouTubeApi.defaultVideoInfoGettingMethod);
+					YouTubeRawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId, YouTubeApi.defaultVideoInfoGettingMethod);
 					if (rawVideoInfoResult.ErrorCode == 200)
 					{
 						YouTubeVideo video = MakeYouTubeVideo(rawVideoInfoResult.RawVideoInfo);

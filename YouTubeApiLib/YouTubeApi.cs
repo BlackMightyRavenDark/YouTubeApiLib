@@ -10,7 +10,7 @@ namespace YouTubeApiLib
 
 		public YouTubeVideo GetVideo(YouTubeVideoId youTubeVideoId)
 		{
-			RawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(youTubeVideoId);
+			YouTubeRawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(youTubeVideoId);
 			if (rawVideoInfoResult.ErrorCode == 200)
 			{
 				return MakeYouTubeVideo(rawVideoInfoResult.RawVideoInfo);
@@ -34,13 +34,13 @@ namespace YouTubeApiLib
 			return null;
 		}
 
-		public RawVideoInfoResult GetRawVideoInfo(YouTubeVideoId youTubeVideoId,
+		public YouTubeRawVideoInfoResult GetRawVideoInfo(YouTubeVideoId youTubeVideoId,
 			VideoInfoGettingMethod method)
 		{
 			return Utils.GetRawVideoInfo(youTubeVideoId.Id, method);
 		}
 
-		public RawVideoInfoResult GetRawVideoInfo(YouTubeVideoId youTubeVideoId)
+		public YouTubeRawVideoInfoResult GetRawVideoInfo(YouTubeVideoId youTubeVideoId)
 		{
 			return Utils.GetRawVideoInfo(youTubeVideoId.Id, defaultVideoInfoGettingMethod);
 		}
