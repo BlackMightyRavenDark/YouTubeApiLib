@@ -2,7 +2,7 @@
 
 namespace YouTubeApiLib
 {
-	internal class TabPageVideoContinuationParser2 : IYouTubeChannelTabPageParser
+	internal class YouTubeChannelTabPageVideoContinuationParser2 : IYouTubeChannelTabPageParser
 	{
 		public JArray FindGridItems(JObject tabPage)
 		{

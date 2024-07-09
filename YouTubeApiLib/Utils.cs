@@ -392,8 +392,8 @@ namespace YouTubeApiLib
 				{
 					List<IYouTubeChannelTabPageParser> continuationParsers = new List<IYouTubeChannelTabPageParser>()
 					{
-						new TabPageVideoContinuationParser1(),
-						new TabPageVideoContinuationParser2()
+						new YouTubeChannelTabPageVideoContinuationParser1(),
+						new YouTubeChannelTabPageVideoContinuationParser2()
 					};
 					foreach (IYouTubeChannelTabPageParser continuationParser in continuationParsers)
 					{
@@ -410,7 +410,7 @@ namespace YouTubeApiLib
 					if (selectedTab != null)
 					{
 						List<IYouTubeChannelTabPageParser> parsers = new List<IYouTubeChannelTabPageParser>() {
-							new TabPageParserVideo1(), new TabPageParserVideo2()
+							new YouTubeChannelTabPageParserVideo1(), new YouTubeChannelTabPageParserVideo2()
 						};
 						foreach (IYouTubeChannelTabPageParser parser in parsers)
 						{
