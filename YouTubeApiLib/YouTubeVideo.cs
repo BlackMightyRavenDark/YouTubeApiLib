@@ -151,7 +151,7 @@ namespace YouTubeApiLib
 				if (rawVideoInfoResult.ErrorCode == 200)
 				{
 					UpdateMediaFormats(rawVideoInfoResult.RawVideoInfo);
-					return 200;
+					return MediaTracks != null && MediaTracks.Count > 0 ? 200 : 204;
 				}
 				return rawVideoInfoResult.ErrorCode;
 			}
