@@ -17,6 +17,26 @@ namespace YouTubeApiLib
 			DataGettingMethod = dataGettingMethod;
 		}
 
+		public static YouTubeStreamingData Get(YouTubeVideoId videoId, YouTubeVideoInfoGettingMethod method)
+		{
+			return Get(videoId.Id, method);
+		}
+
+		public static YouTubeStreamingData Get(string videoId, YouTubeVideoInfoGettingMethod method)
+		{
+			return GetStreamingData(videoId, method);
+		}
+
+		public static YouTubeStreamingData Get(YouTubeVideoId videoId)
+		{
+			return Get(videoId, YouTubeApi.defaultVideoInfoGettingMethod);
+		}
+
+		public static YouTubeStreamingData Get(string videoId)
+		{
+			return Get(videoId, YouTubeApi.defaultVideoInfoGettingMethod);
+		}
+
 		public LinkedList<YouTubeMediaTrack> Parse()
 		{
 			return YouTubeMediaFormatsParser.Parse(this);

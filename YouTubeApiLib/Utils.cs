@@ -158,7 +158,7 @@ namespace YouTubeApiLib
 					YouTubeApi.decryptMediaTrackUrlsAutomaticallyIfPossible && !isUnlisted ?
 					YouTubeVideoInfoGettingMethod.HiddenApiDecryptedUrls :
 					YouTubeVideoInfoGettingMethod.HiddenApiEncryptedUrls;
-				streamingData = GetStreamingData(videoId, method);
+				streamingData = YouTubeStreamingData.Get(videoId, method);
 			}
 			jSimplifiedVideoInfo["streamingData"] =
 				streamingData != null ? streamingData.RawData : rawVideoInfo.StreamingData?.RawData;
@@ -259,7 +259,7 @@ namespace YouTubeApiLib
 			return youTubeVideo;
 		}
 
-		public static YouTubeStreamingData GetStreamingData(string videoId, YouTubeVideoInfoGettingMethod method)
+		internal static YouTubeStreamingData GetStreamingData(string videoId, YouTubeVideoInfoGettingMethod method)
 		{
 			YouTubeRawVideoInfoResult rawVideoInfoResult = YouTubeRawVideoInfo.Get(videoId, method);
 			if (rawVideoInfoResult.ErrorCode == 200)
