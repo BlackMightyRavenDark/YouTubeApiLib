@@ -42,6 +42,11 @@ namespace YouTubeApiLib
 			return Get(youTubeVideoId, YouTubeApi.defaultVideoInfoGettingMethod);
 		}
 
+		public YouTubeSimplifiedVideoInfoResult Parse()
+		{
+			return ParseRawVideoInfo(this);
+		}
+
 		private YouTubeVideoPlayabilityStatus ExtractPlayabilityStatus()
 		{
 			if (_parsedData == null) { _parsedData = TryParseJson(RawData); }

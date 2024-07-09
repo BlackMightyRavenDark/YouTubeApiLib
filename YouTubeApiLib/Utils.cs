@@ -43,7 +43,7 @@ namespace YouTubeApiLib
 				YouTubeRawVideoInfoResult rawVideoInfoResult = ExtractRawVideoInfoFromWebPage(webPage);
 				if (rawVideoInfoResult.ErrorCode == 200)
 				{
-					YouTubeSimplifiedVideoInfoResult simplifiedVideoInfoResult = ParseRawVideoInfo(rawVideoInfoResult.RawVideoInfo);
+					YouTubeSimplifiedVideoInfoResult simplifiedVideoInfoResult = rawVideoInfoResult.RawVideoInfo.Parse();
 					if (simplifiedVideoInfoResult.ErrorCode == 200)
 					{
 						return MakeYouTubeVideo(rawVideoInfoResult.RawVideoInfo, simplifiedVideoInfoResult.SimplifiedVideoInfo);
@@ -83,12 +83,12 @@ namespace YouTubeApiLib
 			YouTubeRawVideoInfoResult rawVideoInfoResult = YouTubeRawVideoInfo.Get(videoId, YouTubeApi.defaultVideoInfoGettingMethod);
 			if (rawVideoInfoResult.ErrorCode == 200)
 			{
-				return ParseRawVideoInfo(rawVideoInfoResult.RawVideoInfo);
+				return rawVideoInfoResult.RawVideoInfo.Parse();
 			}
 			return new YouTubeSimplifiedVideoInfoResult(null, rawVideoInfoResult.ErrorCode);
 		}
 
-		public static YouTubeSimplifiedVideoInfoResult ParseRawVideoInfo(YouTubeRawVideoInfo rawVideoInfo)
+		internal static YouTubeSimplifiedVideoInfoResult ParseRawVideoInfo(YouTubeRawVideoInfo rawVideoInfo)
 		{
 			JObject jVideoDetails = rawVideoInfo.VideoDetails;
 			JObject jMicroformat = rawVideoInfo.Microformat;
@@ -170,7 +170,7 @@ namespace YouTubeApiLib
 
 		public static YouTubeVideo MakeYouTubeVideo(YouTubeRawVideoInfo rawVideoInfo)
 		{
-			YouTubeSimplifiedVideoInfoResult simplifiedVideoInfoResult = ParseRawVideoInfo(rawVideoInfo);
+			YouTubeSimplifiedVideoInfoResult simplifiedVideoInfoResult = rawVideoInfo.Parse();
 			if (simplifiedVideoInfoResult.ErrorCode != 200)
 			{
 				return YouTubeVideo.CreateEmpty(rawVideoInfo.PlayabilityStatus);
