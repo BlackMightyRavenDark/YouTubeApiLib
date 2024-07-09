@@ -124,7 +124,7 @@ namespace YouTubeApiLib
 									dashChunkUrls.Add(segmentUrlPartial);
 								}
 							}
-							DashUrlList dashUrlList = new DashUrlList(baseUrl, dashChunkUrls);
+							YouTubeDashUrlList dashUrlList = new YouTubeDashUrlList(baseUrl, dashChunkUrls);
 
 							YouTubeMediaTrack video = new YouTubeMediaTrackVideo(
 								formatId, videoWidth, videoHeight, videoFrameRate, videoBitrate,
@@ -226,7 +226,7 @@ namespace YouTubeApiLib
 									dashChunkUrls.Add(segmentUrl);
 								}
 							}
-							DashUrlList dashUrlList = new DashUrlList(baseUrl, dashChunkUrls);
+							YouTubeDashUrlList dashUrlList = new YouTubeDashUrlList(baseUrl, dashChunkUrls);
 
 							YouTubeMediaTrack audio = new YouTubeMediaTrackAudio(
 								formatId, audioBitrate, audioSampleRate, audioChannelCount,

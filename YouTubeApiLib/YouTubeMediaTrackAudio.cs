@@ -32,7 +32,7 @@ namespace YouTubeApiLib
 			bool isHls,
 			bool isCiphered,
 			string dashManifestUrl,
-			DashUrlList dashUrls)
+			YouTubeDashUrlList dashUrls)
 			: base(formatId, bitrate, averageBitrate, lastModified, contentLength,
 				  quality, qualityLabel, approxDurationMs, null, fileUrl,
 				  cipherSignatureEncrypted, cipherEncryptedFileUrl,
@@ -56,7 +56,7 @@ namespace YouTubeApiLib
 			string mimeCodecs,
 			string fileExtension,
 			string dashManifestUrl,
-			DashUrlList dashUrls)
+			YouTubeDashUrlList dashUrls)
 			: base(formatId, bitrate, bitrate, null, -1L, null, null, -1,
 				  null, null, null, null,
 				  mimeType, mimeExt, mimeCodecs, fileExtension,

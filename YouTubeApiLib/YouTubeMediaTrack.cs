@@ -23,7 +23,7 @@ namespace YouTubeApiLib
 		public bool IsHlsManifest { get; }
 		public bool IsCiphered { get; }
 		public string DashManifestUrl { get; }
-		public DashUrlList DashUrls { get; }
+		public YouTubeDashUrlList DashUrls { get; }
 		public string HlsManifestUrl { get; }
 		public YouTubeBroadcast Broadcast { get; }
 
@@ -48,7 +48,7 @@ namespace YouTubeApiLib
 			bool isHlsManifest,
 			bool isCiphered,
 			string dashManifestUrl,
-			DashUrlList dashUrls,
+			YouTubeDashUrlList dashUrls,
 			string hlsManifestUrl,
 			YouTubeBroadcast broadcast)
 		{

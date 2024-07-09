@@ -2,7 +2,7 @@
 
 namespace YouTubeApiLib
 {
-	public class DashUrlList
+	public class YouTubeDashUrlList
 	{
 		public string BaseUrl { get; }
 		private readonly List<string> _partialUrlList;
@@ -10,7 +10,7 @@ namespace YouTubeApiLib
 		public int Count => _partialUrlList != null ? _partialUrlList.Count : -1;
 		public string this[int id] => BaseUrl + _partialUrlList[id];
 
-		public DashUrlList(string baseUrl, List<string> partialUrlList)
+		public YouTubeDashUrlList(string baseUrl, List<string> partialUrlList)
 		{
 			BaseUrl = baseUrl;
 			_partialUrlList = partialUrlList;
