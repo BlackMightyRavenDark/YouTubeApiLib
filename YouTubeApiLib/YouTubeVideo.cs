@@ -141,7 +141,7 @@ namespace YouTubeApiLib
 		/// Warming!!! You will lost the current media track list!
 		/// </summary>
 		/// <returns>HTTP error code.</returns>
-		public int UpdateMediaFormats(Utils.VideoInfoGettingMethod method)
+		public int UpdateMediaFormats(Utils.YouTubeVideoInfoGettingMethod method)
 		{
 			MediaTracks = null;
 			YouTubeRawVideoInfoResult rawVideoInfoResult = Utils.GetRawVideoInfo(Id, method);
@@ -165,8 +165,8 @@ namespace YouTubeApiLib
 		/// <returns>HTTP error code.</returns>
 		public int UpdateMediaFormats()
 		{
-			Utils.VideoInfoGettingMethod method =
-				RawInfo != null ? RawInfo.DataGettingMethod : Utils.VideoInfoGettingMethod.HiddenApiEncryptedUrls;
+			Utils.YouTubeVideoInfoGettingMethod method =
+				RawInfo != null ? RawInfo.DataGettingMethod : Utils.YouTubeVideoInfoGettingMethod.HiddenApiEncryptedUrls;
 			return UpdateMediaFormats(method);
 		}
 

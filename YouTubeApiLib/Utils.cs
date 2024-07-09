@@ -12,7 +12,7 @@ namespace YouTubeApiLib
 	{
 		public const string YOUTUBE_URL = "https://www.youtube.com";
 
-		public enum VideoInfoGettingMethod
+		public enum YouTubeVideoInfoGettingMethod
 		{
 			HiddenApiEncryptedUrls,
 			HiddenApiDecryptedUrls,
@@ -54,15 +54,15 @@ namespace YouTubeApiLib
 		}
 
 		public static YouTubeRawVideoInfoResult GetRawVideoInfo(
-			string videoId, VideoInfoGettingMethod method)
+			string videoId, YouTubeVideoInfoGettingMethod method)
 		{
 			switch (method)
 			{
-				case VideoInfoGettingMethod.HiddenApiEncryptedUrls:
-				case VideoInfoGettingMethod.HiddenApiDecryptedUrls:
+				case YouTubeVideoInfoGettingMethod.HiddenApiEncryptedUrls:
+				case YouTubeVideoInfoGettingMethod.HiddenApiDecryptedUrls:
 					return YouTubeApiV1.GetRawVideoInfo(videoId, method);
 
-				case VideoInfoGettingMethod.WebPage:
+				case YouTubeVideoInfoGettingMethod.WebPage:
 					return GetRawVideoInfoViaWebPage(videoId);
 			}
 			return new YouTubeRawVideoInfoResult(null, 400);
@@ -152,12 +152,12 @@ namespace YouTubeApiLib
 
 			YouTubeStreamingData streamingData = null;
 			if (YouTubeApi.getMediaTracksInfoImmediately && isFamilySafe &&
-				rawVideoInfo.DataGettingMethod != VideoInfoGettingMethod.HiddenApiDecryptedUrls)
+				rawVideoInfo.DataGettingMethod != YouTubeVideoInfoGettingMethod.HiddenApiDecryptedUrls)
 			{
-				VideoInfoGettingMethod method =
+				YouTubeVideoInfoGettingMethod method =
 					YouTubeApi.decryptMediaTrackUrlsAutomaticallyIfPossible && !isUnlisted ?
-					VideoInfoGettingMethod.HiddenApiDecryptedUrls :
-					VideoInfoGettingMethod.HiddenApiEncryptedUrls;
+					YouTubeVideoInfoGettingMethod.HiddenApiDecryptedUrls :
+					YouTubeVideoInfoGettingMethod.HiddenApiEncryptedUrls;
 				streamingData = GetStreamingData(videoId, method);
 			}
 			jSimplifiedVideoInfo["streamingData"] =
@@ -259,7 +259,7 @@ namespace YouTubeApiLib
 			return youTubeVideo;
 		}
 
-		public static YouTubeStreamingData GetStreamingData(string videoId, VideoInfoGettingMethod method)
+		public static YouTubeStreamingData GetStreamingData(string videoId, YouTubeVideoInfoGettingMethod method)
 		{
 			YouTubeRawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId, method);
 			if (rawVideoInfoResult.ErrorCode == 200)
@@ -634,7 +634,7 @@ namespace YouTubeApiLib
 				string rawVideoInfo = ExtractRawVideoInfoFromWebPageCode(webPage.WebPageCode);
 				if (!string.IsNullOrEmpty(rawVideoInfo) && !string.IsNullOrWhiteSpace(rawVideoInfo))
 				{
-					VideoInfoGettingMethod method = webPage.IsProvidedManually ? VideoInfoGettingMethod.Manual : VideoInfoGettingMethod.WebPage;
+					YouTubeVideoInfoGettingMethod method = webPage.IsProvidedManually ? YouTubeVideoInfoGettingMethod.Manual : YouTubeVideoInfoGettingMethod.WebPage;
 					YouTubeRawVideoInfo youTubeRawVideoInfo = new YouTubeRawVideoInfo(rawVideoInfo, method);
 					return new YouTubeRawVideoInfoResult(youTubeRawVideoInfo, 200);
 				}

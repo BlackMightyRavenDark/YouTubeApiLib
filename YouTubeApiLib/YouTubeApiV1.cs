@@ -149,14 +149,14 @@ namespace YouTubeApiLib
 		}
 
 		internal static YouTubeRawVideoInfoResult GetRawVideoInfo(
-			string videoId, VideoInfoGettingMethod method)
+			string videoId, YouTubeVideoInfoGettingMethod method)
 		{
-			if (method == VideoInfoGettingMethod.WebPage)
+			if (method == YouTubeVideoInfoGettingMethod.WebPage)
 			{
 				return GetRawVideoInfoViaWebPage(videoId);
 			}
 
-			JObject body = method == VideoInfoGettingMethod.HiddenApiEncryptedUrls ?
+			JObject body = method == YouTubeVideoInfoGettingMethod.HiddenApiEncryptedUrls ?
 				GenerateVideoInfoEncryptedRequestBody(videoId) :
 				GenerateVideoInfoDecryptedRequestBody(videoId);
 			string url = $"{API_V1_PLAYER_URL}?key={API_V1_KEY}";

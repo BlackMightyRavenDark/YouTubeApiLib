@@ -6,7 +6,7 @@ namespace YouTubeApiLib
 	public class YouTubeRawVideoInfo
 	{
 		public string RawData { get; }
-		public VideoInfoGettingMethod DataGettingMethod { get; }
+		public YouTubeVideoInfoGettingMethod DataGettingMethod { get; }
 		public YouTubeVideoPlayabilityStatus PlayabilityStatus => ExtractPlayabilityStatus();
 		public YouTubeStreamingData StreamingData => ExtractStreamingData();
 		public JObject VideoDetails => ExtractVideoDetails();
@@ -14,7 +14,7 @@ namespace YouTubeApiLib
 
 		private JObject _parsedData = null;
 
-		public YouTubeRawVideoInfo(string rawData, VideoInfoGettingMethod dataGettingMethod)
+		public YouTubeRawVideoInfo(string rawData, YouTubeVideoInfoGettingMethod dataGettingMethod)
 		{
 			RawData = rawData;
 			DataGettingMethod = dataGettingMethod;

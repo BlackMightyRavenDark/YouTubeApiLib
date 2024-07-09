@@ -7,11 +7,11 @@ namespace YouTubeApiLib
 	public class YouTubeStreamingData
 	{
 		public string RawData { get; }
-		public VideoInfoGettingMethod DataGettingMethod { get; }
+		public YouTubeVideoInfoGettingMethod DataGettingMethod { get; }
 
 		private JObject _parsedData = null;
 
-		public YouTubeStreamingData(string rawData, VideoInfoGettingMethod dataGettingMethod)
+		public YouTubeStreamingData(string rawData, YouTubeVideoInfoGettingMethod dataGettingMethod)
 		{
 			RawData = rawData;
 			DataGettingMethod = dataGettingMethod;
