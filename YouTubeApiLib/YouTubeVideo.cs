@@ -133,7 +133,7 @@ namespace YouTubeApiLib
 		/// </summary>
 		public void UpdateMediaFormats(YouTubeRawVideoInfo rawVideoInfo)
 		{
-			MediaTracks = Utils.ParseMediaTracks(rawVideoInfo);
+			MediaTracks = rawVideoInfo.StreamingData?.Parse();
 		}
 
 		/// <summary>

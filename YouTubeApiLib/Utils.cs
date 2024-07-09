@@ -243,8 +243,8 @@ namespace YouTubeApiLib
 			if (YouTubeApi.getMediaTracksInfoImmediately)
 			{
 				mediaTracks = simplifiedVideoInfo.StreamingData != null ?
-					ParseMediaTracks(simplifiedVideoInfo.StreamingData) :
-					ParseMediaTracks(rawVideoInfo);
+					simplifiedVideoInfo.StreamingData.Parse() :
+					rawVideoInfo.StreamingData?.Parse();
 			}
 
 			YouTubeVideoPlayabilityStatus videoStatus = rawVideoInfo.PlayabilityStatus;
@@ -549,16 +549,6 @@ namespace YouTubeApiLib
 				jsonArr.Add(thumbnail.ToJson());
 			}
 			return jsonArr;
-		}
-
-		internal static LinkedList<YouTubeMediaTrack> ParseMediaTracks(YouTubeStreamingData streamingData)
-		{
-			return streamingData?.Parse();
-		}
-
-		internal static LinkedList<YouTubeMediaTrack> ParseMediaTracks(YouTubeRawVideoInfo rawVideoInfo)
-		{
-			return rawVideoInfo != null ? ParseMediaTracks(rawVideoInfo.StreamingData) : null;
 		}
 
 		public static int HttpPost(string url, string body, out string responseString)
