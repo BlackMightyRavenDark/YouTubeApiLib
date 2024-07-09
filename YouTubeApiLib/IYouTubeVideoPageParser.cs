@@ -1,7 +1,7 @@
 ﻿
 namespace YouTubeApiLib
 {
-	internal interface IVideoPageParser
+	internal interface IYouTubeVideoPageParser
 	{
 		int Parse();
 	}

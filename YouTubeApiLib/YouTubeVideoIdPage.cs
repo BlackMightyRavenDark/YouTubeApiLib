@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 
 namespace YouTubeApiLib
 {
-	public class YouTubeVideoIdPage : IVideoPageParser
+	public class YouTubeVideoIdPage : IYouTubeVideoPageParser
 	{
 		public string RawData { get; }
 		public List<string> VideoIds { get; private set; }
