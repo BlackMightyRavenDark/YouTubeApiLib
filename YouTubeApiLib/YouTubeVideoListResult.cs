@@ -2,12 +2,12 @@
 
 namespace YouTubeApiLib
 {
-	public class VideoListResult
+	public class YouTubeVideoListResult
 	{
 		public JArray List { get; }
 		public int ErrorCode { get; }
 
-		public VideoListResult(JArray list, int errorCode)
+		public YouTubeVideoListResult(JArray list, int errorCode)
 		{
 			List = list;
 			ErrorCode = errorCode;

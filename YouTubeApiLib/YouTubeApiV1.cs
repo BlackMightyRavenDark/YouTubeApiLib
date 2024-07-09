@@ -213,7 +213,7 @@ namespace YouTubeApiLib
 			return new YouTubeVideoIdPageResult(null, errorCode);
 		}
 
-		internal static VideoListResult GetChannelVideoList(string channelId)
+		internal static YouTubeVideoListResult GetChannelVideoList(string channelId)
 		{
 			JArray resList = new JArray();
 			string continuationToken = null;
@@ -247,7 +247,7 @@ namespace YouTubeApiLib
 				System.Diagnostics.Debug.WriteLine(continuationToken);
 			}
 
-			return new VideoListResult(resList, resList.Count > 0 ? 200 : errorCode);
+			return new YouTubeVideoListResult(resList, resList.Count > 0 ? 200 : errorCode);
 		}
 
 		internal static YouTubeChannelTabResult GetChannelTab(string channelId, YouTubeChannelTabPage channelTabPage)

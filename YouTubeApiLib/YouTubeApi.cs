@@ -50,7 +50,7 @@ namespace YouTubeApiLib
 			return Utils.GetSimplifiedVideoInfo(videoId);
 		}
 
-		public VideoListResult GetChannelVideoList(YouTubeChannel channel)
+		public YouTubeVideoListResult GetChannelVideoList(YouTubeChannel channel)
 		{
 			return YouTubeApiV1.GetChannelVideoList(channel.Id);
 		}
