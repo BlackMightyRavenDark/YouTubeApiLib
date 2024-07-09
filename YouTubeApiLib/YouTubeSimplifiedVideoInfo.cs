@@ -2,7 +2,7 @@
 
 namespace YouTubeApiLib
 {
-	public class SimplifiedVideoInfo
+	public class YouTubeSimplifiedVideoInfo
 	{
 		public JObject Info { get; }
 		public bool IsVideoInfoAvailable { get; }
@@ -15,7 +15,7 @@ namespace YouTubeApiLib
 		/// </summary>
 		public YouTubeStreamingData StreamingData { get; } //TODO: This field must not to be here!
 
-		public SimplifiedVideoInfo(JObject simplifiedVideoInfo,
+		public YouTubeSimplifiedVideoInfo(JObject simplifiedVideoInfo,
 			bool isVideoInfoAvailable, bool isMicroformatInfoAvailable,
 			YouTubeStreamingData streamingData)
 		{

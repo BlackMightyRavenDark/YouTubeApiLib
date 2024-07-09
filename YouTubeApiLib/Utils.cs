@@ -163,7 +163,7 @@ namespace YouTubeApiLib
 			jSimplifiedVideoInfo["streamingData"] =
 				streamingData != null ? streamingData.RawData : rawVideoInfo.StreamingData?.RawData;
 
-			SimplifiedVideoInfo simplifiedVideoInfo = new SimplifiedVideoInfo(
+			YouTubeSimplifiedVideoInfo simplifiedVideoInfo = new YouTubeSimplifiedVideoInfo(
 				jSimplifiedVideoInfo, jVideoDetails != null, jMicroformatRenderer != null, streamingData);
 			return new SimplifiedVideoInfoResult(simplifiedVideoInfo, 200);
 		}
@@ -179,7 +179,7 @@ namespace YouTubeApiLib
 			return MakeYouTubeVideo(rawVideoInfo, simplifiedVideoInfoResult.SimplifiedVideoInfo);
 		}
 
-		public static YouTubeVideo MakeYouTubeVideo(YouTubeRawVideoInfo rawVideoInfo, SimplifiedVideoInfo simplifiedVideoInfo)
+		public static YouTubeVideo MakeYouTubeVideo(YouTubeRawVideoInfo rawVideoInfo, YouTubeSimplifiedVideoInfo simplifiedVideoInfo)
 		{
 			string videoTitle = null;
 			string videoId = null;

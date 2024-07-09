@@ -34,7 +34,7 @@ namespace YouTubeApiLib
 		public List<YouTubeVideoThumbnail> ThumbnailUrls { get; }
 		public LinkedList<YouTubeMediaTrack> MediaTracks { get; private set; }
 		public YouTubeRawVideoInfo RawInfo { get; private set; }
-		public SimplifiedVideoInfo SimplifiedInfo { get; }
+		public YouTubeSimplifiedVideoInfo SimplifiedInfo { get; }
 		public YouTubeVideoPlayabilityStatus Status { get; }
 		public bool IsInfoAvailable => GetIsInfoAvailable();
 
@@ -56,7 +56,7 @@ namespace YouTubeApiLib
 			List<YouTubeVideoThumbnail> thumbnailUrls,
 			LinkedList<YouTubeMediaTrack> mediaTracks,
 			YouTubeRawVideoInfo rawInfo,
-			SimplifiedVideoInfo simplifiedInfo,
+			YouTubeSimplifiedVideoInfo simplifiedInfo,
 			YouTubeVideoPlayabilityStatus status)
 		{
 			Title = title;
