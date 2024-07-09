@@ -230,7 +230,7 @@ namespace YouTubeApiLib
 
 				foreach (string videoId in videoIdPageResult.VideoIdPage.VideoIds)
 				{
-					SimplifiedVideoInfoResult simplifiedVideoInfoResult = GetSimplifiedVideoInfo(videoId);
+					YouTubeSimplifiedVideoInfoResult simplifiedVideoInfoResult = GetSimplifiedVideoInfo(videoId);
 					if (simplifiedVideoInfoResult.ErrorCode == 200)
 					{
 						resList.Add(simplifiedVideoInfoResult.SimplifiedVideoInfo.Info);

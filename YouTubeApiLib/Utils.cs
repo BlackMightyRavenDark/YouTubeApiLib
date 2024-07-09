@@ -43,7 +43,7 @@ namespace YouTubeApiLib
 				YouTubeRawVideoInfoResult rawVideoInfoResult = ExtractRawVideoInfoFromWebPage(webPage);
 				if (rawVideoInfoResult.ErrorCode == 200)
 				{
-					SimplifiedVideoInfoResult simplifiedVideoInfoResult = ParseRawVideoInfo(rawVideoInfoResult.RawVideoInfo);
+					YouTubeSimplifiedVideoInfoResult simplifiedVideoInfoResult = ParseRawVideoInfo(rawVideoInfoResult.RawVideoInfo);
 					if (simplifiedVideoInfoResult.ErrorCode == 200)
 					{
 						return MakeYouTubeVideo(rawVideoInfoResult.RawVideoInfo, simplifiedVideoInfoResult.SimplifiedVideoInfo);
@@ -78,17 +78,17 @@ namespace YouTubeApiLib
 			return new YouTubeRawVideoInfoResult(null, videoWebPageResult.ErrorCode);
 		}
 
-		internal static SimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId)
+		internal static YouTubeSimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId)
 		{
 			YouTubeRawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId, YouTubeApi.defaultVideoInfoGettingMethod);
 			if (rawVideoInfoResult.ErrorCode == 200)
 			{
 				return ParseRawVideoInfo(rawVideoInfoResult.RawVideoInfo);
 			}
-			return new SimplifiedVideoInfoResult(null, rawVideoInfoResult.ErrorCode);
+			return new YouTubeSimplifiedVideoInfoResult(null, rawVideoInfoResult.ErrorCode);
 		}
 
-		public static SimplifiedVideoInfoResult ParseRawVideoInfo(YouTubeRawVideoInfo rawVideoInfo)
+		public static YouTubeSimplifiedVideoInfoResult ParseRawVideoInfo(YouTubeRawVideoInfo rawVideoInfo)
 		{
 			JObject jVideoDetails = rawVideoInfo.VideoDetails;
 			JObject jMicroformat = rawVideoInfo.Microformat;
@@ -165,12 +165,12 @@ namespace YouTubeApiLib
 
 			YouTubeSimplifiedVideoInfo simplifiedVideoInfo = new YouTubeSimplifiedVideoInfo(
 				jSimplifiedVideoInfo, jVideoDetails != null, jMicroformatRenderer != null, streamingData);
-			return new SimplifiedVideoInfoResult(simplifiedVideoInfo, 200);
+			return new YouTubeSimplifiedVideoInfoResult(simplifiedVideoInfo, 200);
 		}
 
 		public static YouTubeVideo MakeYouTubeVideo(YouTubeRawVideoInfo rawVideoInfo)
 		{
-			SimplifiedVideoInfoResult simplifiedVideoInfoResult = ParseRawVideoInfo(rawVideoInfo);
+			YouTubeSimplifiedVideoInfoResult simplifiedVideoInfoResult = ParseRawVideoInfo(rawVideoInfo);
 			if (simplifiedVideoInfoResult.ErrorCode != 200)
 			{
 				return YouTubeVideo.CreateEmpty(rawVideoInfo.PlayabilityStatus);

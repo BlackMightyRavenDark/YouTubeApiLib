@@ -45,7 +45,7 @@ namespace YouTubeApiLib
 			return Utils.GetRawVideoInfo(youTubeVideoId.Id, defaultVideoInfoGettingMethod);
 		}
 
-		public SimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId)
+		public YouTubeSimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId)
 		{
 			return Utils.GetSimplifiedVideoInfo(videoId);
 		}
