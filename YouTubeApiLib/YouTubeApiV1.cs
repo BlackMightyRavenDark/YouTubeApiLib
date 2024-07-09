@@ -160,7 +160,7 @@ namespace YouTubeApiLib
 				GenerateVideoInfoEncryptedRequestBody(videoId) :
 				GenerateVideoInfoDecryptedRequestBody(videoId);
 			string url = $"{API_V1_PLAYER_URL}?key={API_V1_KEY}";
-			int errorCode = HttpsPost(url, body.ToString(), out string rawVideoInfoJsonString);
+			int errorCode = HttpPost(url, body.ToString(), out string rawVideoInfoJsonString);
 			if (errorCode == 200)
 			{
 				YouTubeRawVideoInfo youTubeRawVideoInfo = new YouTubeRawVideoInfo(rawVideoInfoJsonString, method);
@@ -203,7 +203,7 @@ namespace YouTubeApiLib
 		{
 			string url = $"{API_V1_BROWSE_URL}?key={API_V1_KEY}";
 			string body = requestBody != null ? requestBody.ToString() : string.Empty;
-			int errorCode = HttpsPost(url, body, out string response);
+			int errorCode = HttpPost(url, body, out string response);
 			if (errorCode == 200)
 			{
 				YouTubeVideoIdPage videoIdPage = new YouTubeVideoIdPage(response, continuationTokenExists);
@@ -254,7 +254,7 @@ namespace YouTubeApiLib
 		{
 			string url = $"{API_V1_BROWSE_URL}?key={API_V1_KEY}";
 			JObject body = GenerateChannelTabRequestBody(channelId, channelTabPage, null);
-			int errorCode = HttpsPost(url, body.ToString(), out string response);
+			int errorCode = HttpPost(url, body.ToString(), out string response);
 			if (errorCode == 200)
 			{
 				JObject json = TryParseJson(response);
@@ -287,7 +287,7 @@ namespace YouTubeApiLib
 		{
 			string url = $"{API_V1_BROWSE_URL}?key={API_V1_KEY}";
 			JObject body = GenerateChannelTabRequestBody(channelId, channelTabPage, pageToken);
-			int errorCode = HttpsPost(url, body.ToString(), out string response);
+			int errorCode = HttpPost(url, body.ToString(), out string response);
 			return new YouTubeChannelTabPageContentResult(
 				new YouTubeChannelTabPageContent(channelTabPage, response), errorCode);
 		}
@@ -299,7 +299,7 @@ namespace YouTubeApiLib
 			string url = GetSearchRequestUrl();
 			JObject body = GenerateSearchQueryRequestBody(
 				searchQuery, continuationToken, searchResultFilter);
-			int errorCode = HttpsPost(url, body.ToString(), out string response);
+			int errorCode = HttpPost(url, body.ToString(), out string response);
 			if (errorCode == 200)
 			{
 				bool isContinationToken = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);

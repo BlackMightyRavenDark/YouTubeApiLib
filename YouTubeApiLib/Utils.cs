@@ -561,7 +561,7 @@ namespace YouTubeApiLib
 			return rawVideoInfo != null ? ParseMediaTracks(rawVideoInfo.StreamingData) : null;
 		}
 
-		public static int HttpsPost(string url, string body, out string responseString)
+		public static int HttpPost(string url, string body, out string responseString)
 		{
 			try
 			{
