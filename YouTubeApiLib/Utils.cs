@@ -390,12 +390,12 @@ namespace YouTubeApiLib
 			{
 				if (token)
 				{
-					List<ITabPageParser> continuationParsers = new List<ITabPageParser>()
+					List<IYouTubeChannelTabPageParser> continuationParsers = new List<IYouTubeChannelTabPageParser>()
 					{
 						new TabPageVideoContinuationParser1(),
 						new TabPageVideoContinuationParser2()
 					};
-					foreach (ITabPageParser continuationParser in continuationParsers)
+					foreach (IYouTubeChannelTabPageParser continuationParser in continuationParsers)
 					{
 						JArray items = continuationParser.FindGridItems(json);
 						if (items != null && items.Count > 0)
@@ -409,10 +409,10 @@ namespace YouTubeApiLib
 					YouTubeChannelTab selectedTab = FindSelectedChannelTab(json);
 					if (selectedTab != null)
 					{
-						List<ITabPageParser> parsers = new List<ITabPageParser>() {
+						List<IYouTubeChannelTabPageParser> parsers = new List<IYouTubeChannelTabPageParser>() {
 							new TabPageParserVideo1(), new TabPageParserVideo2()
 						};
-						foreach (ITabPageParser parser in parsers)
+						foreach (IYouTubeChannelTabPageParser parser in parsers)
 						{
 							JArray items = parser.FindGridItems(selectedTab.Json);
 							if (items != null && items.Count > 0)
