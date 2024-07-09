@@ -20,6 +20,28 @@ namespace YouTubeApiLib
 			DataGettingMethod = dataGettingMethod;
 		}
 
+		public static YouTubeRawVideoInfoResult Get(YouTubeVideoId videoId, YouTubeVideoInfoGettingMethod method)
+		{
+			return GetRawVideoInfo(videoId.Id, method);
+		}
+
+		public static YouTubeRawVideoInfoResult Get(string videoId, YouTubeVideoInfoGettingMethod method)
+		{
+			YouTubeVideoId youTubeVideoId = new YouTubeVideoId(videoId);
+			return Get(youTubeVideoId, method);
+		}
+
+		public static YouTubeRawVideoInfoResult Get(YouTubeVideoId videoId)
+		{
+			return Get(videoId.Id, YouTubeApi.defaultVideoInfoGettingMethod);
+		}
+
+		public static YouTubeRawVideoInfoResult Get(string videoId)
+		{
+			YouTubeVideoId youTubeVideoId = new YouTubeVideoId(videoId);
+			return Get(youTubeVideoId, YouTubeApi.defaultVideoInfoGettingMethod);
+		}
+
 		private YouTubeVideoPlayabilityStatus ExtractPlayabilityStatus()
 		{
 			if (_parsedData == null) { _parsedData = TryParseJson(RawData); }

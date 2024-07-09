@@ -144,7 +144,7 @@ namespace YouTubeApiLib
 		public int UpdateMediaFormats(Utils.YouTubeVideoInfoGettingMethod method)
 		{
 			MediaTracks = null;
-			YouTubeRawVideoInfoResult rawVideoInfoResult = Utils.GetRawVideoInfo(Id, method);
+			YouTubeRawVideoInfoResult rawVideoInfoResult = YouTubeRawVideoInfo.Get(Id, method);
 			if (rawVideoInfoResult != null)
 			{
 				RawInfo = rawVideoInfoResult.RawVideoInfo;
