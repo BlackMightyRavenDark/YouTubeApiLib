@@ -589,7 +589,7 @@ namespace YouTubeApiLib
 				int errorCode;
 				if (requestResult.ErrorCode == 200)
 				{
-					bool isZipped = IsZippedContent(requestResult.HttpWebResponse);
+					bool isZipped = requestResult.HttpWebResponse.IsZippedContent();
 					errorCode = requestResult.WebContent.ContentToString(out responseString, 4096, isZipped, null, default);
 				}
 				else
@@ -608,7 +608,7 @@ namespace YouTubeApiLib
 			}
 		}
 
-		private static bool IsZippedContent(HttpWebResponse webResponse)
+		private static bool IsZippedContent(this HttpWebResponse webResponse)
 		{
 			int count = webResponse.Headers.Count;
 			for (int i = 0; i < count; ++i)
