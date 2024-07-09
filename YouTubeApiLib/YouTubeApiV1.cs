@@ -163,7 +163,8 @@ namespace YouTubeApiLib
 			int errorCode = HttpsPost(url, body.ToString(), out string rawVideoInfoJsonString);
 			if (errorCode == 200)
 			{
-				return new RawVideoInfoResult(new RawVideoInfo(rawVideoInfoJsonString, method), 200);
+				YouTubeRawVideoInfo youTubeRawVideoInfo = new YouTubeRawVideoInfo(rawVideoInfoJsonString, method);
+				return new RawVideoInfoResult(youTubeRawVideoInfo, 200);
 			}
 			return new RawVideoInfoResult(null, errorCode);
 		}

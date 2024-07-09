@@ -3,7 +3,7 @@ using static YouTubeApiLib.Utils;
 
 namespace YouTubeApiLib
 {
-	public class RawVideoInfo
+	public class YouTubeRawVideoInfo
 	{
 		public string RawData { get; }
 		public VideoInfoGettingMethod DataGettingMethod { get; }
@@ -14,7 +14,7 @@ namespace YouTubeApiLib
 
 		private JObject _parsedData = null;
 
-		public RawVideoInfo(string rawData, VideoInfoGettingMethod dataGettingMethod)
+		public YouTubeRawVideoInfo(string rawData, VideoInfoGettingMethod dataGettingMethod)
 		{
 			RawData = rawData;
 			DataGettingMethod = dataGettingMethod;

@@ -33,7 +33,7 @@ namespace YouTubeApiLib
 		public string HlsManifestUrl { get; }
 		public List<YouTubeVideoThumbnail> ThumbnailUrls { get; }
 		public LinkedList<YouTubeMediaTrack> MediaTracks { get; private set; }
-		public RawVideoInfo RawInfo { get; private set; }
+		public YouTubeRawVideoInfo RawInfo { get; private set; }
 		public SimplifiedVideoInfo SimplifiedInfo { get; }
 		public YouTubeVideoPlayabilityStatus Status { get; }
 		public bool IsInfoAvailable => GetIsInfoAvailable();
@@ -55,7 +55,7 @@ namespace YouTubeApiLib
 			bool isLiveContent,
 			List<YouTubeVideoThumbnail> thumbnailUrls,
 			LinkedList<YouTubeMediaTrack> mediaTracks,
-			RawVideoInfo rawInfo,
+			YouTubeRawVideoInfo rawInfo,
 			SimplifiedVideoInfo simplifiedInfo,
 			YouTubeVideoPlayabilityStatus status)
 		{
@@ -131,7 +131,7 @@ namespace YouTubeApiLib
 		/// Reparse the downloadable formats info.
 		/// Warming!!! You will lost the current media track list!
 		/// </summary>
-		public void UpdateMediaFormats(RawVideoInfo rawVideoInfo)
+		public void UpdateMediaFormats(YouTubeRawVideoInfo rawVideoInfo)
 		{
 			MediaTracks = Utils.ParseMediaTracks(rawVideoInfo);
 		}

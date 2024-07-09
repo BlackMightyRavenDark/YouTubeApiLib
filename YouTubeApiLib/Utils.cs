@@ -88,7 +88,7 @@ namespace YouTubeApiLib
 			return new SimplifiedVideoInfoResult(null, rawVideoInfoResult.ErrorCode);
 		}
 
-		public static SimplifiedVideoInfoResult ParseRawVideoInfo(RawVideoInfo rawVideoInfo)
+		public static SimplifiedVideoInfoResult ParseRawVideoInfo(YouTubeRawVideoInfo rawVideoInfo)
 		{
 			JObject jVideoDetails = rawVideoInfo.VideoDetails;
 			JObject jMicroformat = rawVideoInfo.Microformat;
@@ -168,7 +168,7 @@ namespace YouTubeApiLib
 			return new SimplifiedVideoInfoResult(simplifiedVideoInfo, 200);
 		}
 
-		public static YouTubeVideo MakeYouTubeVideo(RawVideoInfo rawVideoInfo)
+		public static YouTubeVideo MakeYouTubeVideo(YouTubeRawVideoInfo rawVideoInfo)
 		{
 			SimplifiedVideoInfoResult simplifiedVideoInfoResult = ParseRawVideoInfo(rawVideoInfo);
 			if (simplifiedVideoInfoResult.ErrorCode != 200)
@@ -179,7 +179,7 @@ namespace YouTubeApiLib
 			return MakeYouTubeVideo(rawVideoInfo, simplifiedVideoInfoResult.SimplifiedVideoInfo);
 		}
 
-		public static YouTubeVideo MakeYouTubeVideo(RawVideoInfo rawVideoInfo, SimplifiedVideoInfo simplifiedVideoInfo)
+		public static YouTubeVideo MakeYouTubeVideo(YouTubeRawVideoInfo rawVideoInfo, SimplifiedVideoInfo simplifiedVideoInfo)
 		{
 			string videoTitle = null;
 			string videoId = null;
@@ -556,7 +556,7 @@ namespace YouTubeApiLib
 			return streamingData?.Parse();
 		}
 
-		internal static LinkedList<YouTubeMediaTrack> ParseMediaTracks(RawVideoInfo rawVideoInfo)
+		internal static LinkedList<YouTubeMediaTrack> ParseMediaTracks(YouTubeRawVideoInfo rawVideoInfo)
 		{
 			return rawVideoInfo != null ? ParseMediaTracks(rawVideoInfo.StreamingData) : null;
 		}
@@ -631,11 +631,12 @@ namespace YouTubeApiLib
 		{
 			if (webPage != null)
 			{
-				string videoInfo = ExtractRawVideoInfoFromWebPageCode(webPage.WebPageCode);
-				if (!string.IsNullOrEmpty(videoInfo) && !string.IsNullOrWhiteSpace(videoInfo))
+				string rawVideoInfo = ExtractRawVideoInfoFromWebPageCode(webPage.WebPageCode);
+				if (!string.IsNullOrEmpty(rawVideoInfo) && !string.IsNullOrWhiteSpace(rawVideoInfo))
 				{
 					VideoInfoGettingMethod method = webPage.IsProvidedManually ? VideoInfoGettingMethod.Manual : VideoInfoGettingMethod.WebPage;
-					return new RawVideoInfoResult(new RawVideoInfo(videoInfo, method), 200);
+					YouTubeRawVideoInfo youTubeRawVideoInfo = new YouTubeRawVideoInfo(rawVideoInfo, method);
+					return new RawVideoInfoResult(youTubeRawVideoInfo, 200);
 				}
 				else
 				{
