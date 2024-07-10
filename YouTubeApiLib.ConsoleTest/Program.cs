@@ -27,10 +27,9 @@ namespace YouTubeApiLib.ConsoleTest
 
 			if (videoId != null)
 			{
-				YouTubeApi api = new YouTubeApi();
 				YouTubeApi.getMediaTracksInfoImmediately = true;
 				YouTubeApi.decryptMediaTrackUrlsAutomaticallyIfPossible = true;
-				YouTubeVideo video = api.GetVideo(videoId);
+				YouTubeVideo video = YouTubeVideo.GetById(videoId);
 				if (video != null)
 				{
 					if (video.IsInfoAvailable)

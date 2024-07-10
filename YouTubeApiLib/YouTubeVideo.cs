@@ -127,6 +127,18 @@ namespace YouTubeApiLib
 				null, null, null, 0L, null, false, false, false, false, null, null, null, null, status);
 		}
 
+		public static YouTubeVideo GetById(YouTubeVideoId videoId)
+		{
+			YouTubeApi api = new YouTubeApi();
+			return api.GetVideo(videoId);
+		}
+
+		public static YouTubeVideo GetById(string videoId)
+		{
+			YouTubeVideoId youTubeVideoId = new YouTubeVideoId(videoId);
+			return GetById(youTubeVideoId);
+		}
+
 		/// <summary>
 		/// Reparse the downloadable formats info.
 		/// Warming!!! You will lost the current media track list!
