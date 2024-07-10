@@ -38,6 +38,12 @@ namespace YouTubeApiLib
 			return url;
 		}
 
+		public static string GetVideoUrl(string videoId, TimeSpan seekTo)
+		{
+			int seconds = seekTo != null && seekTo > TimeSpan.Zero ? (int)seekTo.TotalSeconds : 0;
+			return GetVideoUrl(videoId, seconds);
+		}
+
 		internal static YouTubeVideo GetVideoFromWebPage(YouTubeVideoWebPage webPage)
 		{
 			if (webPage != null)
