@@ -31,17 +31,17 @@ namespace YouTubeApiLib
 			Manual
 		}
 
-		public static string GetVideoUrl(string videoId, int seekToSecond = 0)
+		public static string GetYouTubeVideoUrl(string videoId, int seekToSecond = 0)
 		{
 			string url = $"{YOUTUBE_URL}/watch?v={videoId}";
 			if (seekToSecond > 0) { url += $"&t={seekToSecond}"; }
 			return url;
 		}
 
-		public static string GetVideoUrl(string videoId, TimeSpan seekTo)
+		public static string GetYouTubeVideoUrl(string videoId, TimeSpan seekTo)
 		{
 			int seconds = seekTo != null && seekTo > TimeSpan.Zero ? (int)seekTo.TotalSeconds : 0;
-			return GetVideoUrl(videoId, seconds);
+			return GetYouTubeVideoUrl(videoId, seconds);
 		}
 
 		internal static YouTubeVideo GetVideoFromWebPage(YouTubeVideoWebPage webPage)
@@ -111,7 +111,7 @@ namespace YouTubeApiLib
 				jSimplifiedVideoInfo["title"] = jVideoDetails.Value<string>("title");
 				videoId = jVideoDetails.Value<string>("videoId");
 				jSimplifiedVideoInfo["id"] = videoId;
-				jSimplifiedVideoInfo["url"] = GetVideoUrl(videoId);
+				jSimplifiedVideoInfo["url"] = GetYouTubeVideoUrl(videoId);
 				if (int.TryParse(jVideoDetails.Value<string>("lengthSeconds"), out int lengthSeconds))
 				{
 					jSimplifiedVideoInfo["lengthSeconds"] = lengthSeconds;

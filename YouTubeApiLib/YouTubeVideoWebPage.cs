@@ -14,7 +14,7 @@ namespace YouTubeApiLib
 
 		internal static YouTubeVideoWebPageResult Get(string videoId)
 		{
-			string url = Utils.GetVideoUrl(videoId);
+			string url = Utils.GetYouTubeVideoUrl(videoId);
 			int errorCode = Utils.DownloadString(url, out string responseWebPageCode);
 			YouTubeVideoWebPage webPage = errorCode == 200 ? new YouTubeVideoWebPage(responseWebPageCode, false) : null;
 			return new YouTubeVideoWebPageResult(webPage, errorCode);

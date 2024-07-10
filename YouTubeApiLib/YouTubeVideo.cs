@@ -62,7 +62,7 @@ namespace YouTubeApiLib
 			Title = title;
 			Id = id;
 			Url = !string.IsNullOrEmpty(id) && !string.IsNullOrWhiteSpace(id) ?
-				Utils.GetVideoUrl(id) : null;
+				Utils.GetYouTubeVideoUrl(id) : null;
 			Length = length;
 			DateUploaded = dateUploaded;
 			DatePublished = datePublished;
