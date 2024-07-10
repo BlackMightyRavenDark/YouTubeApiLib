@@ -150,6 +150,16 @@ namespace YouTubeApiLib
 			return videoWebPageResult.ErrorCode == 200 ? Utils.GetVideoFromWebPage(videoWebPageResult.VideoWebPage) : null;
 		}
 
+		public string GetUrl(int seekToSecond = 0)
+		{
+			return Utils.GetYouTubeVideoUrl(Id, seekToSecond);
+		}
+
+		public string GetUrl(TimeSpan seekTo)
+		{
+			return Utils.GetYouTubeVideoUrl(Id, seekTo);
+		}
+
 		/// <summary>
 		/// Reparse the downloadable formats info.
 		/// Warming!!! You will lost the current media track list!
