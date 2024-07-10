@@ -24,8 +24,7 @@ namespace YouTubeApiLib.TestChannelPages
 					Console.WriteLine($"{channel} {page.Title} tab page:");
 					foreach (string videoId in videoIdPageResult.VideoIdPage.VideoIds)
 					{
-						YouTubeVideoId youTubeVideoId = new YouTubeVideoId(videoId);
-						YouTubeVideo video = api.GetVideo(youTubeVideoId);
+						YouTubeVideo video = YouTubeVideo.GetById(videoId);
 						string t = video != null ? $"{video.Id} > {video.Title}" : $"{videoId} > null";
 						Console.WriteLine(t);
 					}
