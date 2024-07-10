@@ -139,6 +139,17 @@ namespace YouTubeApiLib
 			return GetById(youTubeVideoId);
 		}
 
+		public static YouTubeVideo GetByWebPage(YouTubeVideoWebPage videoWebPage)
+		{
+			return Utils.GetVideoFromWebPage(videoWebPage);
+		}
+
+		public static YouTubeVideo GetByWebPage(string videoWebPageCode)
+		{
+			YouTubeVideoWebPageResult videoWebPageResult = YouTubeVideoWebPage.FromCode(videoWebPageCode);
+			return videoWebPageResult.ErrorCode == 200 ? Utils.GetVideoFromWebPage(videoWebPageResult.VideoWebPage) : null;
+		}
+
 		/// <summary>
 		/// Reparse the downloadable formats info.
 		/// Warming!!! You will lost the current media track list!

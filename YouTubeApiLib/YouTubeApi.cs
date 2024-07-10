@@ -21,17 +21,12 @@ namespace YouTubeApiLib
 
 		public YouTubeVideo GetVideo(YouTubeVideoWebPage videoWebPage)
 		{
-			return GetVideoFromWebPage(videoWebPage);
+			return YouTubeVideo.GetByWebPage(videoWebPage);
 		}
 
 		public YouTubeVideo GetVideo(string webPageCode)
 		{
-			YouTubeVideoWebPageResult webPageResult = YouTubeVideoWebPage.FromCode(webPageCode);
-			if (webPageResult.ErrorCode == 200)
-			{
-				return GetVideo(webPageResult.VideoWebPage);
-			}
-			return null;
+			return YouTubeVideo.GetByWebPage(webPageCode);
 		}
 
 		public YouTubeSimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId)
