@@ -31,9 +31,11 @@ namespace YouTubeApiLib
 			Manual
 		}
 
-		public static string GetVideoUrl(string videoId)
+		public static string GetVideoUrl(string videoId, int seekToSecond = 0)
 		{
-			return $"{YOUTUBE_URL}/watch?v={videoId}";
+			string url = $"{YOUTUBE_URL}/watch?v={videoId}";
+			if (seekToSecond > 0) { url += $"&t={seekToSecond}"; }
+			return url;
 		}
 
 		internal static YouTubeVideo GetVideoFromWebPage(YouTubeVideoWebPage webPage)
