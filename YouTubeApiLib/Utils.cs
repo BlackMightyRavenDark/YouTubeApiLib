@@ -158,10 +158,10 @@ namespace YouTubeApiLib
 					YouTubeApi.decryptMediaTrackUrlsAutomaticallyIfPossible && !isUnlisted ?
 					YouTubeVideoInfoGettingMethod.HiddenApiDecryptedUrls :
 					YouTubeVideoInfoGettingMethod.HiddenApiEncryptedUrls;
-				streamingData = YouTubeStreamingData.Get(videoId, method);
+				streamingData = YouTubeStreamingData.Get(videoId, method).Data;
 			}
 			jSimplifiedVideoInfo["streamingData"] =
-				streamingData != null ? streamingData.RawData : rawVideoInfo.StreamingData?.RawData;
+				streamingData != null ? streamingData.RawData : rawVideoInfo.StreamingData.Data?.RawData;
 
 			YouTubeSimplifiedVideoInfo simplifiedVideoInfo = new YouTubeSimplifiedVideoInfo(
 				jSimplifiedVideoInfo, jVideoDetails != null, jMicroformatRenderer != null, streamingData);
@@ -244,7 +244,7 @@ namespace YouTubeApiLib
 			{
 				mediaTracks = simplifiedVideoInfo.StreamingData != null ?
 					simplifiedVideoInfo.StreamingData.Parse() :
-					rawVideoInfo.StreamingData?.Parse();
+					rawVideoInfo.StreamingData.Data?.Parse();
 			}
 
 			YouTubeVideoPlayabilityStatus videoStatus = rawVideoInfo.PlayabilityStatus;
@@ -259,14 +259,14 @@ namespace YouTubeApiLib
 			return youTubeVideo;
 		}
 
-		internal static YouTubeStreamingData GetStreamingData(string videoId, YouTubeVideoInfoGettingMethod method)
+		internal static YouTubeStreamingDataResult GetStreamingData(string videoId, YouTubeVideoInfoGettingMethod method)
 		{
 			YouTubeRawVideoInfoResult rawVideoInfoResult = YouTubeRawVideoInfo.Get(videoId, method);
 			if (rawVideoInfoResult.ErrorCode == 200)
 			{
 				return rawVideoInfoResult.RawVideoInfo.StreamingData;
 			}
-			return null;
+			return new YouTubeStreamingDataResult(null, 404);
 		}
 
 		internal static string ExtractVideoIDsFromGridRendererItem(JObject gridVideoRendererItem)

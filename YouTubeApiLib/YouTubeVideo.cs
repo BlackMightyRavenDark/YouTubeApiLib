@@ -103,7 +103,7 @@ namespace YouTubeApiLib
 			}
 			else
 			{
-				YouTubeStreamingData streamingData = rawInfo?.StreamingData;
+				YouTubeStreamingData streamingData = rawInfo?.StreamingData.Data;
 				if (streamingData != null)
 				{
 					DashManifestUrl = streamingData.GetDashManifestUrl();
@@ -133,7 +133,7 @@ namespace YouTubeApiLib
 		/// </summary>
 		public void UpdateMediaFormats(YouTubeRawVideoInfo rawVideoInfo)
 		{
-			MediaTracks = rawVideoInfo.StreamingData?.Parse();
+			MediaTracks = rawVideoInfo.StreamingData.Data?.Parse();
 		}
 
 		/// <summary>

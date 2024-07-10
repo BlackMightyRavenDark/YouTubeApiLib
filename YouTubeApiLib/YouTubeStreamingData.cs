@@ -17,22 +17,22 @@ namespace YouTubeApiLib
 			DataGettingMethod = dataGettingMethod;
 		}
 
-		public static YouTubeStreamingData Get(YouTubeVideoId videoId, YouTubeVideoInfoGettingMethod method)
+		public static YouTubeStreamingDataResult Get(YouTubeVideoId videoId, YouTubeVideoInfoGettingMethod method)
 		{
 			return Get(videoId.Id, method);
 		}
 
-		public static YouTubeStreamingData Get(string videoId, YouTubeVideoInfoGettingMethod method)
+		public static YouTubeStreamingDataResult Get(string videoId, YouTubeVideoInfoGettingMethod method)
 		{
 			return GetStreamingData(videoId, method);
 		}
 
-		public static YouTubeStreamingData Get(YouTubeVideoId videoId)
+		public static YouTubeStreamingDataResult Get(YouTubeVideoId videoId)
 		{
 			return Get(videoId, YouTubeApi.defaultVideoInfoGettingMethod);
 		}
 
-		public static YouTubeStreamingData Get(string videoId)
+		public static YouTubeStreamingDataResult Get(string videoId)
 		{
 			return Get(videoId, YouTubeApi.defaultVideoInfoGettingMethod);
 		}
