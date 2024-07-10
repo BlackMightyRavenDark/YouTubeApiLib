@@ -22,11 +22,9 @@ namespace YouTubeApiLib
 			if (IdList != null && IdList.Count > 0)
 			{
 				VideoList = new List<YouTubeVideo>();
-				YouTubeApi api = new YouTubeApi();
 				foreach (string videoId in IdList)
 				{
-					YouTubeVideoId youTubeVideoId = new YouTubeVideoId(videoId);
-					YouTubeVideo video = api.GetVideo(youTubeVideoId);
+					YouTubeVideo video = YouTubeVideo.GetById(videoId);
 					if (video != null)
 					{
 						VideoList.Add(video);
@@ -42,11 +40,9 @@ namespace YouTubeApiLib
 			if (IdList != null && IdList.Count > 0)
 			{
 				ConcurrentBag<YouTubeVideo> bag = new ConcurrentBag<YouTubeVideo>();
-				YouTubeApi api = new YouTubeApi();
 				var tasks = IdList.Select(videoId => Task.Run(() =>
 				{
-					YouTubeVideoId youTubeVideoId = new YouTubeVideoId(videoId);
-					YouTubeVideo video = api.GetVideo(youTubeVideoId);
+					YouTubeVideo video = YouTubeVideo.GetById(videoId);
 					if (video != null)
 					{
 						bag.Add(video);
