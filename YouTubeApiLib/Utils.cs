@@ -587,7 +587,7 @@ namespace YouTubeApiLib
 				int errorCode;
 				if (requestResult.ErrorCode == 200)
 				{
-					bool isZipped = requestResult.HttpWebResponse.IsZippedContent();
+					bool isZipped = requestResult.IsZippedContent();
 					errorCode = requestResult.WebContent.ContentToString(out responseString, 4096, isZipped, null, default);
 				}
 				else
@@ -604,25 +604,6 @@ namespace YouTubeApiLib
 				responseString = ex.Message;
 				return ex.HResult;
 			}
-		}
-
-		private static bool IsZippedContent(this HttpWebResponse webResponse)
-		{
-			int count = webResponse.Headers.Count;
-			for (int i = 0; i < count; ++i)
-			{
-				string headerName = webResponse.Headers.GetKey(i);
-				if (string.Compare(headerName, "Content-Encoding", true) == 0)
-				{
-					string headerValue = webResponse.Headers.Get(i);
-					if (string.Compare(headerValue, "gzip", true) == 0)
-					{
-						return true;
-					}
-				}
-			}
-
-			return false;
 		}
 
 		public static YouTubeRawVideoInfoResult ExtractRawVideoInfoFromWebPage(YouTubeVideoWebPage webPage)
