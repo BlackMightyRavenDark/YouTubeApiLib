@@ -559,7 +559,7 @@ namespace YouTubeApiLib
 			return jsonArr;
 		}
 
-		public static int HttpPost(string url, string body, out string responseString)
+		public static int YouTubeHttpPost(string url, string body, out string responseString)
 		{
 			try
 			{
