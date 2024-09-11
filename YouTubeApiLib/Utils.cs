@@ -559,11 +559,10 @@ namespace YouTubeApiLib
 			return jsonArr;
 		}
 
-		public static int YouTubeHttpPost(string url, string body, out string responseString)
+		public static int YouTubeHttpPost(string url, string body, string userAgent, out string responseString)
 		{
 			try
 			{
-				const string userAgent = "com.google.android.youtube/17.10.35 (Linux; U; Android 12; GB) gzip";
 				NameValueCollection headers = new NameValueCollection()
 				{
 					{ "Host", "www.youtube.com" },
@@ -604,6 +603,12 @@ namespace YouTubeApiLib
 				responseString = ex.Message;
 				return ex.HResult;
 			}
+		}
+
+		public static int YouTubeHttpPost(string url, string body, out string responseString)
+		{
+			const string userAgent = "com.google.android.youtube/17.10.35 (Linux; U; Android 12; GB) gzip";
+			return YouTubeHttpPost(url, body, userAgent, out responseString);
 		}
 
 		public static YouTubeRawVideoInfoResult ExtractRawVideoInfoFromWebPage(YouTubeVideoWebPage webPage)
