@@ -8,8 +8,8 @@ namespace YouTubeApiLib
 		public string Reason { get; }
 		public string ThumbnailUrl { get; }
 		public bool IsPlayable { get; }
-		public bool IsPrivate => GetIsPrivate();
-		public bool IsAdult => GetIsAdult();
+		public bool IsPrivate { get; }
+		public bool IsAdult { get; }
 		public int ErrorCode { get; }
 		public string RawInfo { get; }
 
@@ -22,6 +22,8 @@ namespace YouTubeApiLib
 			ErrorCode = errorCode;
 			RawInfo = rawInfo;
 			IsPlayable = status == "OK";
+			IsPrivate = GetIsPrivate();
+			IsAdult = GetIsAdult();
 		}
 
 		public static YouTubeVideoPlayabilityStatus Parse(JObject jPlayabilityStatus)
@@ -51,7 +53,8 @@ namespace YouTubeApiLib
 					JArray jaThumbnails = jThumbnail.Value<JArray>("thumbnails");
 					if (jaThumbnails != null && jaThumbnails.Count > 0)
 					{
-						thumbnailUrl = $"https:{(jaThumbnails[0] as JObject).Value<string>("url")}";
+						string urlPartial = (jaThumbnails[0] as JObject).Value<string>("url");
+						thumbnailUrl = $"https:{urlPartial}";
 					}
 				}
 			}
