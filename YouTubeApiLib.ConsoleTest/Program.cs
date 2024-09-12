@@ -32,123 +32,129 @@ namespace YouTubeApiLib.ConsoleTest
 				YouTubeVideo video = YouTubeVideo.GetById(videoId);
 				if (video != null)
 				{
-					if (video.IsInfoAvailable)
+					if (video.IsPlayable)
 					{
-						if (!YouTubeApi.getMediaTracksInfoImmediately)
+						if (video.IsInfoAvailable)
 						{
-							video.UpdateMediaFormats(video.RawInfo);
-						}
-						Console.WriteLine($"Title: {video.Title}");
-						Console.WriteLine($"ID: {video.Id}");
-						Console.WriteLine($"URL: {video.Url}");
-						if (video.SimplifiedInfo.IsMicroformatInfoAvailable)
-						{
-							Console.WriteLine($"Uploaded: {DateTimeToString(video.DateUploaded)}");
-							Console.WriteLine($"Published: {DateTimeToString(video.DatePublished)}");
-						}
-						if (video.Length > TimeSpan.Zero)
-						{
-							Console.WriteLine($"Length: {video.Length}");
-						}
-						Console.WriteLine($"Channel title: {video.OwnerChannelTitle}");
-						Console.WriteLine($"Channel ID: {video.OwnerChannelId}");
-						Console.WriteLine($"Description: {video.Description}");
-						Console.WriteLine($"View count: {video.ViewCount}");
-						Console.WriteLine($"Category: {video.Category}");
-						Console.WriteLine($"Private: {video.IsPrivate}");
-						Console.WriteLine($"Unlisted: {video.IsUnlisted}");
-						Console.WriteLine($"Family safe: {video.IsFamilySafe}");
-						Console.WriteLine($"Live content: {video.IsLiveContent}");
-						if (video.IsLiveContent)
-						{
-							Console.WriteLine($"Is broadcasting now: {video.IsLiveNow}");
-							if (video.IsLiveNow)
+							if (!YouTubeApi.getMediaTracksInfoImmediately)
 							{
-								Console.WriteLine($"HLS manifest URL: {video.HlsManifestUrl}");
+								video.UpdateMediaFormats(video.RawInfo);
 							}
-						}
-						Console.WriteLine($"Is DASH manifest present: {video.IsDashed}");
-						if (video.IsDashed)
-						{
-							Console.WriteLine($"DASH manifest URL: {video.DashManifestUrl}");
-						}
-						Console.Write("Thumbnails: ");
-						if (video.ThumbnailUrls != null && video.ThumbnailUrls.Count > 0)
-						{
-							Console.WriteLine("");
-							foreach (YouTubeVideoThumbnail videoThumbnail in video.ThumbnailUrls)
+							Console.WriteLine($"Title: {video.Title}");
+							Console.WriteLine($"ID: {video.Id}");
+							Console.WriteLine($"URL: {video.Url}");
+							if (video.SimplifiedInfo.IsMicroformatInfoAvailable)
 							{
-								Console.WriteLine(videoThumbnail.ToString());
+								Console.WriteLine($"Uploaded: {DateTimeToString(video.DateUploaded)}");
+								Console.WriteLine($"Published: {DateTimeToString(video.DatePublished)}");
 							}
-						}
-						else
-						{
-							Console.WriteLine("null");
-						}
-						Console.Write("Downloadable formats: ");
-						if (video.MediaTracks != null && video.MediaTracks.Count > 0)
-						{
-							Console.WriteLine("");
-							// Quick drafted code may display incorrect field values!
-							// Some of the displayed values can be a big mistake!
-							// The displayed information can be also incomplete in current commit!
-							foreach (YouTubeMediaTrack track in video.MediaTracks)
+							if (video.Length > TimeSpan.Zero)
 							{
-								string info;
-								if (track is YouTubeMediaTrackVideo)
+								Console.WriteLine($"Length: {video.Length}");
+							}
+							Console.WriteLine($"Channel title: {video.OwnerChannelTitle}");
+							Console.WriteLine($"Channel ID: {video.OwnerChannelId}");
+							Console.WriteLine($"Description: {video.Description}");
+							Console.WriteLine($"View count: {video.ViewCount}");
+							Console.WriteLine($"Category: {video.Category}");
+							Console.WriteLine($"Private: {video.IsPrivate}");
+							Console.WriteLine($"Unlisted: {video.IsUnlisted}");
+							Console.WriteLine($"Family safe: {video.IsFamilySafe}");
+							Console.WriteLine($"Live content: {video.IsLiveContent}");
+							if (video.IsLiveContent)
+							{
+								Console.WriteLine($"Is broadcasting now: {video.IsLiveNow}");
+								if (video.IsLiveNow)
 								{
-									YouTubeMediaTrackVideo videoTrack = track as YouTubeMediaTrackVideo;
-									string trackType;
-									if (track.IsHlsManifest)
+									Console.WriteLine($"HLS manifest URL: {video.HlsManifestUrl}");
+								}
+							}
+							Console.WriteLine($"Is DASH manifest present: {video.IsDashed}");
+							if (video.IsDashed)
+							{
+								Console.WriteLine($"DASH manifest URL: {video.DashManifestUrl}");
+							}
+							Console.Write("Thumbnails: ");
+							if (video.ThumbnailUrls != null && video.ThumbnailUrls.Count > 0)
+							{
+								Console.WriteLine("");
+								foreach (YouTubeVideoThumbnail videoThumbnail in video.ThumbnailUrls)
+								{
+									Console.WriteLine(videoThumbnail.ToString());
+								}
+							}
+							else
+							{
+								Console.WriteLine("null");
+							}
+							Console.Write("Downloadable formats: ");
+							if (video.MediaTracks != null && video.MediaTracks.Count > 0)
+							{
+								Console.WriteLine("");
+								// Quick drafted code may display incorrect field values!
+								// Some of the displayed values can be a big mistake!
+								// The displayed information can be also incomplete in current commit!
+								foreach (YouTubeMediaTrack track in video.MediaTracks)
+								{
+									string info;
+									if (track is YouTubeMediaTrackVideo)
 									{
-										trackType = "HLS";
+										YouTubeMediaTrackVideo videoTrack = track as YouTubeMediaTrackVideo;
+										string trackType;
+										if (track.IsHlsManifest)
+										{
+											trackType = "HLS";
+										}
+										else
+										{
+											trackType = videoTrack.IsDashManifest ? "DASH VIDEO" : "VIDEO";
+										}
+										info = $"{trackType} | ID {videoTrack.FormatId} | {videoTrack.VideoWidth}x{videoTrack.VideoHeight} | " +
+											$"{videoTrack.FrameRate} fps | {videoTrack.ContentLength} bytes | {videoTrack.FileExtension}";
+									}
+									else if (track is YouTubeMediaTrackAudio)
+									{
+										YouTubeMediaTrackAudio audioTrack = track as YouTubeMediaTrackAudio;
+										string trackType = audioTrack.IsDashManifest ? "DASH AUDIO" : "AUDIO";
+										info = $"{trackType} | ID {audioTrack.FormatId} | {audioTrack.SampleRate} Hz | " +
+											$"{audioTrack.ChannelCount} ch | {audioTrack.AudioQuality} | {audioTrack.FileExtension}";
+									}
+									else if (track is YouTubeMediaTrackContainer)
+									{
+										YouTubeMediaTrackContainer container = track as YouTubeMediaTrackContainer;
+										info = $"CONTAINER | ID {container.FormatId} | {container.VideoWidth}x{container.VideoHeight} | " +
+											$"{container.VideoFrameRate} fps | {container.FileExtension}";
 									}
 									else
 									{
-										trackType = videoTrack.IsDashManifest ? "DASH VIDEO" : "VIDEO";
+										Console.WriteLine("ERROR! Unknown track type!");
+										continue;
 									}
-									info = $"{trackType} | ID {videoTrack.FormatId} | {videoTrack.VideoWidth}x{videoTrack.VideoHeight} | " +
-										$"{videoTrack.FrameRate} fps | {videoTrack.ContentLength} bytes | {videoTrack.FileExtension}";
+									Console.WriteLine(info);
+									if (track.IsDashManifest)
+									{
+										string dashChunkCountString = track.DashUrls != null ? track.DashUrls.Count.ToString() : "null";
+										Console.WriteLine($"DASH chunk URL count: {dashChunkCountString}");
+									}
+									else
+									{
+										string url = string.IsNullOrEmpty(track.FileUrl) || string.IsNullOrWhiteSpace(track.FileUrl) ? "null" : track.FileUrl;
+										string t = track.IsHlsManifest ? "Playlist URL" : "URL";
+										Console.WriteLine($"{t}: {url}");
+									}
 								}
-								else if (track is YouTubeMediaTrackAudio)
-								{
-									YouTubeMediaTrackAudio audioTrack = track as YouTubeMediaTrackAudio;
-									string trackType = audioTrack.IsDashManifest ? "DASH AUDIO" : "AUDIO";
-									info = $"{trackType} | ID {audioTrack.FormatId} | {audioTrack.SampleRate} Hz | " +
-										$"{audioTrack.ChannelCount} ch | {audioTrack.AudioQuality} | {audioTrack.FileExtension}";
-								}
-								else if (track is YouTubeMediaTrackContainer)
-								{
-									YouTubeMediaTrackContainer container = track as YouTubeMediaTrackContainer;
-									info = $"CONTAINER | ID {container.FormatId} | {container.VideoWidth}x{container.VideoHeight} | " +
-										$"{container.VideoFrameRate} fps | {container.FileExtension}";
-								}
-								else
-								{
-									Console.WriteLine("ERROR! Unknown track type!");
-									continue;
-								}
-								Console.WriteLine(info);
-								if (track.IsDashManifest)
-								{
-									string dashChunkCountString = track.DashUrls != null ? track.DashUrls.Count.ToString() : "null";
-									Console.WriteLine($"DASH chunk URL count: {dashChunkCountString}");
-								}
-								else
-								{
-									string url = string.IsNullOrEmpty(track.FileUrl) || string.IsNullOrWhiteSpace(track.FileUrl) ? "null" : track.FileUrl;
-									string t = track.IsHlsManifest ? "Playlist URL" : "URL";
-									Console.WriteLine($"{t}: {url}");
-								}
+							}
+							else
+							{
+								Console.WriteLine("null or empty");
 							}
 						}
 						else
 						{
-							Console.WriteLine("null or empty");
+							Console.WriteLine("Video info is unavailable!");
 						}
 					}
-
-					if (video.Status != null && !video.Status.IsPlayable)
+					else if (video.Status != null)
 					{
 						Console.WriteLine($"Is playable: {video.Status.IsPlayable}");
 						Console.WriteLine($"Is private: {video.Status.IsPrivate}");

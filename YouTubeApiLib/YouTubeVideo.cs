@@ -37,6 +37,7 @@ namespace YouTubeApiLib
 		public YouTubeSimplifiedVideoInfo SimplifiedInfo { get; }
 		public YouTubeVideoPlayabilityStatus Status { get; }
 		public bool IsInfoAvailable => GetIsInfoAvailable();
+		public bool IsPlayable => GetIsPlayable();
 
 		public YouTubeVideo(
 			string title,
@@ -205,9 +206,13 @@ namespace YouTubeApiLib
 
 		private bool GetIsInfoAvailable()
 		{
-			bool status = Status == null || (Status != null && !Status.IsPrivate);
-			return status || RawInfo?.VideoDetails != null &&
+			return RawInfo?.VideoDetails != null &&
 				(SimplifiedInfo.IsVideoInfoAvailable || SimplifiedInfo.IsMicroformatInfoAvailable);
+		}
+
+		private bool GetIsPlayable()
+		{
+			return Status != null && Status.IsPlayable;
 		}
 	}
 }
