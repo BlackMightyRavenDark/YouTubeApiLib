@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
-using System.Net;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using MultiThreadedDownloaderLib;
 
@@ -46,16 +46,13 @@ namespace YouTubeApiLib
 
 		internal static YouTubeVideo GetVideoFromWebPage(YouTubeVideoWebPage webPage)
 		{
-			if (webPage != null)
+			YouTubeRawVideoInfoResult rawVideoInfoResult = ExtractRawVideoInfoFromWebPage(webPage);
+			if (rawVideoInfoResult.ErrorCode == 200)
 			{
-				YouTubeRawVideoInfoResult rawVideoInfoResult = ExtractRawVideoInfoFromWebPage(webPage);
-				if (rawVideoInfoResult.ErrorCode == 200)
+				YouTubeSimplifiedVideoInfoResult simplifiedVideoInfoResult = rawVideoInfoResult.RawVideoInfo.Parse();
+				if (simplifiedVideoInfoResult.ErrorCode == 200)
 				{
-					YouTubeSimplifiedVideoInfoResult simplifiedVideoInfoResult = rawVideoInfoResult.RawVideoInfo.Parse();
-					if (simplifiedVideoInfoResult.ErrorCode == 200)
-					{
-						return MakeYouTubeVideo(rawVideoInfoResult.RawVideoInfo, simplifiedVideoInfoResult.SimplifiedVideoInfo);
-					}
+					return MakeYouTubeVideo(rawVideoInfoResult.RawVideoInfo, simplifiedVideoInfoResult.SimplifiedVideoInfo);
 				}
 			}
 			return null;
@@ -239,7 +236,7 @@ namespace YouTubeApiLib
 			if (jaThumbnails != null && jaThumbnails.Count > 0)
 			{
 				videoThumbnails = new List<YouTubeVideoThumbnail>();
-				foreach (JObject jThumbnail in jaThumbnails)
+				foreach (JObject jThumbnail in jaThumbnails.Cast<JObject>())
 				{
 					string id = jThumbnail.Value<string>("id");
 					string url = jThumbnail.Value<string>("url");
@@ -317,7 +314,7 @@ namespace YouTubeApiLib
 			}
 
 			List<string> idList = new List<string>();
-			foreach (JObject jItem in gridVideoRendererItems)
+			foreach (JObject jItem in gridVideoRendererItems.Cast<JObject>())
 			{
 				string videoId = ExtractVideoIDsFromGridRendererItem(jItem);
 				if (!string.IsNullOrEmpty(videoId) && !string.IsNullOrWhiteSpace(videoId))
@@ -346,17 +343,8 @@ namespace YouTubeApiLib
 
 		public static JArray FindTabItems(JObject megaRoot)
 		{
-			JObject j = megaRoot.Value<JObject>("contents");
-			if (j == null)
-			{
-				return null;
-			}
-			j = j.Value<JObject>("twoColumnBrowseResultsRenderer");
-			if (j == null)
-			{
-				return null;
-			}
-			return j.Value<JArray>("tabs");
+			JObject j = megaRoot?.Value<JObject>("contents")?.Value<JObject>("twoColumnBrowseResultsRenderer");
+			return j?.Value<JArray>("tabs");
 		}
 
 		public static YouTubeChannelTab FindSelectedChannelTab(JObject megaRoot)
@@ -418,7 +406,8 @@ namespace YouTubeApiLib
 					if (selectedTab != null)
 					{
 						List<IYouTubeChannelTabPageParser> parsers = new List<IYouTubeChannelTabPageParser>() {
-							new YouTubeChannelTabPageParserVideo1(), new YouTubeChannelTabPageParserVideo2()
+							new YouTubeChannelTabPageParserVideo1(),
+							new YouTubeChannelTabPageParserVideo2()
 						};
 						foreach (IYouTubeChannelTabPageParser parser in parsers)
 						{
@@ -434,7 +423,6 @@ namespace YouTubeApiLib
 			catch (Exception ex)
 			{
 				System.Diagnostics.Debug.WriteLine(ex.StackTrace);
-				return null;
 			}
 
 			return null;
@@ -503,39 +491,35 @@ namespace YouTubeApiLib
 			List<YouTubeVideoThumbnail> resList = new List<YouTubeVideoThumbnail>();
 			if (jMicroformatRenderer != null)
 			{
-				JObject jThumbnail = jMicroformatRenderer.Value<JObject>("thumbnail");
-				if (jThumbnail != null)
+				JArray jaThumbnails = jMicroformatRenderer.Value<JObject>("thumbnail")?.Value<JArray>("thumbnails");
+				if (jaThumbnails != null && jaThumbnails.Count > 0)
 				{
-					JArray jaThumbnails = jThumbnail.Value<JArray>("thumbnails");
-					if (jaThumbnails != null && jaThumbnails.Count > 0)
+					foreach (JObject j in jaThumbnails.Cast<JObject>())
 					{
-						foreach (JObject j in jaThumbnails)
+						string url = j.Value<string>("url");
+						if (!string.IsNullOrEmpty(url) && !string.IsNullOrWhiteSpace(url))
 						{
-							string url = j.Value<string>("url");
-							if (!string.IsNullOrEmpty(url) && !string.IsNullOrWhiteSpace(url))
+							if (url.Contains("?"))
 							{
-								if (url.Contains("?"))
-								{
-									url = url.Substring(0, url.IndexOf("?"));
-								}
-								if (url.Contains("vi_webp"))
-								{
-									url = url.Replace("vi_webp", "vi").Replace(".webp", ".jpg");
-								}
+								url = url.Substring(0, url.IndexOf("?"));
+							}
+							if (url.Contains("vi_webp"))
+							{
+								url = url.Replace("vi_webp", "vi").Replace(".webp", ".jpg");
+							}
 
-								bool found = false;
-								foreach (YouTubeVideoThumbnail thumbnail in resList)
+							bool found = false;
+							foreach (YouTubeVideoThumbnail thumbnail in resList)
+							{
+								if (thumbnail.Url == url)
 								{
-									if (thumbnail.Url == url)
-									{
-										found = true;
-										break;
-									}
+									found = true;
+									break;
 								}
-								if (!found)
-								{
-									resList.Add(new YouTubeVideoThumbnail("Unnamed", url));
-								}
+							}
+							if (!found)
+							{
+								resList.Add(new YouTubeVideoThumbnail("Unnamed", url));
 							}
 						}
 					}
@@ -556,6 +540,7 @@ namespace YouTubeApiLib
 			{
 				jsonArr.Add(thumbnail.ToJson());
 			}
+
 			return jsonArr;
 		}
 
@@ -582,21 +567,19 @@ namespace YouTubeApiLib
 					headers.Add("Content-Length", "0");
 				}
 
-				HttpRequestResult requestResult = HttpRequestSender.Send("POST", url, body, headers);
-				int errorCode;
-				if (requestResult.ErrorCode == 200)
+				using (HttpRequestResult requestResult = HttpRequestSender.Send("POST", url, body, headers))
 				{
-					bool isZipped = requestResult.IsZippedContent();
-					errorCode = requestResult.WebContent.ContentToString(out responseString, 4096, isZipped, null, default);
+					if (requestResult.ErrorCode == 200)
+					{
+						bool isZipped = requestResult.IsZippedContent();
+						return requestResult.WebContent.ContentToString(out responseString, 4096, isZipped, null, default);
+					}
+					else
+					{
+						responseString = requestResult.ErrorMessage;
+						return requestResult.ErrorCode;
+					}
 				}
-				else
-				{
-					responseString = requestResult.ErrorMessage;
-					errorCode = requestResult.ErrorCode;
-				}
-
-				requestResult.Dispose();
-				return errorCode;
 			}
 			catch (Exception ex)
 			{
@@ -772,8 +755,8 @@ namespace YouTubeApiLib
 			{
 				if (!string.IsNullOrEmpty(keyValues[i]) && !string.IsNullOrWhiteSpace(keyValues[i]))
 				{
-					string[] t = keyValues[i].Split(valueSeparator);
-					dict.Add(t[0], t[1]);
+					string[] t = keyValues[i].Split(new char[] { valueSeparator }, 2, StringSplitOptions.RemoveEmptyEntries);
+					if (t.Length > 1) { dict.Add(t[0], t[1]); }
 				}
 			}
 			return dict;

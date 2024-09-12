@@ -23,17 +23,16 @@ namespace YouTubeApiLib
 			const string CLIENT_NAME = "WEB";
 			const string CLIENT_VERSION = "2.20201021.03.00";
 
-			JObject jClient = new JObject();
-			jClient["hl"] = "en";
-			jClient["gl"] = "US";
-			jClient["clientName"] = CLIENT_NAME;
-			jClient["clientVersion"] = CLIENT_VERSION;
+			JObject jClient = GenerateYouTubeClientBody(CLIENT_NAME, CLIENT_VERSION);
+			JObject jContext = new JObject
+			{
+				["client"] = jClient
+			};
 
-			JObject jContext = new JObject();
-			jContext.Add(new JProperty("client", jClient));
-
-			JObject json = new JObject();
-			json.Add(new JProperty("context", jContext));
+			JObject json = new JObject
+			{
+				["context"] = jContext
+			};
 			json["videoId"] = videoId;
 
 			return json;
@@ -53,22 +52,22 @@ namespace YouTubeApiLib
 		{
 			const string CLIENT_NAME = "ANDROID_TESTSUITE";
 			const string CLIENT_VERSION = "1.9";
-			const int SDK_VERSION = 30;
+			const int ANDROID_SDK_VERSION = 30;
 
-			JObject jClient = new JObject();
-			jClient["clientName"] = CLIENT_NAME;
-			jClient["clientVersion"] = CLIENT_VERSION;
-			jClient["androidSdkVersion"] = SDK_VERSION;
-			jClient["hl"] = "en";
-			jClient["gl"] = "US";
+			JObject jClient = GenerateYouTubeClientBody(CLIENT_NAME, CLIENT_VERSION);
+			jClient["androidSdkVersion"] = ANDROID_SDK_VERSION;
 			jClient["utcOffsetMinutes"] = 0;
 
-			JObject jContext = new JObject();
-			jContext.Add(new JProperty("client", jClient));
+			JObject jContext = new JObject()
+			{
+				["client"] = jClient
+			};
 
-			JObject json = new JObject();
-			json["videoId"] = videoId;
-			json.Add(new JProperty("context", jContext));
+			JObject json = new JObject()
+			{
+				["videoId"] = videoId,
+				["context"] = jContext
+			};
 
 			return json;
 		}
@@ -79,18 +78,19 @@ namespace YouTubeApiLib
 			const string CLIENT_NAME = "WEB";
 			const string CLIENT_VERSION = "2.20210408.08.00";
 
-			JObject jClient = new JObject();
-			jClient["clientName"] = CLIENT_NAME;
-			jClient["clientVersion"] = CLIENT_VERSION;
-			jClient["hl"] = "en";
-			jClient["gl"] = "US";
+			JObject jClient = GenerateYouTubeClientBody(CLIENT_NAME, CLIENT_VERSION);
 			jClient["utcOffsetMinutes"] = 0;
 
-			JObject jContext = new JObject();
-			jContext.Add(new JProperty("client", jClient));
+			JObject jContext = new JObject()
+			{
+				["client"] = jClient
+			};
 
-			JObject json = new JObject();
-			json.Add(new JProperty("context", jContext));
+			JObject json = new JObject()
+			{
+				["context"] = jContext
+			};
+
 			if (!string.IsNullOrEmpty(searchQuery) && !string.IsNullOrWhiteSpace(searchQuery))
 			{
 				json["query"] = searchQuery;
@@ -103,6 +103,7 @@ namespace YouTubeApiLib
 			{
 				json["continuation"] = continuationToken;
 			}
+
 			return json;
 		}
 
@@ -112,18 +113,17 @@ namespace YouTubeApiLib
 			const string CLIENT_NAME = "WEB";
 			const string CLIENT_VERSION = "2.20211221.00.00";
 
-			JObject jClient = new JObject();
-			jClient["hl"] = "en";
-			jClient["gl"] = "US";
-			jClient["clientName"] = CLIENT_NAME;
-			jClient["clientVersion"] = CLIENT_VERSION;
+			JObject jClient = GenerateYouTubeClientBody(CLIENT_NAME, CLIENT_VERSION);
+			JObject jContext = new JObject()
+			{
+				["client"] = jClient
+			};
 
-			JObject jContext = new JObject();
-			jContext["client"] = jClient;
-
-			JObject json = new JObject();
-			json["context"] = jContext;
-			json["browseId"] = channelId;
+			JObject json = new JObject()
+			{
+				["context"] = jContext,
+				["browseId"] = channelId
+			};
 
 			bool tokenExists = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);
 			if (tokenExists)
@@ -138,9 +138,35 @@ namespace YouTubeApiLib
 			return json;
 		}
 
+		public static JObject GenerateYouTubeClientBody(string clientName, string clientVersion, string hl, string gl)
+		{
+			return new JObject()
+				{
+					["clientName"] = clientName,
+					["clientVersion"] = clientVersion,
+					["hl"] = hl,
+					["gl"] = gl
+				};
+		}
+
+		public static JObject GenerateYouTubeClientBody(string clientName, string clientVersion)
+		{
+			return GenerateYouTubeClientBody(clientName, clientVersion, "en", "US");
+		}
+
 		public static JObject GenerateChannelVideoListRequestBody(string channelId, string continuationToken)
 		{
 			return GenerateChannelTabRequestBody(channelId, YouTubeChannelTabPages.Videos, continuationToken);
+		}
+
+		public static string GetBrowseRequestUrl()
+		{
+			return $"{API_V1_BROWSE_URL}?key={API_V1_KEY}";
+		}
+
+		public static string GetPlayerRequestUrl()
+		{
+			return $"{API_V1_PLAYER_URL}?key={API_V1_KEY}";
 		}
 
 		public static string GetSearchRequestUrl()
@@ -159,7 +185,7 @@ namespace YouTubeApiLib
 			JObject body = method == YouTubeVideoInfoGettingMethod.HiddenApiEncryptedUrls ?
 				GenerateVideoInfoEncryptedRequestBody(videoId) :
 				GenerateVideoInfoDecryptedRequestBody(videoId);
-			string url = $"{API_V1_PLAYER_URL}?key={API_V1_KEY}";
+			string url = GetPlayerRequestUrl();
 			int errorCode = YouTubeHttpPost(url, body.ToString(), out string rawVideoInfoJsonString);
 			if (errorCode == 200)
 			{
@@ -201,7 +227,7 @@ namespace YouTubeApiLib
 
 		internal static YouTubeVideoIdPageResult GetVideoIdPage(JObject requestBody, bool continuationTokenExists)
 		{
-			string url = $"{API_V1_BROWSE_URL}?key={API_V1_KEY}";
+			string url = GetBrowseRequestUrl();
 			string body = requestBody != null ? requestBody.ToString() : string.Empty;
 			int errorCode = YouTubeHttpPost(url, body, out string response);
 			if (errorCode == 200)
