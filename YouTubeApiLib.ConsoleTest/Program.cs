@@ -18,8 +18,8 @@ namespace YouTubeApiLib.ConsoleTest
 			//| 18+ | 1080p | 60 fps | 951661536 bytes
 			//string videoUrl = "https://www.youtube.com/watch?v=EUKa5G7TNI0";
 
-			//NASA Live: Official Stream of NASA TV | HLS
-			//string videoUrl = "https://www.youtube.com/watch?v=21X5lGlDOfg";
+			//Live High-Definition Views from the International Space Station (Official NASA Stream) | HLS
+			//string videoUrl = "https://www.youtube.com/watch?v=O9mYwRlucZY";
 
 			Console.WriteLine($"Video URL: {videoUrl}");
 
