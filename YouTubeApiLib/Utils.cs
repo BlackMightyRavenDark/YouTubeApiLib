@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using MultiThreadedDownloaderLib;
 
@@ -655,6 +656,21 @@ namespace YouTubeApiLib
 			catch (Exception ex)
 			{
 				System.Diagnostics.Debug.WriteLine(ex.Message);
+			}
+
+			return null;
+		}
+
+		public static JObject ExtractYouTubeConfigFromWebPageCode(
+			string webPageCode, string pattern = @"ytcfg\.set\(({\s*"".*""})\);.*window\.ytcfg")
+		{
+			Regex regex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled);
+			MatchCollection matches = regex.Matches(webPageCode);
+			if (matches.Count > 0 && matches[0].Groups.Count > 1)
+			{
+				string t = matches[0].Groups[1].Value;
+				JObject j = TryParseJson(t);
+				return j;
 			}
 
 			return null;

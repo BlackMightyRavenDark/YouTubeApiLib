@@ -1,4 +1,5 @@
-﻿
+﻿using Newtonsoft.Json.Linq;
+
 namespace YouTubeApiLib
 {
 	public class YouTubeVideoWebPage
@@ -32,6 +33,18 @@ namespace YouTubeApiLib
 				return new YouTubeVideoWebPageResult(new YouTubeVideoWebPage(webPageCode, true), 200);
 			}
 			return new YouTubeVideoWebPageResult(null, 404);
+		}
+
+		public JObject ExtractYouTubeConfig(string pattern)
+		{
+			return !string.IsNullOrEmpty(WebPageCode) ?
+				Utils.ExtractYouTubeConfigFromWebPageCode(WebPageCode, pattern) : null;
+		}
+
+		public JObject ExtractYouTubeConfig()
+		{
+			return !string.IsNullOrEmpty(WebPageCode) ?
+				Utils.ExtractYouTubeConfigFromWebPageCode(WebPageCode) : null;
 		}
 	}
 }
