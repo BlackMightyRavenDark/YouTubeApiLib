@@ -197,20 +197,27 @@ namespace YouTubeApiLib.ConsoleTest
 							"null or empty" : video.Status.ThumbnailUrl;
 						Console.WriteLine($"Thumbnail URL: {thumbnailUrl}");
 					}
-					Console.Write($"Raw info: ");
-					Console.WriteLine(video.RawInfo != null ? $"\n{video.RawInfo}" : "null");
+
+					Console.Write("Type 'Y' to print full raw data or just press ENTER to exit...");
+					string userAnswer = Console.ReadLine();
+					if (userAnswer == "y" || userAnswer == "Y")
+					{
+						Console.Write("Raw info: ");
+						Console.WriteLine(video.RawInfo != null ? $"\n{video.RawInfo}" : "null");
+						Console.ReadLine();
+					}
 				}
 				else
 				{
 					Console.WriteLine("ERROR! Video is null!");
+					Console.ReadLine();
 				}
 			}
 			else
 			{
 				Console.WriteLine("Video ID: <ERROR>");
+				Console.ReadLine();
 			}
-
-			Console.ReadLine();
 		}
 
 		private static string DateTimeToString(DateTime dateTime)
