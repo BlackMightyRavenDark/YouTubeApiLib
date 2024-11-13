@@ -21,9 +21,7 @@ namespace YouTubeApiLib
 			int channelCount,
 			double loudnessDb,
 			int approxDurationMs,
-			string fileUrl,
-			string cipherSignatureEncrypted,
-			string cipherEncryptedFileUrl,
+			YouTubeMediaTrackUrl fileUrl,
 			string mimeType,
 			string mimeExt,
 			string mimeCodecs,
@@ -35,7 +33,6 @@ namespace YouTubeApiLib
 			YouTubeDashUrlList dashUrls)
 			: base(formatId, bitrate, averageBitrate, lastModified, contentLength,
 				  quality, qualityLabel, approxDurationMs, null, fileUrl,
-				  cipherSignatureEncrypted, cipherEncryptedFileUrl,
 				  mimeType, mimeExt, mimeCodecs, fileExtension,
 				  isDash, isHls, isCiphered, dashManifestUrl, dashUrls, null, null)
 		{
@@ -57,8 +54,7 @@ namespace YouTubeApiLib
 			string fileExtension,
 			string dashManifestUrl,
 			YouTubeDashUrlList dashUrls)
-			: base(formatId, bitrate, bitrate, null, -1L, null, null, -1,
-				  null, null, null, null,
+			: base(formatId, bitrate, bitrate, null, -1L, null, null, -1, null, null,
 				  mimeType, mimeExt, mimeCodecs, fileExtension,
 				  true, false, false, dashManifestUrl, dashUrls, null, null)
 		{
@@ -82,9 +78,7 @@ namespace YouTubeApiLib
 			int channelCount,
 			double loudnessDb,
 			int approxDurationMs,
-			string fileUrl,
-			string cipherSignatureEncrypted,
-			string cipherEncryptedFileUrl,
+			YouTubeMediaTrackUrl fileUrl,
 			string mimeType,
 			string mimeExt,
 			string mimeCodecs,
@@ -92,7 +86,6 @@ namespace YouTubeApiLib
 			bool isCiphered)
 			: base(formatId, bitrate, averageBitrate, lastModified, contentLength,
 				  quality, qualityLabel, approxDurationMs, null, fileUrl,
-				  cipherSignatureEncrypted, cipherEncryptedFileUrl,
 				  mimeType, mimeExt, mimeCodecs, fileExtension,
 				  false, false, isCiphered, null, null, null, null)
 		{

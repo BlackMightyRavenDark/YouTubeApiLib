@@ -1,14 +1,16 @@
-﻿using Newtonsoft.Json.Linq;
-
+﻿
 namespace YouTubeApiLib
 {
 	public class YouTubeVideoWebPage
 	{
+		public YouTubeVideoId VideoId { get; }
 		public string WebPageCode { get; }
 		public bool IsProvidedManually { get; }
 
-		private YouTubeVideoWebPage(string webPageCode, bool isProvidedManually)
+		private YouTubeVideoWebPage(YouTubeVideoId videoId,
+			string webPageCode, bool isProvidedManually)
 		{
+			VideoId = videoId;
 			WebPageCode = webPageCode;
 			IsProvidedManually = isProvidedManually;
 		}
@@ -17,7 +19,8 @@ namespace YouTubeApiLib
 		{
 			string url = Utils.GetYouTubeVideoUrl(videoId);
 			int errorCode = Utils.DownloadString(url, out string responseWebPageCode);
-			YouTubeVideoWebPage webPage = errorCode == 200 ? new YouTubeVideoWebPage(responseWebPageCode, false) : null;
+			YouTubeVideoWebPage webPage = errorCode == 200 ?
+				new YouTubeVideoWebPage(new YouTubeVideoId(videoId), responseWebPageCode, false) : null;
 			return new YouTubeVideoWebPageResult(webPage, errorCode);
 		}
 
@@ -26,25 +29,33 @@ namespace YouTubeApiLib
 			return youTubeVideoId != null ? Get(youTubeVideoId.Id) : new YouTubeVideoWebPageResult(null, 400);
 		}
 
-		public static YouTubeVideoWebPageResult FromCode(string webPageCode)
+		public static YouTubeVideoWebPageResult FromCode(string videoId, string webPageCode)
 		{
 			if (!string.IsNullOrEmpty(webPageCode) && !string.IsNullOrWhiteSpace(webPageCode))
 			{
-				return new YouTubeVideoWebPageResult(new YouTubeVideoWebPage(webPageCode, true), 200);
+				YouTubeVideoId youTubeVideoId = string.IsNullOrEmpty(videoId) || string.IsNullOrWhiteSpace(videoId) ? null :
+					new YouTubeVideoId(videoId);
+				YouTubeVideoWebPage webPage = new YouTubeVideoWebPage(youTubeVideoId, webPageCode, true);
+				return new YouTubeVideoWebPageResult(webPage, 200);
 			}
 			return new YouTubeVideoWebPageResult(null, 404);
 		}
 
-		public JObject ExtractYouTubeConfig(string pattern)
+		public static YouTubeVideoWebPageResult FromCode(string webPageCode)
 		{
-			return !string.IsNullOrEmpty(WebPageCode) ?
-				Utils.ExtractYouTubeConfigFromWebPageCode(WebPageCode, pattern) : null;
+			return FromCode(null, webPageCode);
 		}
 
-		public JObject ExtractYouTubeConfig()
+		public YouTubeConfig ExtractYouTubeConfig(string pattern)
 		{
 			return !string.IsNullOrEmpty(WebPageCode) ?
-				Utils.ExtractYouTubeConfigFromWebPageCode(WebPageCode) : null;
+				Utils.ExtractYouTubeConfigFromWebPageCode(WebPageCode, VideoId?.Id, pattern) : null;
+		}
+
+		public YouTubeConfig ExtractYouTubeConfig()
+		{
+			return !string.IsNullOrEmpty(WebPageCode) ?
+				Utils.ExtractYouTubeConfigFromWebPageCode(WebPageCode, VideoId?.Id) : null;
 		}
 	}
 }

@@ -25,9 +25,7 @@ namespace YouTubeApiLib
 			int audioChannelCount,
 			int approxDurationMs,
 			string projectionType,
-			string fileUrl,
-			string cipherSignatureEncrypted,
-			string cipherEncryptedFileUrl,
+			YouTubeMediaTrackUrl fileUrl,
 			string mimeType,
 			string mimeExt,
 			string mimeCodecs,
@@ -35,7 +33,6 @@ namespace YouTubeApiLib
 			bool isCiphered)
 			: base(formatId, bitrate, averageBitrate, lastModified, contentLength,
 				  quality, qualityLabel, approxDurationMs, projectionType, fileUrl,
-				  cipherSignatureEncrypted, cipherEncryptedFileUrl,
 				  mimeType, mimeExt, mimeCodecs, fileExtension,
 				  false, false, isCiphered, null, null, null, null)
 		{

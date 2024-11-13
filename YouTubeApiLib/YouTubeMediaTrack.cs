@@ -15,12 +15,10 @@ namespace YouTubeApiLib
 		public string QualityLabel { get; }
 		public int ApproxDurationMs { get; }
 		public string ProjectionType { get; }
-		public string FileUrl { get; }
-		public string CipherSignatureEncrypted { get; }
-		public string CipherEncryptedFileUrl { get; }
+		public YouTubeMediaTrackUrl FileUrl { get; }
 		public string FileExtension { get; }
-		public bool IsDashManifest { get; }
-		public bool IsHlsManifest { get; }
+		public bool IsDashManifestPresent { get; }
+		public bool IsHlsManifestPresent { get; }
 		public bool IsCiphered { get; }
 		public string DashManifestUrl { get; }
 		public YouTubeDashUrlList DashUrls { get; }
@@ -37,15 +35,13 @@ namespace YouTubeApiLib
 			string qualityLabel,
 			int approxDurationMs,
 			string projectionType,
-			string fileUrl,
-			string cipherSignatureEncrypted,
-			string cipherEncryptedFileUrl,
+			YouTubeMediaTrackUrl fileUrl,
 			string mimeType,
 			string mimeExt,
 			string mimeCodecs,
 			string fileExtension,
-			bool isDashManifest,
-			bool isHlsManifest,
+			bool isDashManifestPresent,
+			bool isHlsManifestPresent,
 			bool isCiphered,
 			string dashManifestUrl,
 			YouTubeDashUrlList dashUrls,
@@ -62,14 +58,12 @@ namespace YouTubeApiLib
 			ApproxDurationMs = approxDurationMs;
 			ProjectionType = projectionType;
 			FileUrl = fileUrl;
-			CipherSignatureEncrypted = cipherSignatureEncrypted;
-			CipherEncryptedFileUrl = cipherEncryptedFileUrl;
 			MimeType = mimeType;
 			MimeExt = mimeExt;
 			MimeCodecs = mimeCodecs;
 			FileExtension = fileExtension;
-			IsDashManifest = isDashManifest;
-			IsHlsManifest = isHlsManifest;
+			IsDashManifestPresent = isDashManifestPresent;
+			IsHlsManifestPresent = isHlsManifestPresent;
 			IsCiphered = isCiphered;
 			DashManifestUrl = dashManifestUrl;
 			DashUrls = dashUrls;

@@ -5,46 +5,55 @@ namespace YouTubeApiLib
 {
 	public class YouTubeRawVideoInfo
 	{
-		public string RawData { get; }
-		public YouTubeVideoInfoGettingMethod DataGettingMethod { get; }
+		public string RawData { get; private set; }
+
+		/// <summary>
+		/// The YouTube client which used for getting info.
+		/// </summary>
+		public IYouTubeClient Client { get; }
+
+		public YouTubeMediaTrackUrlDecryptionData UrlDecryptionData { get; }
+
 		public YouTubeVideoPlayabilityStatus PlayabilityStatus => ExtractPlayabilityStatus();
 		public YouTubeStreamingDataResult StreamingData => ExtractStreamingData();
-		public JObject VideoDetails => ExtractVideoDetails();
+		public YouTubeVideoDetails VideoDetails => ExtractVideoDetails();
 		public JObject Microformat => ExtractMicroformat();
 
 		private JObject _parsedData = null;
 
-		public YouTubeRawVideoInfo(string rawData, YouTubeVideoInfoGettingMethod dataGettingMethod)
+		public YouTubeRawVideoInfo(string rawData, IYouTubeClient client, YouTubeMediaTrackUrlDecryptionData urlDecryptionData)
 		{
 			RawData = rawData;
-			DataGettingMethod = dataGettingMethod;
+			Client = client;
+			UrlDecryptionData = urlDecryptionData;
 		}
 
-		public static YouTubeRawVideoInfoResult Get(YouTubeVideoId videoId, YouTubeVideoInfoGettingMethod method)
+		public static YouTubeRawVideoInfoResult Get(YouTubeVideoId videoId, IYouTubeClient client)
 		{
-			return GetRawVideoInfo(videoId.Id, method);
+			return GetRawVideoInfo(videoId.Id, client);
 		}
 
-		public static YouTubeRawVideoInfoResult Get(string videoId, YouTubeVideoInfoGettingMethod method)
+		public static YouTubeRawVideoInfoResult Get(string videoId, IYouTubeClient client)
 		{
-			YouTubeVideoId youTubeVideoId = new YouTubeVideoId(videoId);
-			return Get(youTubeVideoId, method);
+			int errorCode = client.GetRawVideoInfo(videoId, out YouTubeRawVideoInfo rawVideoInfo, out _);
+			return new YouTubeRawVideoInfoResult(rawVideoInfo, errorCode);
 		}
 
 		public static YouTubeRawVideoInfoResult Get(YouTubeVideoId videoId)
 		{
-			return Get(videoId.Id, YouTubeApi.defaultVideoInfoGettingMethod);
+			IYouTubeClient client = YouTubeApi.GetYouTubeClient(YouTubeApi.GetDefaultYouTubeClientId());
+			return Get(videoId.Id, client);
 		}
 
 		public static YouTubeRawVideoInfoResult Get(string videoId)
 		{
-			YouTubeVideoId youTubeVideoId = new YouTubeVideoId(videoId);
-			return Get(youTubeVideoId, YouTubeApi.defaultVideoInfoGettingMethod);
+			IYouTubeClient client = new YouTubeClientIos(null);
+			return Get(videoId, client);
 		}
 
-		public YouTubeSimplifiedVideoInfoResult Parse()
+		public YouTubeSimplifiedVideoInfoResult Simplify(YouTubeStreamingData customStreamingData = null)
 		{
-			return ParseRawVideoInfo(this);
+			return SimplifyRawVideoInfo(this, customStreamingData);
 		}
 
 		private YouTubeVideoPlayabilityStatus ExtractPlayabilityStatus()
@@ -62,7 +71,8 @@ namespace YouTubeApiLib
 				JObject jStreamingData = _parsedData.Value<JObject>("streamingData");
 				if (jStreamingData != null)
 				{
-					YouTubeStreamingData streamingData = new YouTubeStreamingData(jStreamingData.ToString(), DataGettingMethod);
+					YouTubeStreamingData streamingData = new YouTubeStreamingData(
+						jStreamingData.ToString(), Client, UrlDecryptionData);
 					return new YouTubeStreamingDataResult(streamingData, 200);
 				}
 			}
@@ -70,10 +80,11 @@ namespace YouTubeApiLib
 			return new YouTubeStreamingDataResult(null, 404);
 		}
 
-		private JObject ExtractVideoDetails()
+		private YouTubeVideoDetails ExtractVideoDetails()
 		{
 			if (_parsedData == null) { _parsedData = TryParseJson(RawData); }
-			return _parsedData?.Value<JObject>("videoDetails");
+			JObject j = _parsedData?.Value<JObject>("videoDetails");
+			return j != null ? new YouTubeVideoDetails(j.ToString(), Client) : null;
 		}
 
 		private JObject ExtractMicroformat()
@@ -82,9 +93,24 @@ namespace YouTubeApiLib
 			return _parsedData?.Value<JObject>("microformat");
 		}
 
+		public YouTubeVideo ToVideo()
+		{
+			return MakeYouTubeVideo(this);
+		}
+
+		public void FormatRawData()
+		{
+			JObject j = TryParseJson(RawData);
+			if (j != null)
+			{
+				if (_parsedData == null) { _parsedData = j; }
+				RawData = j.ToString();
+			}
+		}
+
 		public override string ToString()
 		{
-			return RawData != null ? RawData : "null";
+			return RawData ?? "null";
 		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace YouTubeApiLib
 {
@@ -25,14 +26,16 @@ namespace YouTubeApiLib
 		/// Warning! This value can be always TRUE for some videos!
 		/// E.G. when the broadcast is finished, but not yet fully processed by YouTube.
 		/// This is a YouTube API bug.
+		/// It's better to use 'UpdateIsLiveNow()' method.
 		/// </summary>
-		public bool IsLiveNow { get; }
+		public bool IsLiveNow => GetIsLiveNow();
 
 		public bool IsDashed { get; }
 		public string DashManifestUrl { get; }
 		public string HlsManifestUrl { get; }
+		public YouTubeVideoDetails Details { get; private set; }
 		public List<YouTubeVideoThumbnail> ThumbnailUrls { get; }
-		public LinkedList<YouTubeMediaTrack> MediaTracks { get; private set; }
+		public Dictionary<string, YouTubeMediaFormatList> MediaTracks { get; private set; }
 		public YouTubeRawVideoInfo RawInfo { get; private set; }
 		public YouTubeSimplifiedVideoInfo SimplifiedInfo { get; }
 		public YouTubeVideoPlayabilityStatus Status { get; }
@@ -54,8 +57,8 @@ namespace YouTubeApiLib
 			bool isUnlisted,
 			bool isFamilySafe,
 			bool isLiveContent,
+			YouTubeVideoDetails videoDetails,
 			List<YouTubeVideoThumbnail> thumbnailUrls,
-			LinkedList<YouTubeMediaTrack> mediaTracks,
 			YouTubeRawVideoInfo rawInfo,
 			YouTubeSimplifiedVideoInfo simplifiedInfo,
 			YouTubeVideoPlayabilityStatus status)
@@ -76,29 +79,32 @@ namespace YouTubeApiLib
 			IsUnlisted = isUnlisted;
 			IsFamilySafe = isFamilySafe;
 			IsLiveContent = isLiveContent;
+			Details = videoDetails;
 			ThumbnailUrls = thumbnailUrls;
-			MediaTracks = mediaTracks;
+			MediaTracks = new Dictionary<string, YouTubeMediaFormatList>();
 			RawInfo = rawInfo;
 			SimplifiedInfo = simplifiedInfo;
 			Status = status;
 
 			if (MediaTracks != null)
 			{
-				foreach (YouTubeMediaTrack track in MediaTracks)
+				foreach (var item in MediaTracks)
 				{
-					if (!IsDashed)
+					foreach (YouTubeMediaTrack track in item.Value.Tracks)
 					{
-						IsDashed = track.IsDashManifest;
-						DashManifestUrl = track.DashManifestUrl;
-					}
-					if (!IsLiveNow && track.Broadcast != null)
-					{
-						HlsManifestUrl = track.HlsManifestUrl;
-						IsLiveNow = true;
-					}
-					if (IsDashed && IsLiveNow)
-					{
-						break;
+						if (!IsDashed)
+						{
+							IsDashed = track.IsDashManifestPresent;
+							DashManifestUrl = track.DashManifestUrl;
+						}
+						if (!IsLiveNow && track.Broadcast != null)
+						{
+							HlsManifestUrl = track.HlsManifestUrl;
+						}
+						if (IsDashed && !string.IsNullOrEmpty(HlsManifestUrl))
+						{
+							return;
+						}
 					}
 				}
 			}
@@ -110,34 +116,67 @@ namespace YouTubeApiLib
 					DashManifestUrl = streamingData.GetDashManifestUrl();
 					IsDashed = !string.IsNullOrEmpty(DashManifestUrl) && !string.IsNullOrWhiteSpace(DashManifestUrl);
 					HlsManifestUrl = streamingData.GetHlsManifestUrl();
-					IsLiveNow = !string.IsNullOrEmpty(HlsManifestUrl) && !string.IsNullOrWhiteSpace(HlsManifestUrl);
 				}
 				else
 				{
 					DashManifestUrl = null;
 					IsDashed = false;
 					HlsManifestUrl = null;
-					IsLiveNow = false;
 				}
 			}
 		}
 
 		public static YouTubeVideo CreateEmpty(YouTubeVideoPlayabilityStatus status)
 		{
-			return new YouTubeVideo(null, null, TimeSpan.FromSeconds(0), DateTime.MaxValue, DateTime.MaxValue,
+			return new YouTubeVideo(null, null, TimeSpan.Zero, DateTime.MaxValue, DateTime.MaxValue,
 				null, null, null, 0L, null, false, false, false, false, null, null, null, null, status);
+		}
+
+		public static YouTubeVideo CreateEmpty()
+		{
+			return CreateEmpty(null);
+		}
+
+		public static YouTubeVideo GetById(YouTubeVideoId videoId, IYouTubeClient client)
+		{
+			bool automaticClientSelection = client == null;
+			if (automaticClientSelection) { client = YouTubeApi.GetYouTubeClient("video_info"); }
+			YouTubeRawVideoInfoResult rawVideoInfoResult = client.GetRawVideoInfo(videoId, out _);
+			if (rawVideoInfoResult.ErrorCode == 200)
+			{
+				YouTubeVideo video = rawVideoInfoResult.RawVideoInfo.ToVideo();
+				if (video != null)
+				{
+					if (YouTubeApi.getMediaTracksInfoImmediately)
+					{
+						IYouTubeClient streamingDataClient = automaticClientSelection ?
+							YouTubeApi.GetYouTubeClient("ios") : client;
+						video.UpdateMediaFormats(streamingDataClient);
+					}
+
+					return video;
+				}
+			}
+
+			return CreateEmpty(new YouTubeVideoPlayabilityStatus(400));
 		}
 
 		public static YouTubeVideo GetById(YouTubeVideoId videoId)
 		{
-			YouTubeApi api = new YouTubeApi();
-			return api.GetVideo(videoId);
+			IYouTubeClient client = YouTubeApi.GetYouTubeClient(YouTubeApi.GetDefaultYouTubeClientId());
+			return client != null ? GetById(videoId, client) : null;
+		}
+
+		public static YouTubeVideo GetById(string videoId, IYouTubeClient client)
+		{
+			YouTubeVideoId youTubeVideoId = new YouTubeVideoId(videoId);
+			return GetById(youTubeVideoId, client);
 		}
 
 		public static YouTubeVideo GetById(string videoId)
 		{
-			YouTubeVideoId youTubeVideoId = new YouTubeVideoId(videoId);
-			return GetById(youTubeVideoId);
+			IYouTubeClient client = YouTubeApi.GetYouTubeClient(YouTubeApi.GetDefaultYouTubeClientId());
+			return client != null ? GetById(videoId, client) : null;
 		}
 
 		public static YouTubeVideo GetByWebPage(YouTubeVideoWebPage videoWebPage)
@@ -163,29 +202,45 @@ namespace YouTubeApiLib
 
 		/// <summary>
 		/// Reparse the downloadable formats info.
-		/// Warming!!! You will lost the current media track list!
+		/// Warming!!! You may lost some data in the current media track list!
 		/// </summary>
 		public void UpdateMediaFormats(YouTubeRawVideoInfo rawVideoInfo)
 		{
-			MediaTracks = rawVideoInfo.StreamingData.Data?.Parse();
+			YouTubeStreamingDataResult streamingDataResult = rawVideoInfo.StreamingData;
+			if (streamingDataResult.ErrorCode == 200)
+			{
+				YouTubeMediaFormatList list = rawVideoInfo.StreamingData.Data.Parse();
+				string clientName = list.Client.DisplayName;
+				if (list.Tracks.Count > 0)
+				{
+					MediaTracks[clientName] = list;
+				}
+				else if (MediaTracks.ContainsKey(clientName))
+				{
+					MediaTracks.Remove(clientName);
+				}
+			}
 		}
 
 		/// <summary>
 		/// Redownload and reparse the downloadable formats info.
-		/// Warming!!! You will lost the current media track list!
+		/// Warming!!! You will lost the data previously obtained by the specified client!
 		/// </summary>
 		/// <returns>HTTP error code.</returns>
-		public int UpdateMediaFormats(Utils.YouTubeVideoInfoGettingMethod method)
+		public int UpdateMediaFormats(IYouTubeClient client)
 		{
-			MediaTracks = null;
-			YouTubeRawVideoInfoResult rawVideoInfoResult = YouTubeRawVideoInfo.Get(Id, method);
+			if (MediaTracks.ContainsKey(client.DisplayName))
+			{
+				MediaTracks.Remove(client.DisplayName);
+			}
+			YouTubeRawVideoInfoResult rawVideoInfoResult = YouTubeRawVideoInfo.Get(Id, client);
 			if (rawVideoInfoResult != null)
 			{
 				RawInfo = rawVideoInfoResult.RawVideoInfo;
 				if (rawVideoInfoResult.ErrorCode == 200)
 				{
 					UpdateMediaFormats(rawVideoInfoResult.RawVideoInfo);
-					return MediaTracks != null && MediaTracks.Count > 0 ? 200 : 204;
+					return MediaTracks.ContainsKey(client.DisplayName) ? 200 : 204;
 				}
 				return rawVideoInfoResult.ErrorCode;
 			}
@@ -193,15 +248,19 @@ namespace YouTubeApiLib
 		}
 
 		/// <summary>
-		/// Redownload and reparse the downloadable formats info.
-		/// Warming!!! You will lost the current media track list!
+		/// Redownload and reparse the downloadable formats info using the default YouTube client.
+		/// Warming!!! You may lost some data in the current media track list!
 		/// </summary>
 		/// <returns>HTTP error code.</returns>
 		public int UpdateMediaFormats()
 		{
-			Utils.YouTubeVideoInfoGettingMethod method =
-				RawInfo != null ? RawInfo.DataGettingMethod : Utils.YouTubeVideoInfoGettingMethod.HiddenApiEncryptedUrls;
-			return UpdateMediaFormats(method);
+			IYouTubeClient client = YouTubeApi.GetYouTubeClient(YouTubeApi.GetDefaultYouTubeClientId());
+			return client != null ? UpdateMediaFormats(client) : 400;
+		}
+
+		public void ClearMediaFormatList()
+		{
+			MediaTracks?.Clear();
 		}
 
 		private bool GetIsInfoAvailable()
@@ -213,6 +272,52 @@ namespace YouTubeApiLib
 		private bool GetIsPlayable()
 		{
 			return Status != null && Status.IsPlayable;
+		}
+
+		public bool UpdateVideoDetails()
+		{
+			Details = Utils.GetVideoDetails(Id);
+			return Details != null;
+		}
+
+		private bool GetIsLiveNow()
+		{
+			JObject jDetails = Details?.Parse();
+			if (jDetails != null)
+			{
+				JToken jt = jDetails.Value<JToken>("isLive");
+				if (jt != null) { return jt.Value<bool>(); }
+			}
+
+			return !string.IsNullOrEmpty(HlsManifestUrl);
+		}
+
+		public bool UpdateIsLiveNow(IYouTubeClient client = null)
+		{
+			if (client == null)
+			{
+				client = YouTubeApi.GetYouTubeClient("video_info");
+			}
+
+			if (client != null)
+			{
+				YouTubeVideoDetails details = Utils.GetVideoDetails(Id, client);
+				JObject jDetails = details?.Parse();
+				if (jDetails != null)
+				{
+					JToken jt = jDetails.Value<JToken>("isLive");
+					return jt != null ? jt.Value<bool>() :
+						jDetails.Value<JToken>("viewCount") != null;
+				}
+			}
+
+			return false;
+		}
+
+		public YouTubeSimplifiedVideoInfo GetSimplifiedInfo()
+		{
+			YouTubeSimplifiedVideoInfoResult infoResult = RawInfo.Simplify();
+			return infoResult.ErrorCode == 200 ? infoResult.SimplifiedVideoInfo : null;
 		}
 	}
 }

@@ -9,10 +9,10 @@ namespace YouTubeApiLib
 		public int FrameRate { get; }
 		public int Bandwidth { get; }
 		public string Codecs { get; }
-		public string PlaylistUrl { get; }
+		public YouTubeMediaTrackUrl PlaylistUrl { get; }
 
 		public YouTubeBroadcast(int formatId, int videoWidth, int videoHeight,
-			int frameRate, int bandwidth, string codecs, string playlistUrl)
+			int frameRate, int bandwidth, string codecs, YouTubeMediaTrackUrl playlistUrl)
 		{
 			FormatId = formatId;
 			VideoWidth = videoWidth;

@@ -69,8 +69,9 @@ namespace YouTubeApiLib
 				}
 				string url = strings[startIndex + 1];
 				int formatId = ExtractFormatIdFromUrl(url);
+				YouTubeMediaTrackUrl trackUrl = new YouTubeMediaTrackUrl(url, null);
 
-				YouTubeBroadcast broadcast = new YouTubeBroadcast(formatId, width, height, frameRate, bandwidth, codecs, url);
+				YouTubeBroadcast broadcast = new YouTubeBroadcast(formatId, width, height, frameRate, bandwidth, codecs, trackUrl);
 				resList.AddLast(broadcast);
 			}
 

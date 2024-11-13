@@ -1,22 +1,27 @@
-﻿using static YouTubeApiLib.Utils;
+﻿using System.Collections.Generic;
 
 namespace YouTubeApiLib
 {
 	public sealed class YouTubeApi
 	{
 		public static bool getMediaTracksInfoImmediately = false;
-		internal static YouTubeVideoInfoGettingMethod defaultVideoInfoGettingMethod = YouTubeVideoInfoGettingMethod.HiddenApiEncryptedUrls;
-		public static bool decryptMediaTrackUrlsAutomaticallyIfPossible = true;
+		private static string _defaultYouTubeClientId = "ios";
+		private static Dictionary<string, IYouTubeClient> _clients = new Dictionary<string, IYouTubeClient>()
+		{
+			["video_info"] = new YouTubeClientVideoInfo(),
+			["web_page"] = new YouTubeClientWebPage(),
+			["ios"] = new YouTubeClientIos()
+		};
+
+		public YouTubeVideo GetVideo(YouTubeVideoId youTubeVideoId, IYouTubeClient client)
+		{
+			return YouTubeVideo.GetById(youTubeVideoId, client);
+		}
 
 		public YouTubeVideo GetVideo(YouTubeVideoId youTubeVideoId)
 		{
-			YouTubeRawVideoInfoResult rawVideoInfoResult = YouTubeRawVideoInfo.Get(youTubeVideoId);
-			if (rawVideoInfoResult.ErrorCode == 200)
-			{
-				return MakeYouTubeVideo(rawVideoInfoResult.RawVideoInfo);
-			}
-			return YouTubeVideo.CreateEmpty(new YouTubeVideoPlayabilityStatus(
-				null, null, null, rawVideoInfoResult.ErrorCode, null));
+			IYouTubeClient client = GetYouTubeClient("video_info");
+			return GetVideo(youTubeVideoId, client);
 		}
 
 		public YouTubeVideo GetVideo(YouTubeVideoWebPage videoWebPage)
@@ -29,14 +34,14 @@ namespace YouTubeApiLib
 			return YouTubeVideo.GetByWebPage(webPageCode);
 		}
 
-		public YouTubeSimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId)
+		public YouTubeSimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId, IYouTubeClient client)
 		{
-			return Utils.GetSimplifiedVideoInfo(videoId);
+			return Utils.GetSimplifiedVideoInfo(videoId, client);
 		}
 
 		public YouTubeVideoListResult GetChannelVideoList(YouTubeChannel channel)
 		{
-			return YouTubeApiV1.GetChannelVideoList(channel.Id);
+			return YouTubeApiV1.GetChannelVideoList(channel.Id, null);
 		}
 
 		public YouTubeVideoIdPageResult GetVideoIdPage(YouTubeChannel youTubeChannel, string continuationToken)
@@ -71,6 +76,30 @@ namespace YouTubeApiLib
 			YouTubeApiV1SearchResultFilter searchResultFilter)
 		{
 			return YouTubeApiV1.SearchYouTube(searchQuery, continuationToken, searchResultFilter);
+		}
+
+		public static IYouTubeClient GetYouTubeClient(string clientId)
+		{
+			lock (_clients)
+			{
+				return _clients.ContainsKey(clientId) ? _clients[clientId] : null;
+			}
+		}
+
+		public static string GetDefaultYouTubeClientId()
+		{
+			lock (_defaultYouTubeClientId)
+			{
+				return _defaultYouTubeClientId;
+			}
+		}
+
+		public static void SetDefaultYouTubeClientId(string clientId)
+		{
+			lock (_defaultYouTubeClientId)
+			{
+				_defaultYouTubeClientId = clientId;
+			}
 		}
 	}
 }

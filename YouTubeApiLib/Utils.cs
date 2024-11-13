@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Web;
 using Newtonsoft.Json.Linq;
 using MultiThreadedDownloaderLib;
 
@@ -12,25 +13,6 @@ namespace YouTubeApiLib
 	public static class Utils
 	{
 		public const string YOUTUBE_URL = "https://www.youtube.com";
-
-		public enum YouTubeVideoInfoGettingMethod
-		{
-			HiddenApiEncryptedUrls,
-			HiddenApiDecryptedUrls,
-
-			/// <summary>
-			/// This way will download and parse the video web page.
-			/// Warning!!! YouTube may ban your IP address if you make requests too often!
-			/// You will get the "HTTP error 429" for some days or weeks (maybe forever!).
-			/// You should not abuse this method!
-			/// </summary>
-			WebPage,
-
-			/// <summary>
-			/// Used when user provide the web page code or video info data manually.
-			/// </summary>
-			Manual
-		}
 
 		public static string GetYouTubeVideoUrl(string videoId, int seekToSecond = 0)
 		{
@@ -50,7 +32,7 @@ namespace YouTubeApiLib
 			YouTubeRawVideoInfoResult rawVideoInfoResult = ExtractRawVideoInfoFromWebPage(webPage);
 			if (rawVideoInfoResult.ErrorCode == 200)
 			{
-				YouTubeSimplifiedVideoInfoResult simplifiedVideoInfoResult = rawVideoInfoResult.RawVideoInfo.Parse();
+				YouTubeSimplifiedVideoInfoResult simplifiedVideoInfoResult = rawVideoInfoResult.RawVideoInfo.Simplify();
 				if (simplifiedVideoInfoResult.ErrorCode == 200)
 				{
 					return MakeYouTubeVideo(rawVideoInfoResult.RawVideoInfo, simplifiedVideoInfoResult.SimplifiedVideoInfo);
@@ -60,50 +42,36 @@ namespace YouTubeApiLib
 		}
 
 		internal static YouTubeRawVideoInfoResult GetRawVideoInfo(
-			string videoId, YouTubeVideoInfoGettingMethod method)
+			string videoId, IYouTubeClient client)
 		{
-			switch (method)
-			{
-				case YouTubeVideoInfoGettingMethod.HiddenApiEncryptedUrls:
-				case YouTubeVideoInfoGettingMethod.HiddenApiDecryptedUrls:
-					return YouTubeApiV1.GetRawVideoInfo(videoId, method);
-
-				case YouTubeVideoInfoGettingMethod.WebPage:
-					return GetRawVideoInfoViaWebPage(videoId);
-			}
-			return new YouTubeRawVideoInfoResult(null, 400);
+			int errorCode = client.GetRawVideoInfo(videoId, out YouTubeRawVideoInfo rawVideoInfo, out _);
+			return new YouTubeRawVideoInfoResult(rawVideoInfo, errorCode);
 		}
 
-		internal static YouTubeRawVideoInfoResult GetRawVideoInfoViaWebPage(string videoId)
+		internal static YouTubeSimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId, IYouTubeClient client)
 		{
-			YouTubeVideoWebPageResult videoWebPageResult = YouTubeVideoWebPage.Get(videoId);
-			if (videoWebPageResult.ErrorCode == 200)
-			{
-				return ExtractRawVideoInfoFromWebPage(videoWebPageResult.VideoWebPage);
-			}
-			return new YouTubeRawVideoInfoResult(null, videoWebPageResult.ErrorCode);
-		}
-
-		internal static YouTubeSimplifiedVideoInfoResult GetSimplifiedVideoInfo(string videoId)
-		{
-			YouTubeRawVideoInfoResult rawVideoInfoResult = YouTubeRawVideoInfo.Get(videoId, YouTubeApi.defaultVideoInfoGettingMethod);
+			YouTubeRawVideoInfoResult rawVideoInfoResult = client.GetRawVideoInfo(new YouTubeVideoId(videoId), out _);
 			if (rawVideoInfoResult.ErrorCode == 200)
 			{
-				return rawVideoInfoResult.RawVideoInfo.Parse();
+				return rawVideoInfoResult.RawVideoInfo.Simplify();
 			}
 			return new YouTubeSimplifiedVideoInfoResult(null, rawVideoInfoResult.ErrorCode);
 		}
 
-		internal static YouTubeSimplifiedVideoInfoResult ParseRawVideoInfo(YouTubeRawVideoInfo rawVideoInfo)
+		internal static YouTubeSimplifiedVideoInfoResult SimplifyRawVideoInfo(YouTubeRawVideoInfo rawVideoInfo,
+			YouTubeStreamingData youTubeStreamingData = null)
 		{
-			JObject jVideoDetails = rawVideoInfo.VideoDetails;
+			JObject jVideoDetails = rawVideoInfo.VideoDetails?.Parse();
+			if (jVideoDetails == null)
+			{
+				return new YouTubeSimplifiedVideoInfoResult(null, 404);
+			}
+
 			JObject jMicroformat = rawVideoInfo.Microformat;
 			JObject jMicroformatRenderer = jMicroformat?.Value<JObject>("playerMicroformatRenderer");
 
 			JObject jSimplifiedVideoInfo = new JObject();
 			string videoId = null;
-			bool isUnlisted = false;
-			bool isFamilySafe = true;
 			if (jVideoDetails != null)
 			{
 				jSimplifiedVideoInfo["title"] = jVideoDetails.Value<string>("title");
@@ -125,9 +93,9 @@ namespace YouTubeApiLib
 			{
 				JObject jDescription = jMicroformatRenderer.Value<JObject>("description");
 				jSimplifiedVideoInfo["description"] = jDescription?.Value<string>("simpleText");
-				isFamilySafe = jMicroformatRenderer.Value<bool>("isFamilySafe");
+				bool isFamilySafe = jMicroformatRenderer.Value<bool>("isFamilySafe");
 				jSimplifiedVideoInfo["isFamilySafe"] = isFamilySafe;
-				isUnlisted = jMicroformatRenderer.Value<bool>("isUnlisted");
+				bool isUnlisted = jMicroformatRenderer.Value<bool>("isUnlisted");
 				jSimplifiedVideoInfo["isUnlisted"] = isUnlisted;
 				jSimplifiedVideoInfo["category"] = jMicroformatRenderer.Value<string>("category");
 				{
@@ -156,18 +124,7 @@ namespace YouTubeApiLib
 			List<YouTubeVideoThumbnail> videoThumbnails = GetThumbnailUrls(jMicroformat, videoId);
 			jSimplifiedVideoInfo["thumbnails"] = ThumbnailsToJson(videoThumbnails);
 
-			YouTubeStreamingData streamingData = null;
-			if (YouTubeApi.getMediaTracksInfoImmediately && isFamilySafe &&
-				rawVideoInfo.DataGettingMethod != YouTubeVideoInfoGettingMethod.HiddenApiDecryptedUrls)
-			{
-				YouTubeVideoInfoGettingMethod method =
-					YouTubeApi.decryptMediaTrackUrlsAutomaticallyIfPossible && !isUnlisted ?
-					YouTubeVideoInfoGettingMethod.HiddenApiDecryptedUrls :
-					YouTubeVideoInfoGettingMethod.HiddenApiEncryptedUrls;
-				streamingData = YouTubeStreamingData.Get(videoId, method).Data;
-			}
-			jSimplifiedVideoInfo["streamingData"] =
-				streamingData != null ? streamingData.RawData : rawVideoInfo.StreamingData.Data?.RawData;
+			YouTubeStreamingData streamingData = youTubeStreamingData ?? rawVideoInfo.StreamingData?.Data;
 
 			YouTubeSimplifiedVideoInfo simplifiedVideoInfo = new YouTubeSimplifiedVideoInfo(
 				jSimplifiedVideoInfo, jVideoDetails != null, jMicroformatRenderer != null, streamingData);
@@ -176,7 +133,7 @@ namespace YouTubeApiLib
 
 		public static YouTubeVideo MakeYouTubeVideo(YouTubeRawVideoInfo rawVideoInfo)
 		{
-			YouTubeSimplifiedVideoInfoResult simplifiedVideoInfoResult = rawVideoInfo.Parse();
+			YouTubeSimplifiedVideoInfoResult simplifiedVideoInfoResult = rawVideoInfo.Simplify();
 			if (simplifiedVideoInfoResult.ErrorCode != 200)
 			{
 				return YouTubeVideo.CreateEmpty(rawVideoInfo.PlayabilityStatus);
@@ -185,7 +142,8 @@ namespace YouTubeApiLib
 			return MakeYouTubeVideo(rawVideoInfo, simplifiedVideoInfoResult.SimplifiedVideoInfo);
 		}
 
-		public static YouTubeVideo MakeYouTubeVideo(YouTubeRawVideoInfo rawVideoInfo, YouTubeSimplifiedVideoInfo simplifiedVideoInfo)
+		public static YouTubeVideo MakeYouTubeVideo(YouTubeRawVideoInfo rawVideoInfo,
+			YouTubeSimplifiedVideoInfo simplifiedVideoInfo)
 		{
 			string videoTitle = null;
 			string videoId = null;
@@ -245,14 +203,7 @@ namespace YouTubeApiLib
 				}
 			}
 
-			LinkedList<YouTubeMediaTrack> mediaTracks = null;
-			if (YouTubeApi.getMediaTracksInfoImmediately)
-			{
-				mediaTracks = simplifiedVideoInfo.StreamingData != null ?
-					simplifiedVideoInfo.StreamingData.Parse() :
-					rawVideoInfo.StreamingData.Data?.Parse();
-			}
-
+			YouTubeVideoDetails videoDetails = rawVideoInfo.VideoDetails;
 			YouTubeVideoPlayabilityStatus videoStatus = rawVideoInfo.PlayabilityStatus;
 
 			string descr = !string.IsNullOrEmpty(description) ? description : shortDescription;
@@ -260,49 +211,59 @@ namespace YouTubeApiLib
 			YouTubeVideo youTubeVideo = new YouTubeVideo(
 				videoTitle, videoId, videoLength, dateUploaded, datePublished, ownerChannelTitle,
 				ownerChannelId, descr, viewCount, category, isPrivate, isUnlisted,
-				isFamilySafe, isLiveContent, videoThumbnails, mediaTracks,
+				isFamilySafe, isLiveContent, videoDetails, videoThumbnails,
 				rawVideoInfo, simplifiedVideoInfo, videoStatus);
+			if (YouTubeApi.getMediaTracksInfoImmediately)
+			{
+				YouTubeMediaFormatList mediaFormats = simplifiedVideoInfo.StreamingData != null ?
+					simplifiedVideoInfo.StreamingData.Parse() :
+					rawVideoInfo.StreamingData.Data?.Parse();
+				if (mediaFormats != null)
+				{
+					youTubeVideo.MediaTracks[mediaFormats.Client.DisplayName] = mediaFormats;
+				}
+			}
+
 			return youTubeVideo;
 		}
 
-		internal static YouTubeStreamingDataResult GetStreamingData(string videoId, YouTubeVideoInfoGettingMethod method)
+		public static YouTubeVideoDetails GetVideoDetails(string videoId, IYouTubeClient client)
 		{
-			YouTubeRawVideoInfoResult rawVideoInfoResult = YouTubeRawVideoInfo.Get(videoId, method);
+			YouTubeRawVideoInfoResult rawVideoInfoResult = client.GetRawVideoInfo(new YouTubeVideoId(videoId), out _);
 			if (rawVideoInfoResult.ErrorCode == 200)
 			{
-				return rawVideoInfoResult.RawVideoInfo.StreamingData;
-			}
-			return new YouTubeStreamingDataResult(null, 404);
-		}
-
-		internal static string ExtractVideoIDsFromGridRendererItem(JObject gridVideoRendererItem)
-		{
-			JObject j = gridVideoRendererItem.Value<JObject>("gridVideoRenderer");
-			if (j != null)
-			{
-				return j.Value<string>("videoId");
-			}
-			else
-			{
-				j = gridVideoRendererItem.Value<JObject>("richItemRenderer");
-				if (j != null)
+				YouTubeVideoDetails details = rawVideoInfoResult.RawVideoInfo.VideoDetails;
+				JObject jDetails = details?.Parse();
+				if (jDetails != null)
 				{
-					j = j.Value<JObject>("content");
-					if (j != null)
-					{
-						JObject jRenderer = j.Value<JObject>("videoRenderer");
-						if (jRenderer == null)
-						{
-							jRenderer = j.Value<JObject>("reelItemRenderer");
-						}
-						if (jRenderer != null)
-						{
-							return jRenderer.Value<string>("videoId");
-						}
-					}
+					return new YouTubeVideoDetails(jDetails.ToString(), client);
 				}
 			}
+
 			return null;
+		}
+
+		public static YouTubeVideoDetails GetVideoDetails(string videoId)
+		{
+			IYouTubeClient client = YouTubeApi.GetYouTubeClient("video_info");
+			YouTubeRawVideoInfoResult rawVideoInfoResult = client.GetRawVideoInfo(new YouTubeVideoId(videoId), out _);
+			return rawVideoInfoResult.ErrorCode == 200 ? rawVideoInfoResult.RawVideoInfo.VideoDetails : null;
+		}
+
+		public static string ExtractVideoIdFromGridRendererItem(string gridVideoRendererItemString)
+		{
+			string[] patterns = new string[]
+			{
+				@"""videoId"":\s*""(.*)""",
+				@"\/shorts/(.*)""",
+				@"""shorts-shelf-item-(.*)"""
+			};
+			return FindRegexp(gridVideoRendererItemString, patterns);
+		}
+
+		internal static string ExtractVideoIdFromGridRendererItem(JObject jGridVideoRendererItem)
+		{
+			return ExtractVideoIdFromGridRendererItem(jGridVideoRendererItem.ToString());
 		}
 
 		internal static List<string> ExtractVideoIDsFromGridRendererItems(
@@ -317,7 +278,7 @@ namespace YouTubeApiLib
 			List<string> idList = new List<string>();
 			foreach (JObject jItem in gridVideoRendererItems.Cast<JObject>())
 			{
-				string videoId = ExtractVideoIDsFromGridRendererItem(jItem);
+				string videoId = ExtractVideoIdFromGridRendererItem(jItem);
 				if (!string.IsNullOrEmpty(videoId) && !string.IsNullOrWhiteSpace(videoId))
 				{
 					idList.Add(videoId);
@@ -327,15 +288,8 @@ namespace YouTubeApiLib
 					JObject jContinuationItemRenderer = jItem.Value<JObject>("continuationItemRenderer");
 					if (jContinuationItemRenderer != null)
 					{
-						JObject j = jContinuationItemRenderer.Value<JObject>("continuationEndpoint");
-						if (j != null)
-						{
-							j = j.Value<JObject>("continuationCommand");
-							if (j != null)
-							{
-								continuationToken = j.Value<string>("token");
-							}
-						}
+						JObject jContinuationCommand = jContinuationItemRenderer.Value<JObject>("continuationEndpoint")?.Value<JObject>("continuationCommand");
+						continuationToken = jContinuationCommand?.Value<string>("token");
 					}
 				}
 			}
@@ -424,6 +378,33 @@ namespace YouTubeApiLib
 			catch (Exception ex)
 			{
 				System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+			}
+
+			return null;
+		}
+
+		public static string FindRegexp(string inputString, string pattern)
+		{
+			if (!string.IsNullOrEmpty(pattern))
+			{
+				Regex regex = new Regex(pattern);
+				MatchCollection matches = regex.Matches(inputString);
+				if (matches != null && matches.Count > 0 && matches[0].Groups.Count > 1)
+				{
+					string value = matches[0].Groups[1].Value;
+					return value;
+				}
+			}
+
+			return null;
+		}
+
+		public static string FindRegexp(string inputString, IEnumerable<string> patterns)
+		{
+			foreach (string pattern in patterns)
+			{
+				string value = FindRegexp(inputString, pattern);
+				if (!string.IsNullOrEmpty(value)) { return value; }
 			}
 
 			return null;
@@ -591,7 +572,7 @@ namespace YouTubeApiLib
 
 		public static int YouTubeHttpPost(string url, string body, out string responseString)
 		{
-			const string userAgent = "com.google.android.youtube/17.10.35 (Linux; U; Android 12; GB) gzip";
+			const string userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0";
 			return YouTubeHttpPost(url, body, userAgent, out responseString);
 		}
 
@@ -602,8 +583,9 @@ namespace YouTubeApiLib
 				string rawVideoInfo = ExtractRawVideoInfoFromWebPageCode(webPage.WebPageCode);
 				if (!string.IsNullOrEmpty(rawVideoInfo) && !string.IsNullOrWhiteSpace(rawVideoInfo))
 				{
-					YouTubeVideoInfoGettingMethod method = webPage.IsProvidedManually ? YouTubeVideoInfoGettingMethod.Manual : YouTubeVideoInfoGettingMethod.WebPage;
-					YouTubeRawVideoInfo youTubeRawVideoInfo = new YouTubeRawVideoInfo(rawVideoInfo, method);
+					IYouTubeClient client = new YouTubeClientWebPage();
+					YouTubeMediaTrackUrlDecryptionData urlDecryptionData = new YouTubeMediaTrackUrlDecryptionData(webPage);
+					YouTubeRawVideoInfo youTubeRawVideoInfo = new YouTubeRawVideoInfo(rawVideoInfo, client, urlDecryptionData);
 					return new YouTubeRawVideoInfoResult(youTubeRawVideoInfo, 200);
 				}
 				else
@@ -661,16 +643,15 @@ namespace YouTubeApiLib
 			return null;
 		}
 
-		public static JObject ExtractYouTubeConfigFromWebPageCode(
-			string webPageCode, string pattern = @"ytcfg\.set\(({\s*"".*""})\);.*window\.ytcfg")
+		public static YouTubeConfig ExtractYouTubeConfigFromWebPageCode(
+			string webPageCode, string videoId, string pattern = @"ytcfg\.set\(({\s*"".*""})\);.*window\.ytcfg")
 		{
 			Regex regex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled);
 			MatchCollection matches = regex.Matches(webPageCode);
 			if (matches.Count > 0 && matches[0].Groups.Count > 1)
 			{
 				string t = matches[0].Groups[1].Value;
-				JObject j = TryParseJson(t);
-				return j;
+				return new YouTubeConfig(videoId, t);
 			}
 
 			return null;
@@ -837,6 +818,16 @@ namespace YouTubeApiLib
 			}
 
 			return dateTime.ToUtcString();
+		}
+
+		public static string UrlDecode(string inputString)
+		{
+			return HttpUtility.UrlDecode(inputString);
+		}
+
+		public static string UrlEncode(string inputString)
+		{
+			return HttpUtility.UrlEncode(inputString);
 		}
 
 		internal static JObject TryParseJson(string jsonString, out string errorText)

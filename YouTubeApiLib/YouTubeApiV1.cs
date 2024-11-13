@@ -11,67 +11,6 @@ namespace YouTubeApiLib
 		internal const string API_V1_PLAYER_URL = "https://www.youtube.com/youtubei/v1/player";
 		internal const string API_V1_SEARCH_URL = "https://www.youtube.com/youtubei/v1/search";
 
-		/// <summary>
-		/// Генерирует тело POST-запроса для получения информации о видео.
-		/// Ответ будет содержать всё необходимое, кроме ссылок для скачивания.
-		/// Ссылки будут зашифрованы (Cipher, ограничение скорости и т.д.).
-		/// </summary>
-		/// <param name="videoId">ID видео</param>
-		/// <returns>Тело запроса</returns>
-		public static JObject GenerateVideoInfoEncryptedRequestBody(string videoId)
-		{
-			const string CLIENT_NAME = "WEB";
-			const string CLIENT_VERSION = "2.20201021.03.00";
-
-			JObject jClient = GenerateYouTubeClientBody(CLIENT_NAME, CLIENT_VERSION);
-			JObject jContext = new JObject
-			{
-				["client"] = jClient
-			};
-
-			JObject json = new JObject
-			{
-				["context"] = jContext
-			};
-			json["videoId"] = videoId;
-
-			return json;
-		}
-
-		/// <summary>
-		/// Генерирует тело POST-запроса для получения информации о видео.
-		/// Ответ будет содержать уже расшифрованные ссылки для скачивания
-		/// без ограничения скорости, но остальная информация будет не полной.
-		/// Используйте этот запрос только для получения ссылок.
-		/// Внимание! Этот запрос не работает для видео с доступом только по ссылке (unlisted)
-		/// и видео с ограничением по возрасту (18+)!
-		/// </summary>
-		/// <param name="videoId">ID видео</param>
-		/// <returns>Тело запроса</returns>
-		public static JObject GenerateVideoInfoDecryptedRequestBody(string videoId)
-		{
-			const string CLIENT_NAME = "ANDROID_TESTSUITE";
-			const string CLIENT_VERSION = "1.9";
-			const int ANDROID_SDK_VERSION = 30;
-
-			JObject jClient = GenerateYouTubeClientBody(CLIENT_NAME, CLIENT_VERSION);
-			jClient["androidSdkVersion"] = ANDROID_SDK_VERSION;
-			jClient["utcOffsetMinutes"] = 0;
-
-			JObject jContext = new JObject()
-			{
-				["client"] = jClient
-			};
-
-			JObject json = new JObject()
-			{
-				["videoId"] = videoId,
-				["context"] = jContext
-			};
-
-			return json;
-		}
-
 		public static JObject GenerateSearchQueryRequestBody(
 			string searchQuery, string continuationToken, YouTubeApiV1SearchResultFilter filter)
 		{
@@ -111,7 +50,7 @@ namespace YouTubeApiLib
 			YouTubeChannelTabPage youTubeChannelTabPage, string continuationToken)
 		{
 			const string CLIENT_NAME = "WEB";
-			const string CLIENT_VERSION = "2.20211221.00.00";
+			const string CLIENT_VERSION = "2.20241029.07.00";
 
 			JObject jClient = GenerateYouTubeClientBody(CLIENT_NAME, CLIENT_VERSION);
 			JObject jContext = new JObject()
@@ -174,25 +113,15 @@ namespace YouTubeApiLib
 			return $"{API_V1_SEARCH_URL}?key={API_V1_KEY}";
 		}
 
-		internal static YouTubeRawVideoInfoResult GetRawVideoInfo(
-			string videoId, YouTubeVideoInfoGettingMethod method)
+		internal static YouTubeRawVideoInfoResult GetRawVideoInfo(YouTubeVideoId videoId)
 		{
-			if (method == YouTubeVideoInfoGettingMethod.WebPage)
-			{
-				return GetRawVideoInfoViaWebPage(videoId);
-			}
+			IYouTubeClient client = YouTubeApi.GetYouTubeClient("video_info");
+			return client.GetRawVideoInfo(videoId, out _);
+		}
 
-			JObject body = method == YouTubeVideoInfoGettingMethod.HiddenApiEncryptedUrls ?
-				GenerateVideoInfoEncryptedRequestBody(videoId) :
-				GenerateVideoInfoDecryptedRequestBody(videoId);
-			string url = GetPlayerRequestUrl();
-			int errorCode = YouTubeHttpPost(url, body.ToString(), out string rawVideoInfoJsonString);
-			if (errorCode == 200)
-			{
-				YouTubeRawVideoInfo youTubeRawVideoInfo = new YouTubeRawVideoInfo(rawVideoInfoJsonString, method);
-				return new YouTubeRawVideoInfoResult(youTubeRawVideoInfo, 200);
-			}
-			return new YouTubeRawVideoInfoResult(null, errorCode);
+		internal static YouTubeRawVideoInfoResult GetRawVideoInfo(string videoId)
+		{
+			return GetRawVideoInfo(new YouTubeVideoId(videoId));
 		}
 
 		internal static YouTubeVideoPageResult GetVideoPage(string channelId, YouTubeChannelTabPage tabPage, string continuationToken)
@@ -203,10 +132,10 @@ namespace YouTubeApiLib
 				List<YouTubeVideo> videos = new List<YouTubeVideo>();
 				foreach (string videoId in videoIdPageResult.VideoIdPage.VideoIds)
 				{
-					YouTubeRawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId, YouTubeApi.defaultVideoInfoGettingMethod);
+					YouTubeRawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId);
 					if (rawVideoInfoResult.ErrorCode == 200)
 					{
-						YouTubeVideo video = MakeYouTubeVideo(rawVideoInfoResult.RawVideoInfo);
+						YouTubeVideo video = rawVideoInfoResult.RawVideoInfo.ToVideo();
 						if (video != null && video.Status != null)
 						{
 							videos.Add(video);
@@ -239,7 +168,7 @@ namespace YouTubeApiLib
 			return new YouTubeVideoIdPageResult(null, errorCode);
 		}
 
-		internal static YouTubeVideoListResult GetChannelVideoList(string channelId)
+		internal static YouTubeVideoListResult GetChannelVideoList(string channelId, IYouTubeClient client)
 		{
 			JArray resList = new JArray();
 			string continuationToken = null;
@@ -256,7 +185,7 @@ namespace YouTubeApiLib
 
 				foreach (string videoId in videoIdPageResult.VideoIdPage.VideoIds)
 				{
-					YouTubeSimplifiedVideoInfoResult simplifiedVideoInfoResult = GetSimplifiedVideoInfo(videoId);
+					YouTubeSimplifiedVideoInfoResult simplifiedVideoInfoResult = GetSimplifiedVideoInfo(videoId, client);
 					if (simplifiedVideoInfoResult.ErrorCode == 200)
 					{
 						resList.Add(simplifiedVideoInfoResult.SimplifiedVideoInfo.Info);

@@ -19,9 +19,7 @@ namespace YouTubeApiLib
 			string qualityLabel,
 			int approxDurationMs,
 			string projectionType,
-			string fileUrl,
-			string cipherSignatureEncrypted,
-			string cipherEncryptedFileUrl,
+			YouTubeMediaTrackUrl fileUrl,
 			string mimeType,
 			string mimeExt,
 			string mimeCodecs,
@@ -35,7 +33,6 @@ namespace YouTubeApiLib
 			YouTubeBroadcast broadcast)
 			: base(formatId, bitrate, averageBitrate, lastModified, contentLength,
 				  quality, qualityLabel, approxDurationMs, projectionType, fileUrl,
-				  cipherSignatureEncrypted, cipherEncryptedFileUrl,
 				  mimeType, mimeExt, mimeCodecs, fileExtension,
 				  isDashManifest, isHlsManifest, isCiphered, dashManifestUrl, dashUrls, hlsManifestUrl, broadcast)
 		{
@@ -57,7 +54,7 @@ namespace YouTubeApiLib
 			string dashManifestUrl,
 			YouTubeDashUrlList dashUrls)
 			: base(formatId, bitrate, bitrate, null, -1L,
-				  null, null, -1, null, null, null, null,
+				  null, null, -1, null, null,
 				  mimeType, mimeExt, mimeCodecs, fileExtension,
 				  true, false, false, dashManifestUrl, dashUrls, null, null)
 		{
@@ -69,7 +66,7 @@ namespace YouTubeApiLib
 		//Simplified constructor for HLS track (broadcast aka stream)
 		public YouTubeMediaTrackVideo(YouTubeBroadcast broadcast, string hlsManifestUrl)
 			: base(broadcast.FormatId, broadcast.Bandwidth, broadcast.Bandwidth, null, -1L,
-				  null, null, -1, null, broadcast.PlaylistUrl, null, null,
+				  null, null, -1, null, broadcast.PlaylistUrl,
 				  "video/ts", "ts", broadcast.Codecs, "ts",
 				  false, true, false, null, null, hlsManifestUrl, broadcast)
 		{
@@ -91,9 +88,7 @@ namespace YouTubeApiLib
 			string qualityLabel,
 			int approxDurationMs,
 			string projectionType,
-			string fileUrl,
-			string cipherSignatureEncrypted,
-			string cipherEncryptedFileUrl,
+			YouTubeMediaTrackUrl fileUrl,
 			string mimeType,
 			string mimeExt,
 			string mimeCodecs,
@@ -101,7 +96,6 @@ namespace YouTubeApiLib
 			bool isCiphered)
 			: base(formatId, bitrate, averageBitrate, lastModified, contentLength,
 				  quality, qualityLabel, approxDurationMs, projectionType, fileUrl,
-				  cipherSignatureEncrypted, cipherEncryptedFileUrl,
 				  mimeType, mimeExt, mimeCodecs, fileExtension, false, false,
 				  isCiphered, null, null, null, null)
 		{
