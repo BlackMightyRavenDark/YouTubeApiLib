@@ -97,9 +97,9 @@ namespace YouTubeApiLib
 							IsDashed = track.IsDashManifestPresent;
 							DashManifestUrl = track.DashManifestUrl;
 						}
-						if (!IsLiveNow && track.Broadcast != null)
+						if (IsLiveNow && track.GetType() == typeof(YouTubeMediaTrackHlsStream))
 						{
-							HlsManifestUrl = track.HlsManifestUrl;
+							HlsManifestUrl = (track as YouTubeMediaTrackHlsStream).HlsManifestUrl;
 						}
 						if (IsDashed && !string.IsNullOrEmpty(HlsManifestUrl))
 						{

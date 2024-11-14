@@ -27,14 +27,13 @@ namespace YouTubeApiLib
 			string mimeCodecs,
 			string fileExtension,
 			bool isDash,
-			bool isHls,
 			bool isCiphered,
 			string dashManifestUrl,
 			YouTubeDashUrlList dashUrls)
 			: base(formatId, bitrate, averageBitrate, lastModified, contentLength,
 				  quality, qualityLabel, approxDurationMs, null, fileUrl,
 				  mimeType, mimeExt, mimeCodecs, fileExtension,
-				  isDash, isHls, isCiphered, dashManifestUrl, dashUrls, null, null)
+				  isDash, isCiphered, dashManifestUrl, dashUrls)
 		{
 			AudioQuality = audioQuality;
 			SampleRate = sampleRate;
@@ -56,7 +55,7 @@ namespace YouTubeApiLib
 			YouTubeDashUrlList dashUrls)
 			: base(formatId, bitrate, bitrate, null, -1L, null, null, -1, null, null,
 				  mimeType, mimeExt, mimeCodecs, fileExtension,
-				  true, false, false, dashManifestUrl, dashUrls, null, null)
+				  true, false, dashManifestUrl, dashUrls)
 		{
 			AudioQuality = null;
 			SampleRate = sampleRate;
@@ -87,7 +86,7 @@ namespace YouTubeApiLib
 			: base(formatId, bitrate, averageBitrate, lastModified, contentLength,
 				  quality, qualityLabel, approxDurationMs, null, fileUrl,
 				  mimeType, mimeExt, mimeCodecs, fileExtension,
-				  false, false, isCiphered, null, null, null, null)
+				  false, isCiphered, null, null)
 		{
 			AudioQuality = audioQuality;
 			SampleRate = sampleRate;

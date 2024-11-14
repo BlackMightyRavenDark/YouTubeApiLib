@@ -25,7 +25,7 @@ namespace YouTubeApiLib
 				{
 					foreach (YouTubeBroadcast broadcast in broadcasts)
 					{
-						YouTubeMediaTrack hlsStream = new YouTubeMediaTrackVideo(broadcast, hlsManifestUrl);
+						YouTubeMediaTrack hlsStream = new YouTubeMediaTrackHlsStream(broadcast, hlsManifestUrl);
 						mediaTracks.AddLast(hlsStream);
 					}
 				}

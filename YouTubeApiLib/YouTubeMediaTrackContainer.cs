@@ -34,7 +34,7 @@ namespace YouTubeApiLib
 			: base(formatId, bitrate, averageBitrate, lastModified, contentLength,
 				  quality, qualityLabel, approxDurationMs, projectionType, fileUrl,
 				  mimeType, mimeExt, mimeCodecs, fileExtension,
-				  false, false, isCiphered, null, null, null, null)
+				  false, isCiphered, null, null)
 		{
 			VideoWidth = videoWidth;
 			VideoHeight = videoHeight;

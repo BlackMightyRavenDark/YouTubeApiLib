@@ -115,29 +115,27 @@ namespace YouTubeApiLib.ConsoleTest
 								foreach (YouTubeMediaTrack track in dictItem.Value.Tracks)
 								{
 									string info;
-									if (track is YouTubeMediaTrackVideo)
+									if (track.GetType() == typeof(YouTubeMediaTrackVideo))
 									{
 										YouTubeMediaTrackVideo videoTrack = track as YouTubeMediaTrackVideo;
-										string trackType;
-										if (track.IsHlsManifestPresent)
-										{
-											trackType = "HLS";
-										}
-										else
-										{
-											trackType = videoTrack.IsDashManifestPresent ? "DASH VIDEO" : "VIDEO";
-										}
+										string trackType = videoTrack.IsDashManifestPresent ? "DASH VIDEO" : "VIDEO";
 										info = $"{trackType} | ID {videoTrack.FormatId} | {videoTrack.VideoWidth}x{videoTrack.VideoHeight} | " +
 											$"{videoTrack.FrameRate} fps | {videoTrack.ContentLength} bytes | {videoTrack.FileExtension}";
 									}
-									else if (track is YouTubeMediaTrackAudio)
+									else if (track.GetType() == typeof(YouTubeMediaTrackHlsStream))
+									{
+										YouTubeMediaTrackHlsStream hls = track as YouTubeMediaTrackHlsStream;
+										info = $"HLS | ID {hls.FormatId} | {hls.VideoWidth}x{hls.VideoHeight} | " +
+											$"{hls.FrameRate} fps | {hls.FileExtension}\nPlaylist URL: {hls.FileUrl}";
+									}
+									else if (track.GetType() == typeof(YouTubeMediaTrackAudio))
 									{
 										YouTubeMediaTrackAudio audioTrack = track as YouTubeMediaTrackAudio;
 										string trackType = audioTrack.IsDashManifestPresent ? "DASH AUDIO" : "AUDIO";
 										info = $"{trackType} | ID {audioTrack.FormatId} | {audioTrack.SampleRate} Hz | " +
 											$"{audioTrack.ChannelCount} ch | {audioTrack.AudioQuality} | {audioTrack.FileExtension}";
 									}
-									else if (track is YouTubeMediaTrackContainer)
+									else if (track.GetType() == typeof(YouTubeMediaTrackContainer))
 									{
 										YouTubeMediaTrackContainer container = track as YouTubeMediaTrackContainer;
 										info = $"CONTAINER | ID {container.FormatId} | {container.VideoWidth}x{container.VideoHeight} | " +
@@ -154,17 +152,15 @@ namespace YouTubeApiLib.ConsoleTest
 										string dashChunkCountString = track.DashUrls != null ? track.DashUrls.Count.ToString() : "null";
 										Console.WriteLine($"DASH chunk URL count: {dashChunkCountString}");
 									}
-									else
+									else if (!(track is YouTubeMediaTrackHlsStream))
 									{
-										string url = string.IsNullOrEmpty(track.FileUrl.ToString()) || string.IsNullOrWhiteSpace(track.FileUrl.ToString()) ? "null" : track.FileUrl.ToString();
-										string t = track.IsHlsManifestPresent ? "Playlist URL" : "URL";
-										Console.WriteLine($"{t}: {url}");
-										if (!track.IsHlsManifestPresent)
+										string url = track.FileUrl.ToString();
+										if (string.IsNullOrEmpty(url) || string.IsNullOrWhiteSpace(url)) { url = "null"; }
+										Console.WriteLine($"URL: {url}");
+
+										if (track.FileUrl.SplitUrl() && track.FileUrl.QueryUrl.ContainsKey("n"))
 										{
-											if (track.FileUrl.SplitUrl() && track.FileUrl.QueryUrl.ContainsKey("n"))
-											{
-												Console.WriteLine($"'n'-param: {track.FileUrl.QueryUrl["n"]}");
-											}
+											Console.WriteLine($"'n'-param: {track.FileUrl.QueryUrl["n"]}");
 										}
 									}
 								}

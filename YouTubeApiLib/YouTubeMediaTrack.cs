@@ -18,12 +18,9 @@ namespace YouTubeApiLib
 		public YouTubeMediaTrackUrl FileUrl { get; }
 		public string FileExtension { get; }
 		public bool IsDashManifestPresent { get; }
-		public bool IsHlsManifestPresent { get; }
 		public bool IsCiphered { get; }
 		public string DashManifestUrl { get; }
 		public YouTubeDashUrlList DashUrls { get; }
-		public string HlsManifestUrl { get; }
-		public YouTubeBroadcast Broadcast { get; }
 
 		public YouTubeMediaTrack(
 			int formatId,
@@ -41,12 +38,9 @@ namespace YouTubeApiLib
 			string mimeCodecs,
 			string fileExtension,
 			bool isDashManifestPresent,
-			bool isHlsManifestPresent,
 			bool isCiphered,
 			string dashManifestUrl,
-			YouTubeDashUrlList dashUrls,
-			string hlsManifestUrl,
-			YouTubeBroadcast broadcast)
+			YouTubeDashUrlList dashUrls)
 		{
 			FormatId = formatId;
 			Bitrate = bitrate;
@@ -63,12 +57,9 @@ namespace YouTubeApiLib
 			MimeCodecs = mimeCodecs;
 			FileExtension = fileExtension;
 			IsDashManifestPresent = isDashManifestPresent;
-			IsHlsManifestPresent = isHlsManifestPresent;
 			IsCiphered = isCiphered;
 			DashManifestUrl = dashManifestUrl;
 			DashUrls = dashUrls;
-			HlsManifestUrl = hlsManifestUrl;
-			Broadcast = broadcast;
 		}
 
 		public virtual string GetShortInfo()
