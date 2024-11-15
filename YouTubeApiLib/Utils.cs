@@ -296,24 +296,22 @@ namespace YouTubeApiLib
 			return idList;
 		}
 
-		internal static JArray FindItemsArray(JObject json, bool token)
+		internal static JArray FindItemsArray(JObject json, bool dataWasRecievedUsingContinuationToken)
 		{
 			try
 			{
-				if (token)
+				if (dataWasRecievedUsingContinuationToken)
 				{
-					List<IYouTubeChannelTabPageParser> continuationParsers = new List<IYouTubeChannelTabPageParser>()
+					IYouTubeChannelTabPageParser[] continuationParsers = new IYouTubeChannelTabPageParser[]
 					{
 						new YouTubeChannelTabPageVideoContinuationParser1(),
 						new YouTubeChannelTabPageVideoContinuationParser2()
 					};
+
 					foreach (IYouTubeChannelTabPageParser continuationParser in continuationParsers)
 					{
 						JArray items = continuationParser.FindGridItems(json);
-						if (items != null && items.Count > 0)
-						{
-							return items;
-						}
+						if (items != null && items.Count > 0) { return items; }
 					}
 				}
 				else
@@ -321,17 +319,16 @@ namespace YouTubeApiLib
 					YouTubeChannelTab selectedTab = YouTubeChannelTab.FindSelectedTab(json);
 					if (selectedTab != null)
 					{
-						List<IYouTubeChannelTabPageParser> parsers = new List<IYouTubeChannelTabPageParser>() {
+						IYouTubeChannelTabPageParser[] parsers = new IYouTubeChannelTabPageParser[]
+						{
 							new YouTubeChannelTabPageParserVideo1(),
 							new YouTubeChannelTabPageParserVideo2()
 						};
+
 						foreach (IYouTubeChannelTabPageParser parser in parsers)
 						{
 							JArray items = parser.FindGridItems(selectedTab.Json);
-							if (items != null && items.Count > 0)
-							{
-								return items;
-							}
+							if (items != null && items.Count > 0) { return items; }
 						}
 					}
 				}
