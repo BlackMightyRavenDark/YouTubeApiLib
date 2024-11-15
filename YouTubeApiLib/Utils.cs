@@ -314,14 +314,9 @@ namespace YouTubeApiLib
 		
 		public static YouTubeChannelTab FindSelectedChannelTab(JArray jaTabs)
 		{
-			foreach (JObject jObject in jaTabs)
+			foreach (JObject jObject in jaTabs.Cast<JObject>())
 			{
-				JObject j = jObject.Value<JObject>("tabRenderer");
-				if (j == null)
-				{
-					j = jObject.Value<JObject>("expandableTabRenderer");
-				}
-
+				JObject j = jObject.Value<JObject>("tabRenderer") ?? jObject.Value<JObject>("expandableTabRenderer");
 				if (j != null)
 				{
 					bool selected = j.Value<bool>("selected");
@@ -332,6 +327,7 @@ namespace YouTubeApiLib
 					}
 				}
 			}
+
 			return null;
 		}
 
