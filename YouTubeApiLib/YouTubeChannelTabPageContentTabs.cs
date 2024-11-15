@@ -14,7 +14,7 @@ namespace YouTubeApiLib
 		public YouTubeChannelTab GetSelectedTab()
 		{
 			JArray jaTabs = Utils.TryParseJsonArray(RawData);
-			return jaTabs != null ? Utils.FindSelectedChannelTab(jaTabs) : null;
+			return jaTabs != null ? YouTubeChannelTab.FindSelectedTab(jaTabs) : null;
 		}
 	}
 }

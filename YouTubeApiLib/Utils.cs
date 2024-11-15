@@ -296,41 +296,6 @@ namespace YouTubeApiLib
 			return idList;
 		}
 
-		public static JArray FindTabItems(JObject megaRoot)
-		{
-			JObject j = megaRoot?.Value<JObject>("contents")?.Value<JObject>("twoColumnBrowseResultsRenderer");
-			return j?.Value<JArray>("tabs");
-		}
-
-		public static YouTubeChannelTab FindSelectedChannelTab(JObject megaRoot)
-		{
-			JArray jaTabs = FindTabItems(megaRoot);
-			if (jaTabs == null || jaTabs.Count == 0)
-			{
-				return null;
-			}
-			return FindSelectedChannelTab(jaTabs);
-		}
-		
-		public static YouTubeChannelTab FindSelectedChannelTab(JArray jaTabs)
-		{
-			foreach (JObject jObject in jaTabs.Cast<JObject>())
-			{
-				JObject j = jObject.Value<JObject>("tabRenderer") ?? jObject.Value<JObject>("expandableTabRenderer");
-				if (j != null)
-				{
-					bool selected = j.Value<bool>("selected");
-					if (selected)
-					{
-						string tabTitle = j.Value<string>("title");
-						return new YouTubeChannelTab(tabTitle, jObject);
-					}
-				}
-			}
-
-			return null;
-		}
-
 		internal static JArray FindItemsArray(JObject json, bool token)
 		{
 			try
@@ -353,7 +318,7 @@ namespace YouTubeApiLib
 				}
 				else
 				{
-					YouTubeChannelTab selectedTab = FindSelectedChannelTab(json);
+					YouTubeChannelTab selectedTab = YouTubeChannelTab.FindSelectedTab(json);
 					if (selectedTab != null)
 					{
 						List<IYouTubeChannelTabPageParser> parsers = new List<IYouTubeChannelTabPageParser>() {

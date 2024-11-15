@@ -218,7 +218,7 @@ namespace YouTubeApiLib
 					return new YouTubeChannelTabResult(null, 404);
 				}
 
-				YouTubeChannelTab selectedTab = FindSelectedChannelTab(json);
+				YouTubeChannelTab selectedTab = YouTubeChannelTab.FindSelectedTab(json);
 				if (selectedTab == null)
 				{
 					return new YouTubeChannelTabResult(null, 404);
