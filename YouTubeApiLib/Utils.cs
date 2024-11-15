@@ -121,8 +121,11 @@ namespace YouTubeApiLib
 				}
 			}
 
-			List<YouTubeVideoThumbnail> videoThumbnails = GetThumbnailUrls(jMicroformat, videoId);
-			jSimplifiedVideoInfo["thumbnails"] = ThumbnailsToJson(videoThumbnails);
+			List<YouTubeVideoThumbnail> videoThumbnails = GetThumbnailUrls(jMicroformat, videoId).ToList();
+			if (videoThumbnails.Count > 0)
+			{
+				jSimplifiedVideoInfo["thumbnails"] = ThumbnailsToJson(videoThumbnails);
+			}
 
 			YouTubeStreamingData streamingData = youTubeStreamingData ?? rawVideoInfo.StreamingData?.Data;
 
@@ -368,11 +371,11 @@ namespace YouTubeApiLib
 			return null;
 		}
 
-		internal static List<YouTubeVideoThumbnail> GetThumbnailUrls(JObject jMicroformat, string videoId)
+		internal static IEnumerable<YouTubeVideoThumbnail> GetThumbnailUrls(JObject jMicroformat, string videoId)
 		{
 			if (string.IsNullOrEmpty(videoId) || string.IsNullOrWhiteSpace(videoId))
 			{
-				return null;
+				yield break;
 			}
 
 			List<YouTubeVideoThumbnail> possibleThumbnails = new List<YouTubeVideoThumbnail>()
@@ -389,31 +392,19 @@ namespace YouTubeApiLib
 				List<YouTubeVideoThumbnail> thumbnails = ExtractThumbnailsFromMicroformat(jMicroformat);
 				foreach (YouTubeVideoThumbnail thumbnail in thumbnails)
 				{
-					bool found = false;
-					foreach (YouTubeVideoThumbnail thumbnail2 in possibleThumbnails)
-					{
-						if (thumbnail.Url == thumbnail2.Url)
-						{
-							found = true;
-							break;
-						}
-					}
-					if (!found)
+					if (!possibleThumbnails.Any(item => string.Compare(thumbnail.Url, item.Url, true) == 0))
 					{
 						possibleThumbnails.Add(thumbnail);
 					}
 				}
 			}
 
-			List<YouTubeVideoThumbnail> resList = new List<YouTubeVideoThumbnail>();
 			foreach (YouTubeVideoThumbnail thumbnail in possibleThumbnails)
 			{
 				//TODO: Check the URL availability
 				//But it's extremely slow operation :(
-				resList.Add(thumbnail);
+				yield return thumbnail;
 			}
-
-			return resList;
 		}
 
 		private static List<YouTubeVideoThumbnail> ExtractThumbnailsFromMicroformat(JObject jMicroformat)
