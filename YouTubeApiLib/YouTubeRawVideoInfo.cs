@@ -30,7 +30,8 @@ namespace YouTubeApiLib
 
 		public static YouTubeRawVideoInfoResult Get(YouTubeVideoId videoId, IYouTubeClient client)
 		{
-			return GetRawVideoInfo(videoId.Id, client);
+			return videoId != null && client != null ? GetRawVideoInfo(videoId.Id, client) :
+				new YouTubeRawVideoInfoResult(null, 400);
 		}
 
 		public static YouTubeRawVideoInfoResult Get(string videoId, IYouTubeClient client)
