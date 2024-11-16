@@ -47,7 +47,7 @@ namespace YouTubeApiLib
 
 		public static YouTubeRawVideoInfoResult Get(string videoId)
 		{
-			IYouTubeClient client = new YouTubeClientIos(null);
+			IYouTubeClient client = YouTubeApi.GetYouTubeClient(YouTubeApi.GetDefaultYouTubeClientId());
 			return Get(videoId, client);
 		}
 
