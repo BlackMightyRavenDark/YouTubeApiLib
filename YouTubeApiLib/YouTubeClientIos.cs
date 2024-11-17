@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
 using Newtonsoft.Json.Linq;
-using MultiThreadedDownloaderLib;
 
 namespace YouTubeApiLib
 {
