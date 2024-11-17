@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Specialized;
 using Newtonsoft.Json.Linq;
+using MultiThreadedDownloaderLib;
 using static YouTubeApiLib.Utils;
 
 namespace YouTubeApiLib
@@ -10,6 +12,37 @@ namespace YouTubeApiLib
 		public const string API_V1_BROWSE_URL = "https://www.youtube.com/youtubei/v1/browse";
 		public const string API_V1_PLAYER_URL = "https://www.youtube.com/youtubei/v1/player";
 		public const string API_V1_SEARCH_URL = "https://www.youtube.com/youtubei/v1/search";
+
+		public static int CallHiddenApi(string url, NameValueCollection headers, string body, out string response)
+		{
+			try
+			{
+				using (HttpRequestResult requestResult = HttpRequestSender.Send("POST", url, body, headers))
+				{
+					if (requestResult.ErrorCode == 200)
+					{
+						return requestResult.WebContent.ContentToString(out response);
+					}
+					else
+					{
+						response = requestResult.ErrorMessage;
+						return requestResult.ErrorCode;
+					}
+				}
+			}
+			catch (System.Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine(ex.Message);
+				response = ex.Message;
+				return ex.HResult;
+			}
+		}
+
+		public static int CallPlayerApi(NameValueCollection headers, string body, out string response)
+		{
+			string url = GetPlayerRequestUrl();
+			return CallHiddenApi(url, headers, body, out response);
+		}
 
 		public static JObject GenerateSearchQueryRequestBody(
 			string searchQuery, string continuationToken, YouTubeApiV1SearchResultFilter filter)

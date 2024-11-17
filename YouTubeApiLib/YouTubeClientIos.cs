@@ -110,24 +110,19 @@ namespace YouTubeApiLib
 
 					NameValueCollection headers = GenerateRequestHeaders(videoId, config);
 					JObject body = GenerateRequestBody(videoId, config);
-					using (HttpRequestResult requestResult = HttpRequestSender.Send(
-						"POST", YouTubeApiV1.API_V1_PLAYER_URL, body.ToString(), headers))
+					int errorCode = YouTubeApiV1.CallPlayerApi(headers, body.ToString(), out string response);
+					if (errorCode == 200)
 					{
-						if (requestResult.ErrorCode == 200)
-						{
-							int errorCode = requestResult.WebContent.ContentToString(out string response);
-							if (errorCode == 200)
-							{
-								rawVideoInfo = new YouTubeRawVideoInfo(response, this,
-									new YouTubeMediaTrackUrlDecryptionData(webPageResult.VideoWebPage));
-								errorMessage = null;
-								return 200;
-							}
-						}
-
+						rawVideoInfo = new YouTubeRawVideoInfo(response, this,
+							new YouTubeMediaTrackUrlDecryptionData(webPageResult.VideoWebPage));
+						errorMessage = null;
+						return 200;
+					}
+					else
+					{
 						rawVideoInfo = null;
-						errorMessage = requestResult.ErrorMessage;
-						return requestResult.ErrorCode;
+						errorMessage = response;
+						return errorCode;
 					}
 				}
 
