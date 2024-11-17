@@ -4,12 +4,12 @@ using static YouTubeApiLib.Utils;
 
 namespace YouTubeApiLib
 {
-	internal static class YouTubeApiV1
+	public static class YouTubeApiV1
 	{
-		internal const string API_V1_KEY = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8";
-		internal const string API_V1_BROWSE_URL = "https://www.youtube.com/youtubei/v1/browse";
-		internal const string API_V1_PLAYER_URL = "https://www.youtube.com/youtubei/v1/player";
-		internal const string API_V1_SEARCH_URL = "https://www.youtube.com/youtubei/v1/search";
+		public const string API_V1_KEY = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8";
+		public const string API_V1_BROWSE_URL = "https://www.youtube.com/youtubei/v1/browse";
+		public const string API_V1_PLAYER_URL = "https://www.youtube.com/youtubei/v1/player";
+		public const string API_V1_SEARCH_URL = "https://www.youtube.com/youtubei/v1/search";
 
 		public static JObject GenerateSearchQueryRequestBody(
 			string searchQuery, string continuationToken, YouTubeApiV1SearchResultFilter filter)
