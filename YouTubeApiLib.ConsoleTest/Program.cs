@@ -59,6 +59,10 @@ namespace YouTubeApiLib.ConsoleTest
 						Console.WriteLine($"Description: {video.Description}");
 						Console.WriteLine($"View count: {video.ViewCount}");
 						Console.WriteLine($"Category: {video.Category}");
+						if (!video.IsLiveContent)
+						{
+							Console.WriteLine($"Short (aka Reel): {video.IsShortFormat}");
+						}
 						Console.WriteLine($"Private: {video.IsPrivate}");
 						Console.WriteLine($"Unlisted: {video.IsUnlisted}");
 						Console.WriteLine($"Family safe: {video.IsFamilySafe}");

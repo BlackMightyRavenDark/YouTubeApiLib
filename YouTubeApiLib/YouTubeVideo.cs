@@ -17,6 +17,12 @@ namespace YouTubeApiLib
 		public string Description { get; }
 		public long ViewCount { get; }
 		public string Category { get; }
+
+		/// <summary>
+		/// It's the short (aka "reel") video or not.
+		/// </summary>
+		public bool IsShortFormat { get; }
+
 		public bool IsPrivate { get; }
 		public bool IsUnlisted { get; }
 		public bool IsFamilySafe { get; }
@@ -53,6 +59,7 @@ namespace YouTubeApiLib
 			string description,
 			long viewCount,
 			string category,
+			bool isShortFormat,
 			bool isPrivate,
 			bool isUnlisted,
 			bool isFamilySafe,
@@ -75,6 +82,7 @@ namespace YouTubeApiLib
 			Description = description;
 			ViewCount = viewCount;
 			Category = category;
+			IsShortFormat = isShortFormat;
 			IsPrivate = isPrivate;
 			IsUnlisted = isUnlisted;
 			IsFamilySafe = isFamilySafe;
@@ -129,7 +137,7 @@ namespace YouTubeApiLib
 		public static YouTubeVideo CreateEmpty(YouTubeVideoPlayabilityStatus status)
 		{
 			return new YouTubeVideo(null, null, TimeSpan.Zero, DateTime.MaxValue, DateTime.MaxValue,
-				null, null, null, 0L, null, false, false, false, false, null, null, null, null, status);
+				null, null, null, 0L, null, false, false, false, false, false, null, null, null, null, status);
 		}
 
 		public static YouTubeVideo CreateEmpty()

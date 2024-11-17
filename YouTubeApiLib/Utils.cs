@@ -97,6 +97,8 @@ namespace YouTubeApiLib
 				jSimplifiedVideoInfo["isFamilySafe"] = isFamilySafe;
 				bool isUnlisted = jMicroformatRenderer.Value<bool>("isUnlisted");
 				jSimplifiedVideoInfo["isUnlisted"] = isUnlisted;
+				bool isShort = jMicroformatRenderer.Value<bool>("isShortsEligible");
+				jSimplifiedVideoInfo["isShort"] = isShort;
 				jSimplifiedVideoInfo["category"] = jMicroformatRenderer.Value<string>("category");
 				{
 					string date = jMicroformatRenderer.Value<string>("publishDate");
@@ -159,6 +161,7 @@ namespace YouTubeApiLib
 			string shortDescription = null;
 
 			string description = null;
+			bool isShort = false;
 			bool isFamilySafe = true;
 			bool isUnlisted = false;
 			string category = null;
@@ -188,6 +191,7 @@ namespace YouTubeApiLib
 			if (simplifiedVideoInfo.IsMicroformatInfoAvailable)
 			{
 				description = simplifiedVideoInfo.Info.Value<string>("description");
+				isShort = simplifiedVideoInfo.Info.Value<bool>("isShort");
 				isFamilySafe = simplifiedVideoInfo.Info.Value<bool>("isFamilySafe");
 				isUnlisted = simplifiedVideoInfo.Info.Value<bool>("isUnlisted");
 				category = simplifiedVideoInfo.Info.Value<string>("category");
@@ -213,7 +217,7 @@ namespace YouTubeApiLib
 
 			YouTubeVideo youTubeVideo = new YouTubeVideo(
 				videoTitle, videoId, videoLength, dateUploaded, datePublished, ownerChannelTitle,
-				ownerChannelId, descr, viewCount, category, isPrivate, isUnlisted,
+				ownerChannelId, descr, viewCount, category, isShort, isPrivate, isUnlisted,
 				isFamilySafe, isLiveContent, videoDetails, videoThumbnails,
 				rawVideoInfo, simplifiedVideoInfo, videoStatus);
 			if (YouTubeApi.getMediaTracksInfoImmediately)
