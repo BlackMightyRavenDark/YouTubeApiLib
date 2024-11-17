@@ -37,7 +37,10 @@ namespace YouTubeApiLib.ConsoleTest
 							(YouTubeApi.getMediaTracksInfoImmediately && video.MediaTracks.Count == 0))
 						{
 							IYouTubeClient client = YouTubeApi.GetYouTubeClient("ios");
-							video.UpdateMediaFormats(client);
+							if (client != null)
+							{
+								video.UpdateMediaFormats(client);
+							}
 						}
 						Console.WriteLine($"Title: {video.Title}");
 						Console.WriteLine($"ID: {video.Id}");

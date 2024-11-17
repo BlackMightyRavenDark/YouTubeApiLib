@@ -141,6 +141,7 @@ namespace YouTubeApiLib
 		{
 			bool automaticClientSelection = client == null;
 			if (automaticClientSelection) { client = YouTubeApi.GetYouTubeClient("video_info"); }
+			if (client == null) { return null; }
 			YouTubeRawVideoInfoResult rawVideoInfoResult = client.GetRawVideoInfo(videoId, out _);
 			if (rawVideoInfoResult.ErrorCode == 200)
 			{
@@ -151,7 +152,10 @@ namespace YouTubeApiLib
 					{
 						IYouTubeClient streamingDataClient = automaticClientSelection ?
 							YouTubeApi.GetYouTubeClient("ios") : client;
-						video.UpdateMediaFormats(streamingDataClient);
+						if (streamingDataClient != null)
+						{
+							video.UpdateMediaFormats(streamingDataClient);
+						}
 					}
 
 					return video;

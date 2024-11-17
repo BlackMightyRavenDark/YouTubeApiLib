@@ -116,7 +116,7 @@ namespace YouTubeApiLib
 		internal static YouTubeRawVideoInfoResult GetRawVideoInfo(YouTubeVideoId videoId)
 		{
 			IYouTubeClient client = YouTubeApi.GetYouTubeClient("video_info");
-			return client.GetRawVideoInfo(videoId, out _);
+			return client != null ? client.GetRawVideoInfo(videoId, out _) : new YouTubeRawVideoInfoResult(null, 400);
 		}
 
 		internal static YouTubeRawVideoInfoResult GetRawVideoInfo(string videoId)

@@ -249,6 +249,7 @@ namespace YouTubeApiLib
 		public static YouTubeVideoDetails GetVideoDetails(string videoId)
 		{
 			IYouTubeClient client = YouTubeApi.GetYouTubeClient("video_info");
+			if (client == null) { return null; }
 			YouTubeRawVideoInfoResult rawVideoInfoResult = client.GetRawVideoInfo(new YouTubeVideoId(videoId), out _);
 			return rawVideoInfoResult.ErrorCode == 200 ? rawVideoInfoResult.RawVideoInfo.VideoDetails : null;
 		}
