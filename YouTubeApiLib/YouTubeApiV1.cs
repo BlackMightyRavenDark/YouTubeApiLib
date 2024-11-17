@@ -38,9 +38,21 @@ namespace YouTubeApiLib
 			}
 		}
 
+		public static int CallBrowseApi(NameValueCollection headers, string body, out string response)
+		{
+			string url = GetBrowseRequestUrl();
+			return CallHiddenApi(url, headers, body, out response);
+		}
+
 		public static int CallPlayerApi(NameValueCollection headers, string body, out string response)
 		{
 			string url = GetPlayerRequestUrl();
+			return CallHiddenApi(url, headers, body, out response);
+		}
+
+		public static int CallSearchApi(NameValueCollection headers, string body, out string response)
+		{
+			string url = GetSearchRequestUrl();
 			return CallHiddenApi(url, headers, body, out response);
 		}
 
