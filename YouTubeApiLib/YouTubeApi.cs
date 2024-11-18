@@ -101,5 +101,13 @@ namespace YouTubeApiLib
 				_defaultYouTubeClientId = clientId;
 			}
 		}
+
+		public static IEnumerable<string> GetClientNames()
+		{
+			foreach (string name in _clients.Keys)
+			{
+				yield return name;
+			}
+		}
 	}
 }
