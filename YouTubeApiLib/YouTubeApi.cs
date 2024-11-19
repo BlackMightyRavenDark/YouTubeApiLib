@@ -126,9 +126,13 @@ namespace YouTubeApiLib
 
 		public static IEnumerable<string> GetYouTubeClientNames()
 		{
-			foreach (string name in _clients.Keys)
+			lock (_clients)
 			{
-				yield return name;
+				var keys = _clients.Keys;
+				foreach (string name in keys)
+				{
+					yield return name;
+				}
 			}
 		}
 	}
