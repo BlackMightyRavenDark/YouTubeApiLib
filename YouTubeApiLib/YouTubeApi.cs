@@ -102,6 +102,28 @@ namespace YouTubeApiLib
 			}
 		}
 
+		/// <summary>
+		/// Adds a new client to the client list or replaces the existing client.
+		/// </summary>
+		public static void AddYouTubeClient(string clientId, IYouTubeClient client)
+		{
+			lock (_clients)
+			{
+				_clients[clientId] = client;
+			}
+		}
+
+		public static void RemoveYouTubeClient(string clientId)
+		{
+			lock (_clients)
+			{
+				if (_clients.ContainsKey(clientId))
+				{
+					_clients.Remove(clientId);
+				}
+			}
+		}
+
 		public static IEnumerable<string> GetClientNames()
 		{
 			foreach (string name in _clients.Keys)
