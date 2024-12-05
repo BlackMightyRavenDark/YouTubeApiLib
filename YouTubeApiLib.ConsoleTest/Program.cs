@@ -164,7 +164,7 @@ namespace YouTubeApiLib.ConsoleTest
 										string dashChunkCountString = track.DashUrls != null ? track.DashUrls.Count.ToString() : "null";
 										Console.WriteLine($"DASH chunk URL count: {dashChunkCountString}");
 									}
-									else if (!(track is YouTubeMediaTrackHlsStream))
+									else if (track.GetType() != typeof(YouTubeMediaTrackHlsStream))
 									{
 										string url = track.FileUrl.ToString();
 										if (string.IsNullOrEmpty(url) || string.IsNullOrWhiteSpace(url)) { url = "null"; }
