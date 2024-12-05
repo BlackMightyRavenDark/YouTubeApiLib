@@ -124,7 +124,11 @@ namespace YouTubeApiLib.ConsoleTest
 										YouTubeMediaTrackVideo videoTrack = track as YouTubeMediaTrackVideo;
 										string trackType = videoTrack.IsDashManifestPresent ? "DASH VIDEO" : "VIDEO";
 										info = $"{trackType} | ID {videoTrack.FormatId} | {videoTrack.VideoWidth}x{videoTrack.VideoHeight} | " +
-											$"{videoTrack.FrameRate} fps | {videoTrack.ContentLength} bytes | {videoTrack.FileExtension}";
+											$"{videoTrack.FrameRate} fps | {videoTrack.FileExtension}";
+										if (videoTrack.ContentLength > 0L)
+										{
+											info += $" | {videoTrack.ContentLength} bytes";
+										}
 									}
 									else if (track.GetType() == typeof(YouTubeMediaTrackHlsStream))
 									{
@@ -138,6 +142,10 @@ namespace YouTubeApiLib.ConsoleTest
 										string trackType = audioTrack.IsDashManifestPresent ? "DASH AUDIO" : "AUDIO";
 										info = $"{trackType} | ID {audioTrack.FormatId} | {audioTrack.SampleRate} Hz | " +
 											$"{audioTrack.ChannelCount} ch | {audioTrack.AudioQuality} | {audioTrack.FileExtension}";
+										if (audioTrack.ContentLength > 0L)
+										{
+											info += $" | {audioTrack.ContentLength} bytes";
+										}
 									}
 									else if (track.GetType() == typeof(YouTubeMediaTrackContainer))
 									{
