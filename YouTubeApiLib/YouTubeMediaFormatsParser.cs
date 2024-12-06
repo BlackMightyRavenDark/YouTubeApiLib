@@ -85,7 +85,6 @@ namespace YouTubeApiLib
 						}
 						int approxDurationMs = -1;
 						bool isCiphered = false;
-						string url = null;
 						string signatureCipherString = null;
 						jt = jFormat.Value<JToken>("signatureCipher");
 						if (jt != null)
@@ -93,10 +92,7 @@ namespace YouTubeApiLib
 							signatureCipherString = jt.Value<string>();
 							isCiphered = true;
 						}
-						else
-						{
-							url = jFormat.Value<string>("url");
-						}
+						string url = jFormat.Value<string>("url");
 
 						YouTubeMediaTrackUrl trackUrl = new YouTubeMediaTrackUrl(url, signatureCipherString);
 
@@ -130,7 +126,6 @@ namespace YouTubeApiLib
 						}
 						int approxDurationMs = -1;
 						bool isCiphered = false;
-						string url = null;
 						string signatureCipherString = null;
 						jt = jFormat.Value<JToken>("signatureCipher");
 						if (jt != null)
@@ -138,10 +133,7 @@ namespace YouTubeApiLib
 							signatureCipherString = jt.Value<string>();
 							isCiphered = true;
 						}
-						else
-						{
-							url = jFormat.Value<string>("url");
-						}
+						string url = jFormat.Value<string>("url");
 
 						YouTubeMediaTrackUrl trackUrl = new YouTubeMediaTrackUrl(url, signatureCipherString);
 
@@ -200,7 +192,6 @@ namespace YouTubeApiLib
 					jt = jFormat.Value<JToken>("approxDurationMs");
 					int approxDurationMs = jt != null ? int.Parse(jt.Value<string>()) : -1;
 					bool isCiphered = false;
-					string url = null;
 					string signatureCipherString = null;
 					jt = jFormat.Value<JToken>("signatureCipher");
 					if (jt != null)
@@ -208,10 +199,7 @@ namespace YouTubeApiLib
 						signatureCipherString = jt.Value<string>();
 						isCiphered = true;
 					}
-					else
-					{
-						url = jFormat.Value<string>("url");
-					}
+					string url = jFormat.Value<string>("url");
 
 					YouTubeMediaTrackUrl trackUrl = new YouTubeMediaTrackUrl(url, signatureCipherString);
 
