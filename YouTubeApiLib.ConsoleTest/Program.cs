@@ -78,10 +78,10 @@ namespace YouTubeApiLib.ConsoleTest
 							Console.WriteLine($"DASH manifest URL: {video.DashManifestUrl}");
 						}
 						Console.Write("Thumbnails: ");
-						if (video.ThumbnailUrls != null && video.ThumbnailUrls.Count > 0)
+						if (video.Thumbnails != null && video.Thumbnails.Count > 0)
 						{
 							Console.WriteLine("");
-							foreach (YouTubeVideoThumbnail videoThumbnail in video.ThumbnailUrls)
+							foreach (YouTubeVideoThumbnail videoThumbnail in video.Thumbnails)
 							{
 								Console.WriteLine(videoThumbnail.ToString());
 							}

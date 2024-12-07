@@ -40,7 +40,7 @@ namespace YouTubeApiLib
 		public string DashManifestUrl { get; }
 		public string HlsManifestUrl { get; }
 		public YouTubeVideoDetails Details { get; private set; }
-		public List<YouTubeVideoThumbnail> ThumbnailUrls { get; }
+		public List<YouTubeVideoThumbnail> Thumbnails { get; }
 		public Dictionary<string, YouTubeMediaFormatList> MediaTracks { get; private set; }
 		public YouTubeRawVideoInfo RawInfo { get; private set; }
 		public YouTubeSimplifiedVideoInfo SimplifiedInfo { get; }
@@ -65,7 +65,7 @@ namespace YouTubeApiLib
 			bool isFamilySafe,
 			bool isLiveContent,
 			YouTubeVideoDetails videoDetails,
-			List<YouTubeVideoThumbnail> thumbnailUrls,
+			List<YouTubeVideoThumbnail> thumbnails,
 			YouTubeRawVideoInfo rawInfo,
 			YouTubeSimplifiedVideoInfo simplifiedInfo,
 			YouTubeVideoPlayabilityStatus status)
@@ -88,7 +88,7 @@ namespace YouTubeApiLib
 			IsFamilySafe = isFamilySafe;
 			IsLiveContent = isLiveContent;
 			Details = videoDetails;
-			ThumbnailUrls = thumbnailUrls;
+			Thumbnails = thumbnails;
 			MediaTracks = new Dictionary<string, YouTubeMediaFormatList>();
 			RawInfo = rawInfo;
 			SimplifiedInfo = simplifiedInfo;
