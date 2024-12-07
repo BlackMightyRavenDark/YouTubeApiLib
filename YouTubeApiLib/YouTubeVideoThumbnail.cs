@@ -15,9 +15,7 @@ namespace YouTubeApiLib
 
 		public JObject ToJson()
 		{
-			JObject json = new JObject();
-			json["id"] = Id;
-			json["url"] = Url;
+			JObject json = new JObject() { ["id"] = Id, ["url"] = Url };
 			return json;
 		}
 
