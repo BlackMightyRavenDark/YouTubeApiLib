@@ -13,8 +13,7 @@ namespace YouTubeApiLib
 
 		public YouTubeVideosTabPage(IEnumerable<string> idList, string nextPageToken)
 		{
-			IdList = new List<string>();
-			foreach (string id in idList) { IdList.Add(id); }
+			IdList = idList.ToList();
 			NextPageToken = nextPageToken;
 		}
 
