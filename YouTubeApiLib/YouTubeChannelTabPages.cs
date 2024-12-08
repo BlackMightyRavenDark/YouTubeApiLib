@@ -9,8 +9,6 @@ namespace YouTubeApiLib
 		public static readonly TabPageLive Live = new TabPageLive("Live", "EgdzdHJlYW1z8gYECgJ6AA%3D%3D");
 		public static readonly TabPagePlaylists Playlists = new TabPagePlaylists("Playlists", "EglwbGF5bGlzdHPyBgQKAkIA");
 		public static readonly TabPageCommunity Community = new TabPageCommunity("Community", "Egljb21tdW5pdHk%3D");
-		public static readonly TabPageChannels Channels = new TabPageChannels("Channels", "EghjaGFubmVscw%3D%3D");
-		public static readonly TabPageAbout About = new TabPageAbout("About", "EgVhYm91dA%3D%3D");
 	}
 
 	public class TabPageHome : YouTubeChannelTabPage
