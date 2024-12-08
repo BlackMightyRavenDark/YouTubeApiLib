@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace YouTubeApiLib
 {
@@ -7,9 +8,9 @@ namespace YouTubeApiLib
 		public List<YouTubeVideo> Videos { get; }
 		public string ContinuationToken { get; }
 
-		public YouTubeVideoPage(List<YouTubeVideo> videos, string continuationToken)
+		public YouTubeVideoPage(IEnumerable<YouTubeVideo> videos, string continuationToken)
 		{
-			Videos = videos;
+			Videos = videos.ToList();
 			ContinuationToken = continuationToken;
 		}
 	}
