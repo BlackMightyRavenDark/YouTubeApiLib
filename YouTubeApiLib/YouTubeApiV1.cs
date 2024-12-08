@@ -174,21 +174,19 @@ namespace YouTubeApiLib
 			YouTubeVideoIdPageResult videoIdPageResult = GetVideoIdPage(channelId, tabPage, continuationToken);
 			if (videoIdPageResult.ErrorCode == 200)
 			{
-				List<YouTubeVideo> videos = new List<YouTubeVideo>();
+				LinkedList<YouTubeVideo> videos = new LinkedList<YouTubeVideo>();
 				foreach (string videoId in videoIdPageResult.VideoIdPage.VideoIds)
 				{
-					YouTubeRawVideoInfoResult rawVideoInfoResult = GetRawVideoInfo(videoId);
-					if (rawVideoInfoResult.ErrorCode == 200)
+					YouTubeVideo video = YouTubeVideo.GetById(videoId);
+					if (video != null && video.Status != null)
 					{
-						YouTubeVideo video = rawVideoInfoResult.RawVideoInfo.ToVideo();
-						if (video != null && video.Status != null)
-						{
-							videos.Add(video);
-						}
+						videos.AddLast(video);
 					}
 				}
+
 				return new YouTubeVideoPageResult(new YouTubeVideoPage(videos, videoIdPageResult.VideoIdPage.ContinuationToken), 200);
 			}
+
 			return new YouTubeVideoPageResult(null, videoIdPageResult.ErrorCode);
 		}
 
