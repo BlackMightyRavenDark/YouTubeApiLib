@@ -44,15 +44,25 @@ namespace YouTubeApiLib
 			return YouTubeApiV1.GetChannelVideoList(channel.Id, null);
 		}
 
+		public YouTubeVideoIdPageResult GetVideoIdPage(
+			YouTubeChannel youTubeChannel, YouTubeChannelTabPage channelTabPage, string continuationToken)
+		{
+			return YouTubeApiV1.GetVideoIdPage(youTubeChannel?.Id, channelTabPage, continuationToken);
+		}
+
+		public YouTubeVideoIdPageResult GetVideoIdPage(YouTubeChannel youTubeChannel, YouTubeChannelTabPage channelTabPage)
+		{
+			return GetVideoIdPage(youTubeChannel, channelTabPage, null);
+		}
+
 		public YouTubeVideoIdPageResult GetVideoIdPage(YouTubeChannel youTubeChannel, string continuationToken)
 		{
 			return GetVideoIdPage(youTubeChannel, null, continuationToken);
 		}
 
-		public YouTubeVideoIdPageResult GetVideoIdPage(
-			YouTubeChannel youTubeChannel, YouTubeChannelTabPage channelTabPage, string continuationToken)
+		public YouTubeVideoIdPageResult GetVideoIdPage(YouTubeChannel youTubeChannel)
 		{
-			return YouTubeApiV1.GetVideoIdPage(youTubeChannel?.Id, channelTabPage, continuationToken);
+			return GetVideoIdPage(youTubeChannel, string.Empty);
 		}
 
 		public YouTubeVideoPageResult GetVideoPage(YouTubeChannel youTubeChannel, string continuationToken)
