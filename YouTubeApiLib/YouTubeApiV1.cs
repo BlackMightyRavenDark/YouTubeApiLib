@@ -294,16 +294,8 @@ namespace YouTubeApiLib
 			string searchQuery, string continuationToken,
 			YouTubeApiV1SearchResultFilter searchResultFilter)
 		{
-			string url = GetSearchRequestUrl();
-			JObject body = GenerateSearchQueryRequestBody(
-				searchQuery, continuationToken, searchResultFilter);
-			int errorCode = YouTubeHttpPost(url, body.ToString(), out string response);
-			if (errorCode == 200)
-			{
-				bool isContinuationToken = !string.IsNullOrEmpty(continuationToken) && !string.IsNullOrWhiteSpace(continuationToken);
-				return new YouTubeApiV1SearchResults(response, searchResultFilter, isContinuationToken, errorCode);
-			}
-			return new YouTubeApiV1SearchResults(null, searchResultFilter, false, errorCode);
+			IYouTubeSearcher searcher = new YouTubeSearcherV1(searchQuery, continuationToken, searchResultFilter);
+			return (YouTubeApiV1SearchResults)searcher.Search();
 		}
 	}
 }
