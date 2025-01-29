@@ -65,8 +65,13 @@ namespace YouTubeApiLib
 					}
 					else if (mimeType.Contains("audio"))
 					{
-						YouTubeMediaTrackAudio audio = ParseAudioTrackItem(jFormat, mimeType);
-						mediaTracks.AddLast(audio);
+						JToken jt = jFormat.Value<JToken>("isDrc");
+						bool isDrc = jt != null && jt.Value<bool>();
+						if (!isDrc) //Ignoring the DRC (Dynamic range compression) audio tracks.
+						{
+							YouTubeMediaTrackAudio audio = ParseAudioTrackItem(jFormat, mimeType);
+							mediaTracks.AddLast(audio);
+						}
 					}
 					else
 					{
