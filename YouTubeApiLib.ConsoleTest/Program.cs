@@ -100,7 +100,7 @@ namespace YouTubeApiLib.ConsoleTest
 						{
 							ok = true;
 							Console.WriteLine("Receiving download URLs...");
-							IYouTubeClient client = new YouTubeClientAndroidVr();
+							IYouTubeClient client = new YouTubeClientVisionOs();
 							video.UpdateMediaFormats(client);
 							if (video.MediaTracks.Count > 0)
 							{

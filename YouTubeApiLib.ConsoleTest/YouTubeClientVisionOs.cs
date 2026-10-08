@@ -4,62 +4,64 @@ using MultiThreadedDownloaderLib;
 
 namespace YouTubeApiLib.ConsoleTest
 {
-	internal class YouTubeClientAndroidVr : IYouTubeClient
+	internal class YouTubeClientVisionOs : IYouTubeClient
 	{
-		public string DisplayName => "android vr";
+		public string DisplayName => "Vision OS";
 		public YouTubeVideoWebPage WebPage { get; private set; }
 		public FileDownloader Downloader { get; set; }
 
-		public const string CLIENT_VERSION = "1.71.26";
+		internal const string CLIENT_VERSION = "1.02";
+		internal const string OS_NAME = "VisionOS";
+		internal const string OS_VERSION = "26.5.23O471";
+
+		private const string USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15";
 
 		public JObject GenerateRequestBody(string videoId, YouTubeConfig youTubeConfig = null)
 		{
 			if (youTubeConfig == null) { return null; }
 
-			JObject jContentPlaybackContext = new JObject()
+			JObject jClient = new JObject()
 			{
-				["html5Preference"] = "HTML5_PREF_WANTS",
-				["signatureTimestamp"] = youTubeConfig.SignatureTimestamp
+				["clientName"] = "VISIONOS",
+				["clientVersion"] = CLIENT_VERSION,
+				["deviceMake"] = "Apple",
+				["deviceModel"] = "RealityDevice17,1",
+				["userAgent"] = USER_AGENT,
+				["osName"] = OS_NAME,
+				["osVersion"] = OS_VERSION,
+				["hl"] = "en",
+				["timeZone"] = "UTC",
+				["utcOffsetMinutes"] = 0
 			};
 			JObject jPlaybackContext = new JObject()
 			{
-				["contentPlaybackContext"] = jContentPlaybackContext
+				["contentPlaybackContext"] = new JObject()
+				{
+					["html5Preference"] = "HTML5_PREF_WANTS",
+					["signatureTimestamp"] = youTubeConfig.SignatureTimestamp
+				}
 			};
-
-			JObject jClient = new JObject()
+			JObject json = new JObject()
 			{
-				["clientName"] = "ANDROID_VR",
-				["clientVersion"] = CLIENT_VERSION,
-				["deviceMake"] = "Oculus",
-				["deviceModel"] = "Quest 3",
-				["androidSdkVersion"] = 32,
-				["userAgent"] = $"com.google.android.apps.youtube.vr.oculus/{CLIENT_VERSION} (Linux; U; Android 12L; eureka-user Build/SQ3A.220605.009.A1) gzip",
-				["osName"] = "Android",
-				["osVersion"] = "12L"
-			};
-			JObject jContext = new JObject()
-			{
-				["client"] = jClient
-			};
-
-			return new JObject()
-			{
-				["context"] = jContext,
+				["context"] = new JObject() { ["client"] = jClient },
 				["playbackContext"] = jPlaybackContext,
 				["videoId"] = videoId,
 				["contentCheckOk"] = true,
 				["racyCheckOk"] = true
 			};
+
+			return json;
 		}
 
 		public WebHeaderCollection GenerateRequestHeaders(string videoId, YouTubeConfig youTubeConfig = null)
 		{
-			return new WebHeaderCollection()
+			return youTubeConfig == null ? null : new WebHeaderCollection()
 			{
-				{ "Origin", Utils.YOUTUBE_URL },
+				{ "Origin", YouTubeApiLib.Utils.YOUTUBE_URL },
 				{ "X-Goog-Visitor-Id", youTubeConfig.VisitorData },
-				{ "X-YouTube-Client-Name", "28" },
-				{ "X-YouTube-Client-Version", CLIENT_VERSION }
+				{ "X-YouTube-Client-Name", "101" },
+				{ "X-YouTube-Client-Version", CLIENT_VERSION },
+				{ "User-Agent", USER_AGENT }
 			};
 		}
 
@@ -88,19 +90,19 @@ namespace YouTubeApiLib.ConsoleTest
 
 				JObject body = GenerateRequestBody(videoId, youTubeConfig);
 				WebHeaderCollection headers = GenerateRequestHeaders(videoId, youTubeConfig);
-				int errorCode = Utils.YouTubeHttpPost(YouTubeApiV1.API_V1_PLAYER_URL, body.ToString(), headers, out string response);
+				int errorCode = YouTubeApiLib.Utils.YouTubeHttpPost(YouTubeApiV1.API_V1_PLAYER_URL, body.ToString(), headers, out string response);
 				if (errorCode == 200)
 				{
 					rawVideoInfo = YouTubeRawVideoInfo.MakeFromRaw(response, this, System.DateTime.UtcNow);
 					errorMessage = null;
-					return 200;
 				}
 				else
 				{
 					rawVideoInfo = null;
 					errorMessage = response;
-					return errorCode;
 				}
+
+				return errorCode;
 			}
 
 			rawVideoInfo = null;
