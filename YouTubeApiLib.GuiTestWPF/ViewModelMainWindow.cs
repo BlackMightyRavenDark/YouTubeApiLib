@@ -110,7 +110,8 @@ namespace YouTubeApiLib.GuiTestWPF
 							{
 								string[] keys = _video.MediaTracks.Keys.ToArray();
 								ApiClientId = keys[0];
-								foreach (YouTubeMediaTrack track in _video.MediaTracks[ApiClientId].Tracks)
+								var sorted = SortMediaTracks(_video.MediaTracks[ApiClientId].Tracks);
+								foreach (YouTubeMediaTrack track in sorted)
 								{
 									MediaTracks.Add(new ModelYouTubeMediaTrackWrapper(track));
 								}
@@ -244,7 +245,8 @@ namespace YouTubeApiLib.GuiTestWPF
 				});
 				if (formatList != null)
 				{
-					foreach (YouTubeMediaTrack track in formatList.Tracks)
+					var sorted = SortMediaTracks(formatList.Tracks);
+					foreach (YouTubeMediaTrack track in sorted)
 					{
 						MediaTracks.Add(new ModelYouTubeMediaTrackWrapper(track));
 					}

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -68,6 +69,53 @@ namespace YouTubeApiLib.GuiTestWPF
 			Process process = new Process();
 			process.StartInfo.FileName = url;
 			process.Start();
+		}
+
+		internal static IEnumerable<YouTubeMediaTrack> SortMediaTracks(IEnumerable<YouTubeMediaTrack> tracks)
+		{
+			List<YouTubeMediaTrackHlsStream> hlsStreams = tracks.Where(track => track is YouTubeMediaTrackHlsStream).Cast<YouTubeMediaTrackHlsStream>().ToList();
+			if (hlsStreams.Count > 0)
+			{
+				hlsStreams.Sort((x, y) =>
+				{
+					int n = y.VideoHeight - x.VideoHeight;
+					return n == 0 ? (y.FrameRate - x.FrameRate) : n;
+				});
+				foreach (var track in hlsStreams)
+				{
+					yield return track;
+				}
+			}
+
+			List<YouTubeMediaTrackVideo> videos = tracks.Where(track => track.GetType() == typeof(YouTubeMediaTrackVideo)).Cast<YouTubeMediaTrackVideo>().ToList();
+			if (videos.Count > 0)
+			{
+				videos.Sort((x, y) => x.ContentLength > y.ContentLength ? -1 : 1);
+				foreach (var track in videos)
+				{
+					yield return track;
+				}
+			}
+
+			List<YouTubeMediaTrackContainer> containers = tracks.Where(track => track is YouTubeMediaTrackContainer).Cast<YouTubeMediaTrackContainer>().ToList();
+			if (containers.Count > 0)
+			{
+				containers.Sort((x, y) => x.ContentLength > y.ContentLength ? -1 : 1);
+				foreach (var track in containers)
+				{
+					yield return track;
+				}
+			}
+
+			List<YouTubeMediaTrackAudio> audios = tracks.Where(track => track is YouTubeMediaTrackAudio).Cast<YouTubeMediaTrackAudio>().ToList();
+			if (audios.Count > 0)
+			{
+				audios.Sort((x, y) => x.ContentLength > y.ContentLength ? -1 : 1);
+				foreach (var track in audios)
+				{
+					yield return track;
+				}
+			}
 		}
 	}
 }
