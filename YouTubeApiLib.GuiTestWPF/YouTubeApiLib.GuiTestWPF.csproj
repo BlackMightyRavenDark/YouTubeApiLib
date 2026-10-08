@@ -81,7 +81,7 @@
     </Compile>
     <Compile Include="Utils.cs" />
     <Compile Include="ViewModelMainWindow.cs" />
-    <Compile Include="YouTubeClientAndroidVr.cs" />
+    <Compile Include="YouTubeClientVisionOs.cs" />
     <Compile Include="ModelYouTubeMediaTrackWrapper.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

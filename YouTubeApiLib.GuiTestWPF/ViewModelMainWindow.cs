@@ -234,7 +234,7 @@ namespace YouTubeApiLib.GuiTestWPF
 				ApiClientId = null;
 				YouTubeMediaFormatList formatList = await Task.Run(() =>
 				{
-					IYouTubeClient client = new YouTubeClientAndroidVr()
+					IYouTubeClient client = new YouTubeClientVisionOs()
 					{
 						Downloader = MakeDownloader()
 					};
