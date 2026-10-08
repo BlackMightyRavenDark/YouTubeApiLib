@@ -35,6 +35,10 @@ namespace YouTubeApiLib.GuiTestWPF
 			{
 				return "Audio";
 			}
+			else if (BaseTrack is YouTubeMediaTrackHlsStream)
+			{
+				return "HLS";
+			}
 			else if (BaseTrack is YouTubeMediaTrackVideo)
 			{
 				return "Video";
@@ -88,6 +92,10 @@ namespace YouTubeApiLib.GuiTestWPF
 			else if (BaseTrack is YouTubeMediaTrackAudio)
 			{
 				return "LightSkyBlue";
+			}
+			else if (BaseTrack is YouTubeMediaTrackHlsStream)
+			{
+				return "LightPink";
 			}
 			else if (BaseTrack is YouTubeMediaTrackVideo)
 			{
