@@ -11,7 +11,7 @@ namespace YouTubeApiLib.ConsoleTest
 		public FileDownloader Downloader { get; set; }
 
 		internal const string CLIENT_VERSION = "1.02";
-		internal const string OS_NAME = "VisionOS";
+		internal const string OS_NAME = "visionOS";
 		internal const string OS_VERSION = "26.5.23O471";
 
 		private const string USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15";
